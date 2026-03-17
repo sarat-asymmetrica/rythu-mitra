@@ -23,7 +23,8 @@ import { localMoneyEvents, myIdentity, connected, moneyEvents } from './stores';
 import { saveMemory } from './memory';
 import { getConnection } from './db';
 import { generateIdempotencyKey } from './voice';
-import { translateToTeluguSafe } from './translate';
+import { performSearch } from './search';
+import { analyseOcrForOvercharges } from './vyapti';
 import type { MoneyEvent } from './types';
 
 // ---------------------------------------------------------------------------
@@ -761,7 +762,7 @@ async function handleCheckScheme(action: ChatAction): Promise<ActionResult> {
 
 async function handleRecordFromBill(action: ChatAction): Promise<ActionResult> {
   // The AI interprets OCR text and constructs a structured action
-  return handleRecordMoney({
+  const result = await handleRecordMoney({
     action: 'record_money',
     amount_paise: action.amount_paise,
     kind: action.kind || 'InputPurchase',
@@ -769,6 +770,24 @@ async function handleRecordFromBill(action: ChatAction): Promise<ActionResult> {
     description: action.description || '',
     party: action.party || '',
   });
+
+  // Run Vyāpti overcharge detection on the original OCR text (if provided)
+  const ocrText = String(action.ocr_text || '');
+  if (ocrText.length > 5) {
+    try {
+      const { overcharges } = analyseOcrForOvercharges(ocrText);
+      if (overcharges.length > 0) {
+        const alerts = overcharges.map(o =>
+          `⚠️ ${o.product.name}: డీలర్ ₹${(o.detectedPrice / 100).toLocaleString('en-IN')} vs MRP ₹${(o.expectedPrice / 100).toLocaleString('en-IN')} (${o.overchargePercent}% ఎక్కువ)`
+        );
+        result.message += '\n\n' + alerts.join('\n');
+      }
+    } catch (err) {
+      console.warn('[actions] Vyāpti overcharge check failed:', err);
+    }
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -777,50 +796,45 @@ async function handleRecordFromBill(action: ChatAction): Promise<ActionResult> {
 
 /**
  * Perform a web search and return Telugu summary.
+ * Uses the multi-provider fallback chain from search.ts:
+ *   1. Cached Agricultural Knowledge Base (offline, instant)
+ *   2. DuckDuckGo Instant Answer API (free, no key)
+ *   3. Google Custom Search (if keys configured)
+ *   4. Sarvam AI knowledge retrieval (last resort)
  */
 export async function performWebSearch(query: string): Promise<ActionResult> {
-  const searchApiKey = localStorage.getItem('rythu_mitra_search_api_key');
-  const searchEngineId = localStorage.getItem('rythu_mitra_search_engine_id');
-
-  if (searchApiKey && searchEngineId) {
-    try {
-      const url = `https://www.googleapis.com/customsearch/v1?key=${searchApiKey}&cx=${searchEngineId}&q=${encodeURIComponent(query)}&num=3`;
-      const response = await fetch(url);
-
-      if (response.ok) {
-        const data = await response.json() as {
-          items?: Array<{ title: string; snippet: string; link: string }>;
-        };
-
-        const items = data.items || [];
-        if (items.length === 0) {
-          return {
-            success: true,
-            message: `🔍 "${query}" కోసం ఫలితాలు దొరకలేదు`,
-          };
-        }
-
-        const results: string[] = [];
-        for (const item of items.slice(0, 3)) {
-          const teluguSnippet = await translateToTeluguSafe(item.snippet);
-          results.push(`* ${teluguSnippet}\n  (${item.link})`);
-        }
-
-        return {
-          success: true,
-          message: `🔍 వెబ్ ఫలితాలు:\n${results.join('\n\n')}`,
-          data: items,
-        };
-      }
-    } catch (err) {
-      console.error('[actions] Web search failed:', err);
-    }
+  if (!query) {
+    return { success: false, message: 'సెర్చ్ query ఖాళీగా ఉంది' };
   }
 
-  return {
-    success: true,
-    message: `🔍 వెబ్ సెర్చ్ అందుబాటులో లేదు. నా జ్ఞానం ప్రకారం సమాధానం ఇస్తాను.`,
-  };
+  try {
+    const { results, summary } = await performSearch(query);
+
+    if (results.length === 0) {
+      return {
+        success: true,
+        message: `🔍 "${query}" కోసం ఫలితాలు దొరకలేదు. నా జ్ఞానం ప్రకారం సమాధానం ఇస్తాను.`,
+      };
+    }
+
+    // Format top 3 results with source emoji prefix
+    const lines = results.slice(0, 3).map(r => {
+      const sourceEmoji = r.source === 'cached' ? '📚' : r.source === 'duckduckgo' ? '🔍' : r.source === 'sarvam' ? '🧠' : '🔍';
+      return `${sourceEmoji} **${r.title}**\n${r.snippet}${r.url ? `\n${r.url}` : ''}`;
+    });
+
+    return {
+      success: true,
+      message: `🔍 ఫలితాలు:\n\n${lines.join('\n\n')}`,
+      data: results,
+    };
+  } catch (err) {
+    console.error('[actions] performWebSearch failed:', err);
+    return {
+      success: true,
+      message: `🔍 సెర్చ్ విఫలమైంది. నా జ్ఞానం ప్రకారం సమాధానం ఇస్తాను.`,
+    };
+  }
 }
 
 // ---------------------------------------------------------------------------

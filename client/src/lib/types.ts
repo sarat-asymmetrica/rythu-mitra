@@ -154,4 +154,4 @@ export interface MandiRow {
   barWidth: number;  // percentage
 }
 
-export type ScreenName = 'home' | 'dabbu' | 'market' | 'panta' | 'settings';
+export type ScreenName = 'home' | 'dabbu' | 'market' | 'panta' | 'learn' | 'settings';

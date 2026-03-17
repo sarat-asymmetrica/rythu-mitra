@@ -10,13 +10,68 @@
  *   - Income amounts: Green #2D6A4F
  *   - Expense amounts: Red #C0392B
  *   - Accent/separator: Gold-brown #C5A059
- *   - Body font: Helvetica (pdf-lib built-in, Latin only)
- *   - Telugu text: transliterated or skipped (Telugu font embedding = v2)
+ *   - Telugu font: Noto Sans Telugu (embedded from /fonts/NotoSansTelugu-Regular.ttf)
+ *   - Fallback: Helvetica (pdf-lib built-in, Latin only) when font load fails
+ *
+ * Font loading strategy:
+ *   - Attempt fetch from local /fonts/NotoSansTelugu-Regular.ttf (bundled in public/)
+ *   - Cache in module-level variable — only fetched once per app session
+ *   - Graceful fallback to Helvetica if font unavailable (offline/error)
+ *   - Use Helvetica for amounts (₹ → "Rs." since Helvetica is WinAnsi)
+ *   - Use Telugu font for all user-generated Telugu text (names, descriptions, labels)
  *
  * All amounts are in rupees (already converted from paise by callers).
  */
 
 import { PDFDocument, StandardFonts, rgb, type PDFPage, type PDFFont } from 'pdf-lib';
+
+// ---------------------------------------------------------------------------
+// Telugu font loader — cached, graceful fallback
+// ---------------------------------------------------------------------------
+
+/** Module-level cache: null = not tried, Uint8Array = loaded, false = failed */
+let _teluguFontCache: Uint8Array | false | null = null;
+
+/**
+ * Load Noto Sans Telugu TTF bytes for PDF embedding.
+ *
+ * Tries /fonts/NotoSansTelugu-Regular.ttf (served from public/).
+ * Returns null on any failure — callers fall back to Helvetica gracefully.
+ */
+async function loadTeluguFontBytes(): Promise<Uint8Array | null> {
+  // Return cached result immediately
+  if (_teluguFontCache instanceof Uint8Array) return _teluguFontCache;
+  if (_teluguFontCache === false) return null;
+
+  try {
+    const res = await fetch('/fonts/NotoSansTelugu-Regular.ttf');
+    if (!res.ok) {
+      _teluguFontCache = false;
+      return null;
+    }
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    _teluguFontCache = bytes;
+    return bytes;
+  } catch {
+    _teluguFontCache = false;
+    return null;
+  }
+}
+
+/**
+ * Embed Noto Sans Telugu into a PDFDocument.
+ * Returns the custom font, or null if the font could not be loaded.
+ * When null is returned, callers use the provided Helvetica fallback.
+ */
+async function embedTeluguFont(pdfDoc: PDFDocument): Promise<PDFFont | null> {
+  const bytes = await loadTeluguFontBytes();
+  if (!bytes) return null;
+  try {
+    return await pdfDoc.embedFont(bytes, { subset: false });
+  } catch {
+    return null;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Color palette (Matti earth)
@@ -81,6 +136,7 @@ function drawHeaderBar(
   boldFont: PDFFont,
   title: string,
   subtitle: string,
+  teFont?: PDFFont | null,
 ): void {
   // Brown header bar
   page.drawRectangle({
@@ -91,21 +147,21 @@ function drawHeaderBar(
     color: COLOR_BROWN,
   });
 
-  // Title
+  // Title — use Telugu font if available (farmer names are in Telugu)
   page.drawText(title, {
     x: MARGIN,
     y: PAGE_HEIGHT - 32,
     size: 18,
-    font: boldFont,
+    font: teFont ?? boldFont,
     color: COLOR_WHITE,
   });
 
-  // Subtitle
+  // Subtitle — season + location (may contain Telugu)
   page.drawText(subtitle, {
     x: MARGIN,
     y: PAGE_HEIGHT - 54,
     size: 11,
-    font: boldFont,
+    font: teFont ?? boldFont,
     color: COLOR_GOLD,
   });
 
@@ -155,21 +211,32 @@ function drawFooter(page: PDFPage, regularFont: PDFFont, pageNum: number): void 
  *   Page 1: Header, financial summary, top 20 transactions
  *   Page 2 (if needed): remaining transactions + crop diary
  *
+ * Telugu text (farmer name, village, labels) uses embedded Noto Sans Telugu.
+ * Falls back to Helvetica if the font cannot be loaded.
+ *
  * @returns Uint8Array of PDF bytes ready for download or sharing
  */
 export async function generateSeasonReport(report: SeasonReport): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
-  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const boldFont    = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+  // Attempt Telugu font embedding — null means fall back to Helvetica
+  const teFont = await embedTeluguFont(pdfDoc);
+
+  // Helper: pick Telugu font when available, else Latin fallback
+  const te  = (font: PDFFont) => teFont ?? font;
+  const teBold = teFont ?? boldFont;
 
   let page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
 
-  // Header
+  // Header — pass teBold for farmer name + season (both may contain Telugu)
   drawHeaderBar(
     page,
     boldFont,
     `${report.farmerName} - Season Report`,
     `${report.season}  |  ${report.village}, ${report.district}`,
+    teBold,
   );
 
   let y = PAGE_HEIGHT - 110;
@@ -185,36 +252,35 @@ export async function generateSeasonReport(report: SeasonReport): Promise<Uint8A
     borderWidth: 1,
   });
 
-  // Income
+  // Income / Expense / Balance labels: Latin-only, use Helvetica
   page.drawText('Total Income', { x: MARGIN + 10, y: y - 20, size: 10, font: regularFont, color: COLOR_GRAY });
   page.drawText(fmt(report.totalIncome), { x: MARGIN + 10, y: y - 38, size: 14, font: boldFont, color: COLOR_GREEN });
 
-  // Expense
   const expX = MARGIN + CONTENT_WIDTH / 3;
   page.drawText('Total Expense', { x: expX, y: y - 20, size: 10, font: regularFont, color: COLOR_GRAY });
   page.drawText(fmt(report.totalExpense), { x: expX, y: y - 38, size: 14, font: boldFont, color: COLOR_RED });
 
-  // Balance
   const balX = MARGIN + (CONTENT_WIDTH / 3) * 2;
   const balColor = report.balance >= 0 ? COLOR_GREEN : COLOR_RED;
   page.drawText('Balance', { x: balX, y: y - 20, size: 10, font: regularFont, color: COLOR_GRAY });
   page.drawText(fmt(report.balance), { x: balX, y: y - 38, size: 14, font: boldFont, color: balColor });
 
-  // Top expense category
+  // Top expense category label — may contain Telugu via kindLabel
   page.drawText(
     `Top expense: ${report.topExpenseCategory} (${report.topExpensePercent.toFixed(0)}%)`,
-    { x: MARGIN + 10, y: y - 62, size: 9, font: regularFont, color: COLOR_GRAY },
+    { x: MARGIN + 10, y: y - 62, size: 9, font: te(regularFont), color: COLOR_GRAY },
   );
 
   y -= 100;
 
   // ---- Transactions Table ----
+  // Section heading: "Transactions" is Latin
   page.drawText('Transactions', { x: MARGIN, y, size: 13, font: boldFont, color: COLOR_BROWN });
   y -= 20;
   drawHRule(page, y);
   y -= 12;
 
-  // Table header
+  // Table column headers: Latin
   const colDate  = MARGIN;
   const colDesc  = MARGIN + 70;
   const colKind  = MARGIN + 290;
@@ -240,7 +306,7 @@ export async function generateSeasonReport(report: SeasonReport): Promise<Uint8A
       drawFooter(page, regularFont, pageNum);
       pageNum++;
       page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-      drawHeaderBar(page, boldFont, `${report.farmerName} - Season Report (cont.)`, report.season);
+      drawHeaderBar(page, boldFont, `${report.farmerName} - Season Report (cont.)`, report.season, teBold);
       y = PAGE_HEIGHT - 110;
     }
 
@@ -259,14 +325,14 @@ export async function generateSeasonReport(report: SeasonReport): Promise<Uint8A
     const amtColor = tx.amount >= 0 ? COLOR_GREEN : COLOR_RED;
     const amtStr = (tx.amount >= 0 ? '+' : '-') + fmt(tx.amount);
 
-    // Truncate long descriptions
+    // Truncate long descriptions — Telugu text, use te() font
     const descShort = tx.description.length > 28 ? tx.description.slice(0, 26) + '..' : tx.description;
     const kindShort = tx.kind.length > 16 ? tx.kind.slice(0, 14) + '..' : tx.kind;
 
-    page.drawText(tx.date,    { x: colDate, y, size: 9, font: regularFont, color: COLOR_BLACK });
-    page.drawText(descShort,  { x: colDesc, y, size: 9, font: regularFont, color: COLOR_BLACK });
-    page.drawText(kindShort,  { x: colKind, y, size: 9, font: regularFont, color: COLOR_GRAY  });
-    page.drawText(amtStr,     { x: colAmt,  y, size: 9, font: boldFont,    color: amtColor    });
+    page.drawText(tx.date,    { x: colDate, y, size: 9, font: regularFont,   color: COLOR_BLACK });
+    page.drawText(descShort,  { x: colDesc, y, size: 9, font: te(regularFont), color: COLOR_BLACK });
+    page.drawText(kindShort,  { x: colKind, y, size: 9, font: te(regularFont), color: COLOR_GRAY  });
+    page.drawText(amtStr,     { x: colAmt,  y, size: 9, font: boldFont,       color: amtColor    });
 
     y -= ROW_HEIGHT;
     txIndex++;
@@ -279,7 +345,7 @@ export async function generateSeasonReport(report: SeasonReport): Promise<Uint8A
       drawFooter(page, regularFont, pageNum);
       pageNum++;
       page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-      drawHeaderBar(page, boldFont, `${report.farmerName} - Crop Diary`, report.season);
+      drawHeaderBar(page, boldFont, `${report.farmerName} - Crop Diary`, report.season, teBold);
       y = PAGE_HEIGHT - 110;
     }
 
@@ -289,7 +355,7 @@ export async function generateSeasonReport(report: SeasonReport): Promise<Uint8A
     drawHRule(page, y);
     y -= 14;
 
-    // Column headers
+    // Column headers: Latin
     page.drawText('Date',  { x: MARGIN,       y, size: 9, font: boldFont, color: COLOR_GRAY });
     page.drawText('Event', { x: MARGIN + 70,  y, size: 9, font: boldFont, color: COLOR_GRAY });
     page.drawText('Crop',  { x: MARGIN + 150, y, size: 9, font: boldFont, color: COLOR_GRAY });
@@ -303,15 +369,16 @@ export async function generateSeasonReport(report: SeasonReport): Promise<Uint8A
         drawFooter(page, regularFont, pageNum);
         pageNum++;
         page = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-        drawHeaderBar(page, boldFont, `${report.farmerName} - Crop Diary (cont.)`, report.season);
+        drawHeaderBar(page, boldFont, `${report.farmerName} - Crop Diary (cont.)`, report.season, teBold);
         y = PAGE_HEIGHT - 110;
       }
 
       const notesShort = ev.notes.length > 30 ? ev.notes.slice(0, 28) + '..' : ev.notes;
-      page.drawText(ev.date,     { x: MARGIN,       y, size: 9, font: regularFont, color: COLOR_BLACK });
-      page.drawText(ev.kind,     { x: MARGIN + 70,  y, size: 9, font: regularFont, color: COLOR_BROWN });
-      page.drawText(ev.crop,     { x: MARGIN + 150, y, size: 9, font: regularFont, color: COLOR_BLACK });
-      page.drawText(notesShort,  { x: MARGIN + 230, y, size: 9, font: regularFont, color: COLOR_GRAY  });
+      // ev.kind, ev.crop, ev.notes may all be Telugu
+      page.drawText(ev.date,     { x: MARGIN,       y, size: 9, font: regularFont,     color: COLOR_BLACK });
+      page.drawText(ev.kind,     { x: MARGIN + 70,  y, size: 9, font: te(regularFont), color: COLOR_BROWN });
+      page.drawText(ev.crop,     { x: MARGIN + 150, y, size: 9, font: te(regularFont), color: COLOR_BLACK });
+      page.drawText(notesShort,  { x: MARGIN + 230, y, size: 9, font: te(regularFont), color: COLOR_GRAY  });
       y -= ROW_HEIGHT;
     }
   }
@@ -352,6 +419,11 @@ export async function generateReceipt(
   const boldFont    = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
+  // Attempt Telugu font embedding — null means fall back to Helvetica
+  const teFont = await embedTeluguFont(pdfDoc);
+  const te  = (font: PDFFont) => teFont ?? font;
+  const teBold = teFont ?? boldFont;
+
   // Half-page receipt (A5 landscape feel: 595 × 420)
   const RECEIPT_HEIGHT = 420;
   const page = pdfDoc.addPage([PAGE_WIDTH, RECEIPT_HEIGHT]);
@@ -373,11 +445,12 @@ export async function generateReceipt(
     color: COLOR_WHITE,
   });
 
+  // Farmer name is Telugu — use teBold
   page.drawText(farmerName, {
     x: MARGIN,
     y: RECEIPT_HEIGHT - 50,
     size: 11,
-    font: regularFont,
+    font: teBold,
     color: COLOR_GOLD,
   });
 
@@ -413,27 +486,34 @@ export async function generateReceipt(
   page.drawRectangle({ x: MARGIN, y: RECEIPT_HEIGHT - 180, width: CONTENT_WIDTH, height: 1, color: COLOR_GOLD, opacity: 0.6 });
 
   // Details grid
+  // Labels are Latin; values may be Telugu (kind label, description)
   const detailY = RECEIPT_HEIGHT - 210;
   const labelX = MARGIN;
   const valueX = MARGIN + 100;
   const ROW = 24;
 
-  const details: Array<[string, string]> = [
-    ['Date',        date],
-    ['Category',    kind],
-    ['Description', description || '—'],
+  const details: Array<[string, string, boolean]> = [
+    //  [label,         value,               isTeluguValue]
+    ['Date',        date,                 false],
+    ['Category',    kind,                 true],
+    ['Description', description || '\u2014', true],
   ];
 
   for (let i = 0; i < details.length; i++) {
     const ry = detailY - i * ROW;
-    page.drawText(details[i][0] + ':', { x: labelX, y: ry, size: 11, font: boldFont,    color: COLOR_GRAY });
+    const [label, rawVal, isTe] = details[i];
 
-    // Truncate long values to fit
-    let val = details[i][1];
-    while (val.length > 3 && regularFont.widthOfTextAtSize(val, 11) > CONTENT_WIDTH - 110) {
+    page.drawText(label + ':', { x: labelX, y: ry, size: 11, font: boldFont, color: COLOR_GRAY });
+
+    // Use Telugu font for Telugu values; Helvetica for date
+    const valFont = isTe ? te(regularFont) : regularFont;
+
+    // Truncate long values to fit — measure with the right font
+    let val = rawVal;
+    while (val.length > 3 && valFont.widthOfTextAtSize(val, 11) > CONTENT_WIDTH - 110) {
       val = val.slice(0, -4) + '...';
     }
-    page.drawText(val, { x: valueX, y: ry, size: 11, font: regularFont, color: COLOR_BLACK });
+    page.drawText(val, { x: valueX, y: ry, size: 11, font: valFont, color: COLOR_BLACK });
   }
 
   // Footer

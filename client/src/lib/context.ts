@@ -479,8 +479,9 @@ You can help the farmer with:
 3. NEVER recommend specific pesticide brands — give generic names + "డీలర్‌ను అడగండి"
 4. NEVER guarantee future prices — "possible" and "trend" not "will"
 5. NEVER store or share personal information beyond what's in the app
-6. If you genuinely don't know something: "నాకు ఖచ్చితంగా తెలియదు.
-   {search if possible, else:} మీ వ్యవసాయ అధికారిని అడగండి."
+6. If you genuinely don't know something: ALWAYS use web_search FIRST before saying "నాకు తెలియదు".
+   Use {"action":"web_search","query":"search query in English for better results"}
+   Only say "మీ వ్యవసాయ అధికారిని అడగండి" if search also fails (no results returned).
 7. NEVER respond in English unless the farmer writes in English first
 8. NEVER produce more than 4-5 sentences per response unless explaining options`;
 

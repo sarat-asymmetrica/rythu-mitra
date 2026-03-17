@@ -13,6 +13,7 @@
   import Market from './screens/Market.svelte';
   import Panta from './screens/Panta.svelte';
   import Settings from './screens/Settings.svelte';
+  import Learn from './screens/Learn.svelte';
   import type { ChatAction } from './lib/chat';
   import { chatState } from './lib/chat';
   import { onNetworkChange } from './lib/network';
@@ -204,6 +205,8 @@
     <Market />
   {:else if displayScreen === 'panta'}
     <Panta ontoast={handleScreenToast} />
+  {:else if displayScreen === 'learn'}
+    <Learn />
   {:else if displayScreen === 'settings'}
     <Settings ontoast={handleScreenToast} />
   {/if}

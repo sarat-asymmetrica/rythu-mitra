@@ -1,0 +1,28 @@
+/* =============================================================
+   Noto Sans Telugu — Local Subset for Rythu Mitra
+   Served from /fonts/ for offline + 3G performance
+   Telugu block: U+0C00-U+0C7F
+   Also covers Vedic marks, ZWJ/ZWNJ, and dotted circle
+   ============================================================= */
+
+/* Regular (weight 400) */
+@font-face {
+  font-family: 'Noto Sans Telugu';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/NotoSansTelugu-Regular.woff2') format('woff2'),
+       url('/fonts/NotoSansTelugu-Regular.ttf')   format('truetype');
+  unicode-range: U+0951-0952, U+0964-0965, U+0C00-0C7F, U+1CDA, U+1CF2, U+200C-200D, U+25CC;
+}
+
+/* Bold reuses same variable font — browser selects heavier instance */
+@font-face {
+  font-family: 'Noto Sans Telugu';
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url('/fonts/NotoSansTelugu-Regular.woff2') format('woff2'),
+       url('/fonts/NotoSansTelugu-Regular.ttf')   format('truetype');
+  unicode-range: U+0951-0952, U+0964-0965, U+0C00-0C7F, U+1CDA, U+1CF2, U+200C-200D, U+25CC;
+}

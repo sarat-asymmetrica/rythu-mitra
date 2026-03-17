@@ -1,11 +1,24 @@
 <script lang="ts">
   import type { ChatMessage } from '../lib/chat';
+  import SearchResults from './SearchResults.svelte';
+  import type { SearchResult } from '../lib/search';
 
   interface Props {
     message: ChatMessage;
   }
 
   let { message }: Props = $props();
+
+  /** Extract SearchResult[] from action data if this is a web_search response. */
+  function getSearchResults(): SearchResult[] | null {
+    if (message.action?.action !== 'web_search') return null;
+    const data = message.action?.data;
+    if (!Array.isArray(data) || data.length === 0) return null;
+    // Validate that the first item looks like a SearchResult (has snippet + source)
+    const first = data[0] as Record<string, unknown>;
+    if (typeof first.snippet !== 'string' || typeof first.source !== 'string') return null;
+    return data as SearchResult[];
+  }
 
   function formatTime(ts: number): string {
     const d = new Date(ts);
@@ -127,6 +140,9 @@
       <div class="msg-content">
         {@html displayContent(message.content)}
       </div>
+      {#if getSearchResults()}
+        <SearchResults results={getSearchResults()!} query={String(message.action?.query ?? '')} />
+      {/if}
       {#if message.streaming}
         <span class="cursor-blink" aria-hidden="true"></span>
       {/if}
