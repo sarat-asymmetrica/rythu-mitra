@@ -1,8 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { speakTeluguOrThrow } from '../lib/tts';
+  import { speakIfEnabled, isTTSEnabled } from '../lib/tts';
   import { hasApiKey } from '../lib/sarvam';
-  import { handleAIError } from '../lib/errors';
   import { showToast } from '../lib/toast';
 
   interface Props {
@@ -28,11 +27,13 @@
       showToast('API కీ సెట్ చేయబడలేదు. సెట్టింగ్స్‌లో నమోదు చేయండి.', 'warning', 4000);
       return;
     }
+    if (!isTTSEnabled()) {
+      showToast('ధ్వని నిర్ధారణ ఆపివేయబడింది. Settings లో ఆన్ చేయండి.', 'warning', 3000);
+      return;
+    }
     speaking = true;
     try {
-      await speakTeluguOrThrow(speakText);
-    } catch (err) {
-      handleAIError(err, 'tts');
+      await speakIfEnabled(speakText);
     } finally {
       speaking = false;
     }

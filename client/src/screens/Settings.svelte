@@ -8,6 +8,8 @@
   } from '../lib/sarvam';
   import { loadOcrConfig, saveOcrConfig, hasOcrKey, type OcrConfig } from '../lib/ocr';
   import { loadSearchConfig, type SearchConfig } from '../lib/search';
+  import { isTTSEnabled, setTTSEnabled } from '../lib/tts';
+  import { getMandiApiKey, setMandiApiKey } from '../lib/mandi-api';
   import { generateSeasonReport, downloadPdf, type SeasonReport } from '../lib/pdf';
   import { getQueueSize } from '../lib/offline';
   import { showToast } from '../lib/toast';
@@ -41,6 +43,13 @@
     hasOcrKey() ? 'present' : 'missing',
   );
 
+  // Mandi API key (data.gov.in)
+  let mandiApiKey = $state(getMandiApiKey());
+  let mandiKeyStatus: 'present' | 'missing' | 'testing' | 'valid' | 'invalid' = $state(
+    getMandiApiKey() ? 'present' : 'missing',
+  );
+  let showMandiKey = $state(false);
+
   // Search config (persisted state for UI toggles)
   const SEARCH_DDG_KEY   = 'rythu_mitra_search_ddg_enabled';
   const SEARCH_SARVAM_KEY = 'rythu_mitra_search_sarvam_enabled';
@@ -67,6 +76,14 @@
   // Offline queue size
   let queueSize = $state(getQueueSize());
 
+  // TTS toggle state (reads from localStorage via helper)
+  let ttsEnabled = $state(isTTSEnabled());
+
+  function handleTtsToggle() {
+    ttsEnabled = !ttsEnabled;
+    setTTSEnabled(ttsEnabled);
+  }
+
   // Memory section state
   let showDismissed = $state(false);
   let showAddMemory = $state(false);
@@ -90,6 +107,9 @@
     // Save OCR config
     saveOcrConfig(ocrConfig);
     ocrKeyStatus = ocrConfig.mistralApiKey ? 'present' : 'missing';
+    // Save mandi API key
+    setMandiApiKey(mandiApiKey);
+    mandiKeyStatus = mandiApiKey ? 'present' : 'missing';
     // Save search config toggles
     localStorage.setItem(SEARCH_DDG_KEY,    String(searchDDG));
     localStorage.setItem(SEARCH_SARVAM_KEY, String(searchSarvam));
@@ -118,6 +138,37 @@
       showToast('OCR key looks valid! Save to apply.', 'default', 3000);
     } else {
       showToast('Key too short — check and try again', 'alert', 3000);
+    }
+  }
+
+  function handleMandiKeyInput(e: Event) {
+    const input = e.target as HTMLInputElement;
+    mandiApiKey = input.value.trim();
+    mandiKeyStatus = mandiApiKey ? 'present' : 'missing';
+  }
+
+  async function handleTestMandiKey() {
+    if (!mandiApiKey) {
+      showToast('data.gov.in API కీ లేదు', 'warning', 3000);
+      return;
+    }
+    mandiKeyStatus = 'testing';
+    try {
+      const RESOURCE_ID = '9ef84268-d588-465a-a308-a864a43d0070';
+      const url = `https://api.data.gov.in/resource/${RESOURCE_ID}?api-key=${mandiApiKey}&format=json&limit=1&offset=0`;
+      const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      if (res.ok) {
+        const data = await res.json();
+        const total = data.total || 0;
+        mandiKeyStatus = 'valid';
+        showToast(`API కీ సరైనది! ${total.toLocaleString('en-IN')} రికార్డులు అందుబాటులో ఉన్నాయి`, 'default', 4000);
+      } else {
+        mandiKeyStatus = 'invalid';
+        showToast(`API కీ తప్పు: HTTP ${res.status}`, 'alert', 4000);
+      }
+    } catch (err) {
+      mandiKeyStatus = 'invalid';
+      showToast('నెట్‌వర్క్ లోపం — మళ్ళీ ప్రయత్నించండి', 'warning', 3000);
     }
   }
 
@@ -308,6 +359,26 @@
     </select>
   </section>
 
+  <!-- TTS Toggle -->
+  <section class="config-section">
+    <div class="tts-toggle-row">
+      <div class="tts-toggle-info">
+        <span class="field-label">ధ్వని నిర్ధారణ</span>
+        <p class="field-hint">ఖర్చు నమోదు తర్వాత తెలుగులో చదువుతుంది</p>
+      </div>
+      <button
+        class="tts-toggle-btn"
+        class:on={ttsEnabled}
+        onclick={handleTtsToggle}
+        aria-label="ధ్వని నిర్ధారణ {ttsEnabled ? 'ఆపు' : 'ప్రారంభించు'}"
+        type="button"
+      >
+        <span class="tts-toggle-label">{ttsEnabled ? 'ఆన్' : 'ఆఫ్'}</span>
+        <span class="tts-toggle-icon">{ttsEnabled ? '🔊' : '🔇'}</span>
+      </button>
+    </div>
+  </section>
+
   <!-- Mistral OCR Key -->
   <section class="config-section">
     <div class="field-header">
@@ -337,6 +408,72 @@
     >
       Test Key
     </button>
+  </section>
+
+  <!-- data.gov.in Mandi API Key -->
+  <section class="config-section">
+    <div class="field-header">
+      <label class="field-label" for="mandi-key">మండీ ధరల API కీ (data.gov.in)</label>
+      <span
+        class="status-dot"
+        class:valid={mandiKeyStatus === 'valid' || mandiKeyStatus === 'present'}
+        class:invalid={mandiKeyStatus === 'missing' || mandiKeyStatus === 'invalid'}
+        class:unknown={mandiKeyStatus === 'testing'}
+        aria-label={mandiKeyStatus === 'valid' || mandiKeyStatus === 'present'
+          ? 'configured'
+          : mandiKeyStatus === 'testing'
+            ? 'testing'
+            : 'not configured'}
+      ></span>
+    </div>
+    <p class="field-hint">
+      data.gov.in నుండి ఉచిత API కీ పొందండి — నేటి మండీ ధరలకు అవసరం
+    </p>
+    <div class="key-input-row">
+      <input
+        id="mandi-key"
+        type={showMandiKey ? 'text' : 'password'}
+        class="key-input"
+        placeholder="Enter data.gov.in API key..."
+        value={mandiApiKey}
+        oninput={handleMandiKeyInput}
+        autocomplete="off"
+        spellcheck={false}
+      />
+      <button
+        class="show-hide-btn"
+        type="button"
+        onclick={() => { showMandiKey = !showMandiKey; }}
+        aria-label={showMandiKey ? 'కీ దాచు' : 'కీ చూపు'}
+      >{showMandiKey ? '🙈' : '👁'}</button>
+    </div>
+    <div class="btn-row">
+      <button
+        class="test-btn"
+        onclick={handleTestMandiKey}
+        disabled={mandiKeyStatus === 'testing' || !mandiApiKey}
+      >
+        {#if mandiKeyStatus === 'testing'}
+          పరీక్షిస్తోంది...
+        {:else}
+          కీ పరీక్షించు
+        {/if}
+      </button>
+      {#if mandiKeyStatus === 'valid'}
+        <span class="key-ok-badge">సరైనది</span>
+      {:else if mandiKeyStatus === 'invalid'}
+        <span class="key-fail-badge">తప్పు</span>
+      {/if}
+    </div>
+    <p class="mandi-key-help">
+      API కీ పొందడానికి:
+      <a
+        href="https://data.gov.in/user/register"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mandi-link"
+      >data.gov.in లో రిజిస్టర్ చేయండి</a>
+    </p>
   </section>
 
   <!-- Search Configuration -->
@@ -438,6 +575,16 @@
     <div class="status-row">
       <span class="status-label">PDF Reports:</span>
       <span class="status-value ok">Ready</span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">మండీ ధరలు:</span>
+      <span
+        class="status-value"
+        class:ok={mandiKeyStatus === 'valid' || mandiKeyStatus === 'present'}
+        class:missing={mandiKeyStatus === 'missing' || mandiKeyStatus === 'invalid'}
+      >
+        {mandiKeyStatus === 'valid' || mandiKeyStatus === 'present' ? 'Ready' : 'Key needed'}
+      </span>
     </div>
     {#if queueSize > 0}
     <div class="status-row">
@@ -586,6 +733,53 @@
   .settings-subtitle {
     font-size: var(--text-sm);
     color: var(--ink-tertiary);
+  }
+
+  /* TTS toggle */
+  .tts-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-13);
+  }
+  .tts-toggle-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .tts-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    padding: var(--space-5) var(--space-13);
+    border-radius: 20px;
+    border: 1.5px solid var(--nalupurugu);
+    background: var(--patti);
+    color: var(--ink-tertiary);
+    font-family: var(--font-te);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--dur-233) ease, border-color var(--dur-233) ease, color var(--dur-233) ease;
+    white-space: nowrap;
+    min-height: 40px;
+  }
+  .tts-toggle-btn.on {
+    background: var(--pacchi-glow, rgba(45, 106, 79, 0.12));
+    border-color: var(--pacchi);
+    color: var(--pacchi);
+  }
+  .tts-toggle-btn:active {
+    transform: scale(0.95);
+  }
+  .tts-toggle-label {
+    font-size: var(--text-xs);
+    font-family: var(--font-mono);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .tts-toggle-icon {
+    font-size: 16px;
+    line-height: 1;
   }
 
   .config-section {
@@ -991,6 +1185,69 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-8);
+  }
+
+  /* ── Mandi API Key input row ── */
+  .key-input-row {
+    display: flex;
+    gap: var(--space-5);
+    align-items: center;
+    margin-bottom: var(--space-8);
+  }
+  .key-input-row .key-input {
+    flex: 1;
+    margin-bottom: 0;
+  }
+  .show-hide-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-card-sm);
+    border: 1px solid var(--nalupurugu);
+    background: var(--patti);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--dur-233) ease;
+  }
+  .show-hide-btn:hover {
+    background: var(--nalupurugu);
+  }
+  .btn-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+  }
+  .key-ok-badge {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--pacchi);
+    background: var(--pacchi-soft);
+    padding: 2px var(--space-8);
+    border-radius: 4px;
+  }
+  .key-fail-badge {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--erra);
+    background: var(--erra-soft);
+    padding: 2px var(--space-8);
+    border-radius: 4px;
+  }
+  .mandi-key-help {
+    margin-top: var(--space-8);
+    font-size: var(--text-xs);
+    color: var(--ink-tertiary);
+  }
+  .mandi-link {
+    color: var(--neeli);
+    text-decoration: underline;
+  }
+  .mandi-link:hover {
+    color: var(--neeli);
+    opacity: 0.8;
   }
 
   /* Data Export Section */

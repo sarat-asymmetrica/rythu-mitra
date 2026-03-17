@@ -25,6 +25,7 @@ import { getConnection } from './db';
 import { generateIdempotencyKey } from './voice';
 import { performSearch } from './search';
 import { analyseOcrForOvercharges } from './vyapti';
+import { speakIfEnabled, buildConfirmationText } from './tts';
 import type { MoneyEvent } from './types';
 
 // ---------------------------------------------------------------------------
@@ -355,6 +356,9 @@ async function handleRecordMoney(action: ChatAction): Promise<ActionResult> {
         message: `✅ ₹${rupees.toLocaleString('en-IN')} ${KIND_CATEGORY_TELUGU[kind] || kind} ${direction} నమోదు అయింది${gapCelebration}`,
       };
 
+      // Speak confirmation aloud (fire-and-forget; respects TTS toggle)
+      speakIfEnabled(buildConfirmationText(rupees, kind));
+
       // Set undo for creation (skip if this is already an undo operation)
       if (!skipUndo) {
         // Note: We can't easily get the STDB-assigned ID here because the reducer
@@ -406,6 +410,9 @@ async function handleRecordMoney(action: ChatAction): Promise<ActionResult> {
     success: true,
     message: `✅ ₹${rupees.toLocaleString('en-IN')} ${KIND_CATEGORY_TELUGU[kind] || kind} ${direction} నమోదు అయింది (లోకల్)${gapCelebrationLocal}`,
   };
+
+  // Speak confirmation aloud (fire-and-forget; respects TTS toggle)
+  speakIfEnabled(buildConfirmationText(rupees, kind));
 
   if (!skipUndo) {
     setUndo({

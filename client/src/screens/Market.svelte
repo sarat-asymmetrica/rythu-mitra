@@ -1,16 +1,26 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { marketPricesStore, myFarmerContext, connected } from '../lib/stores';
+  import { myCropPrices, myFarmerContext, connected, liveMandiPrices } from '../lib/stores';
   import {
     computeCropSummaries,
     formatRupees,
     relativeTimeTelugu,
     teluguDateShort,
     buildMarketInsight,
-    type CropPriceSummary,
-    type MarketInsight,
   } from '../lib/market';
-  import type { MarketPrice as StdbMarketPrice } from '../module_bindings/types';
+  import {
+    getMandiApiKey,
+    fetchAllMandiPrices,
+    getCachedPrices,
+    cachePrices,
+    getCacheFreshness,
+    filterForAP,
+    mandiRecordsToStoreFormat,
+    type FreshnessLabel,
+  } from '../lib/mandi-api';
+  import { showToast } from '../lib/toast';
+  import { speakIfEnabled, buildPriceReadout, isTTSEnabled } from '../lib/tts';
+  import { hasApiKey } from '../lib/sarvam';
 
   // ── State ──
   let activeCrop = $state('వేరుశెనగ');
@@ -18,6 +28,10 @@
   let trendCanvas = $state<HTMLCanvasElement>(undefined as any);
   let refreshing = $state(false);
   let lastRefreshTime = $state(new Date().toISOString().slice(0, 10));
+
+  // ── Mandi API fetch progress ──
+  let fetchProgress = $state<{ fetched: number; total: number } | null>(null);
+  let freshness = $state<FreshnessLabel>('seed');
 
   // ── Crops from farmer context, with fallback ──
   const defaultCrops = [
@@ -40,8 +54,8 @@
     return defaultCrops;
   });
 
-  // ── Derived summaries from live STDB data ──
-  let allSummaries = $derived(computeCropSummaries($marketPricesStore, activeCrop, selectedMandi));
+  // ── Derived summaries from live data (liveMandiPrices > STDB via myCropPrices) ──
+  let allSummaries = $derived(computeCropSummaries($myCropPrices, activeCrop, selectedMandi));
   let currentSummary = $derived(allSummaries.find(s => s.crop === activeCrop) || null);
   let insight = $derived(currentSummary ? buildMarketInsight(currentSummary) : null);
 
@@ -107,12 +121,51 @@
     touchStartY = 0;
   }
 
+  /** Load cached prices into the store (called on mount + after fetch) */
+  function loadCacheIntoStore() {
+    const cache = getCachedPrices();
+    if (!cache || cache.records.length === 0) {
+      freshness = 'seed';
+      return;
+    }
+    const apRecords = filterForAP(cache.records);
+    const storeRows = mandiRecordsToStoreFormat(apRecords);
+    liveMandiPrices.set(storeRows);
+    lastRefreshTime = cache.date;
+    freshness = getCacheFreshness();
+  }
+
   async function handleRefresh() {
+    const apiKey = getMandiApiKey();
+    if (!apiKey) {
+      showToast('data.gov.in API కీ లేదు. Settings లో జోడించండి.', 'warning', 4000);
+      return;
+    }
+
     refreshing = true;
-    // Simulate refresh delay (in production, call fetch_mandi_prices procedure)
-    await new Promise(r => setTimeout(r, 1200));
-    lastRefreshTime = new Date().toISOString().slice(0, 10);
-    refreshing = false;
+    fetchProgress = { fetched: 0, total: 0 };
+
+    try {
+      const records = await fetchAllMandiPrices(apiKey, (fetched, total) => {
+        fetchProgress = { fetched, total };
+      });
+
+      // Cache and filter for AP
+      cachePrices(records);
+      const apRecords = filterForAP(records);
+      const storeRows = mandiRecordsToStoreFormat(apRecords);
+      liveMandiPrices.set(storeRows);
+      lastRefreshTime = new Date().toISOString().slice(0, 10);
+      freshness = 'live';
+      showToast(`${apRecords.length} AP/Telangana ధరలు లోడ్ అయ్యాయి`, 'default', 3000);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      showToast(`ధరలు లోడ్ కాలేదు: ${msg}`, 'alert', 5000);
+      // Keep showing whatever was in the store before
+    } finally {
+      refreshing = false;
+      fetchProgress = null;
+    }
   }
 
   // ── Trend chart drawing ──
@@ -308,7 +361,10 @@
   }
 
   onMount(() => {
-    // Initial draw after a tick
+    // Load cached mandi prices immediately (no API call, instant)
+    loadCacheIntoStore();
+
+    // Initial chart draw after a tick
     setTimeout(() => {
       if (priceHistory.length > 0) drawTrendChart();
     }, 500);
@@ -335,6 +391,27 @@
   function selectMandi(mandi: string) {
     selectedMandi = selectedMandi === mandi ? '' : mandi;
   }
+
+  // ── TTS: read hero price aloud ──
+  let speakingPrice = $state(false);
+
+  async function handleSpeakPrice() {
+    if (!hasApiKey()) {
+      showToast('API కీ సెట్ చేయబడలేదు. సెట్టింగ్స్‌లో నమోదు చేయండి.', 'warning', 4000);
+      return;
+    }
+    if (!isTTSEnabled()) {
+      showToast('ధ్వని నిర్ధారణ ఆపివేయబడింది. Settings లో ఆన్ చేయండి.', 'warning', 3000);
+      return;
+    }
+    if (!heroMandi || heroPrice <= 0) return;
+    speakingPrice = true;
+    try {
+      await speakIfEnabled(buildPriceReadout(heroMandi, activeCrop, heroPrice));
+    } finally {
+      speakingPrice = false;
+    }
+  }
 </script>
 
 <!-- Pull-to-refresh indicator -->
@@ -350,6 +427,20 @@
 {#if refreshing}
   <div class="refresh-bar">
     <div class="refresh-bar-inner"></div>
+  </div>
+{/if}
+
+{#if fetchProgress && fetchProgress.total > 0}
+  <div class="fetch-progress">
+    <span class="fetch-progress-text">
+      {fetchProgress.fetched.toLocaleString('en-IN')} / {fetchProgress.total.toLocaleString('en-IN')} ధరలు లోడ్...
+    </span>
+    <div class="fetch-progress-bar">
+      <div
+        class="fetch-progress-fill"
+        style="width: {Math.min((fetchProgress.fetched / fetchProgress.total) * 100, 100)}%"
+      ></div>
+    </div>
   </div>
 {/if}
 
@@ -370,6 +461,14 @@
       onclick={() => { activeCrop = crop.id; selectedMandi = ''; }}
     >{crop.label}</button>
   {/each}
+  <!-- Freshness indicator -->
+  {#if freshness === 'live'}
+    <span class="freshness-badge live" title="నేడు data.gov.in నుండి">నేటి ధరలు</span>
+  {:else if freshness === 'yesterday'}
+    <span class="freshness-badge yesterday" title="నిన్నటి కాషే">నిన్నటి ధరలు</span>
+  {:else}
+    <span class="freshness-badge seed" title="నమూనా డేటా">సీడ్ డేటా</span>
+  {/if}
   <!-- Refresh button -->
   <button
     class="refresh-btn"
@@ -397,6 +496,18 @@
         <span class="hero-price">₹{formatRupees(displayPrice)}</span>
         <span class="price-unit">/ క్వింటాల్</span>
       </div>
+      <button
+        class="price-speak-btn"
+        class:speaking={speakingPrice}
+        onclick={handleSpeakPrice}
+        aria-label="ధర చదవండి"
+        type="button"
+        title="ధర తెలుగులో చదవండి"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0014 8.5v7a4.47 4.47 0 002.5-3.5zM14 3.23v2.06A7.003 7.003 0 0119 12c0 3.12-2.04 5.76-4.86 6.71v2.06A9.005 9.005 0 0021 12c0-4.08-2.72-7.52-6.44-8.63L14 3.23z"/>
+        </svg>
+      </button>
       {#if trendDir === 'up'}
         <span class="trend-badge up">↑ ₹{formatRupees(Math.abs(trendAmt))}</span>
       {:else if trendDir === 'down'}
@@ -699,6 +810,38 @@
     color: var(--ink-tertiary);
     margin-bottom: 4px;
   }
+  .price-speak-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: var(--pasupu-glow, rgba(232, 163, 23, 0.12));
+    color: var(--ittadi);
+    border: 1.5px solid rgba(232, 163, 23, 0.25);
+    cursor: pointer;
+    transition: color var(--dur-233) ease, background var(--dur-233) ease, transform var(--dur-233) var(--spring);
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .price-speak-btn:hover {
+    background: var(--pasupu, #E8A317);
+    color: #fff;
+    border-color: var(--pasupu);
+  }
+  .price-speak-btn:active {
+    transform: scale(0.88);
+  }
+  .price-speak-btn.speaking {
+    color: var(--pasupu);
+    animation: breathePulse-speak 1.2s ease-in-out infinite;
+  }
+  @keyframes breathePulse-speak {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
   .trend-badge {
     display: inline-flex;
     align-items: center;
@@ -949,4 +1092,53 @@
   }
 
   .bottom-spacer { height: 120px; }
+
+  /* ── Fetch progress ── */
+  .fetch-progress {
+    padding: var(--space-5) var(--space-21);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .fetch-progress-text {
+    font-size: var(--text-xs);
+    color: var(--ink-tertiary);
+    font-family: var(--font-mono);
+  }
+  .fetch-progress-bar {
+    height: 3px;
+    background: var(--nalupurugu);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .fetch-progress-fill {
+    height: 100%;
+    background: var(--pasupu);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  /* ── Freshness badge ── */
+  .freshness-badge {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    padding: 2px var(--space-5);
+    border-radius: 3px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  .freshness-badge.live {
+    background: var(--pacchi-soft);
+    color: var(--pacchi);
+  }
+  .freshness-badge.yesterday {
+    background: var(--pasupu-glow);
+    color: var(--ittadi);
+  }
+  .freshness-badge.seed {
+    background: var(--nalupurugu);
+    color: var(--ink-tertiary);
+  }
 </style>

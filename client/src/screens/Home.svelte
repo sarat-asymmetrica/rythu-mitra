@@ -2,6 +2,7 @@
   import BriefingCard from '../components/BriefingCard.svelte';
   import BalanceStrip from '../components/BalanceStrip.svelte';
   import SchemeCard from '../components/SchemeCard.svelte';
+  import WeatherCard from '../components/WeatherCard.svelte';
   import { moneyEvents, myFarmer, myFarmerContext, briefingCards, connected } from '../lib/stores';
   import { online } from '../lib/network';
   import type { BriefingCard as BriefingCardType, GovtScheme } from '../lib/types';
@@ -148,6 +149,9 @@
     <div class="season-ring-sub">{parseCrops($myFarmerContext?.crops)}</div>
   </div>
 </div>
+
+<!-- Weather Card -->
+<WeatherCard district={$myFarmerContext?.district ?? $myFarmer?.district ?? ''} />
 
 <!-- Morning Briefing -->
 <div class="section-header">

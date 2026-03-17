@@ -10,6 +10,19 @@
 import type { MarketPrice as StdbMarketPrice } from '../module_bindings/types';
 
 // ---------------------------------------------------------------------------
+// Minimal structural type accepted by analytics functions.
+// Both StdbMarketPrice and StoreMarketPrice (mandi-api.ts) satisfy this.
+// ---------------------------------------------------------------------------
+export interface PriceRecord {
+  crop: string;
+  mandi: string;
+  district?: string;
+  date: string;
+  pricePerQuintalPaise: bigint;
+  mspPricePaise: bigint;
+}
+
+// ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
@@ -61,12 +74,12 @@ const MANDI_DISTANCES: Record<string, { km: number; transport: number }> = {
  * Groups by crop, finds best/worst mandis, computes trends.
  */
 export function computeCropSummaries(
-  allPrices: StdbMarketPrice[],
+  allPrices: PriceRecord[],
   selectedCrop?: string,
   selectedMandi?: string,
 ): CropPriceSummary[] {
   // Group by crop
-  const byCrop = new Map<string, StdbMarketPrice[]>();
+  const byCrop = new Map<string, PriceRecord[]>();
   for (const p of allPrices) {
     const existing = byCrop.get(p.crop) || [];
     existing.push(p);
@@ -83,7 +96,7 @@ export function computeCropSummaries(
     const latestDate = sorted[sorted.length - 1]?.date || '';
 
     // Latest prices per mandi
-    const latestByMandi = new Map<string, StdbMarketPrice>();
+    const latestByMandi = new Map<string, PriceRecord>();
     for (const p of sorted) {
       if (p.date === latestDate) {
         latestByMandi.set(p.mandi, p);

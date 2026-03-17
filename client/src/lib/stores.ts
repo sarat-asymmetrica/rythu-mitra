@@ -19,6 +19,8 @@ import type {
   TransactionGroup, DonutSegment, ScreenName,
 } from './types';
 import { loadMemories, type FarmerMemory } from './memory';
+import type { StoreMarketPrice } from './mandi-api';
+import type { PriceRecord } from './market';
 
 // ---------------------------------------------------------------------------
 // Connection state
@@ -111,16 +113,28 @@ export const totalExpense = derived(balanceData, ($b) => $b.expense);
 export const balance = derived(balanceData, ($b) => $b.net);
 
 // ---------------------------------------------------------------------------
+// Live mandi prices (from data.gov.in API, injected by Market.svelte on refresh)
+// Declared before myCropPrices so it can be used in the derived store.
+// ---------------------------------------------------------------------------
+export const liveMandiPrices = writable<StoreMarketPrice[]>([]);
+
+// ---------------------------------------------------------------------------
 // Derived: my crop prices (market prices filtered by farmer's crops + district)
+// Priority: liveMandiPrices (data.gov.in) > STDB marketPricesStore
 // ---------------------------------------------------------------------------
 export const myCropPrices = derived(
-  [marketPricesStore, myFarmerContext, myFarmer],
-  ([$prices, $ctx, $farmer]) => {
-    if (!$ctx || !$farmer) return $prices; // Show all prices if no context
+  [marketPricesStore, liveMandiPrices, myFarmerContext, myFarmer],
+  ([$stdbPrices, $livePrices, $ctx, $farmer]): PriceRecord[] => {
+    // Use live mandi prices when available (they are already AP-filtered)
+    const prices: PriceRecord[] =
+      $livePrices.length > 0
+        ? ($livePrices as PriceRecord[])
+        : ($stdbPrices as PriceRecord[]);
+    if (!$ctx || !$farmer) return prices; // Show all prices if no context
     let crops: string[] = [];
     try { crops = JSON.parse($ctx.crops || '[]'); } catch { crops = []; }
-    if (crops.length === 0) return $prices;
-    return $prices.filter(p => crops.includes(p.crop));
+    if (crops.length === 0) return prices;
+    return prices.filter(p => crops.includes(p.crop));
   }
 );
 
@@ -316,9 +330,9 @@ export const briefingCards = derived(
   ([$prices, $ctx, $uiPrices]): BriefingCard[] => {
     const cards: BriefingCard[] = [];
 
-    // If STDB has live market prices, use those for briefing cards
+    // If live or STDB market prices exist, use them for briefing cards
     if ($prices.length > 0) {
-      const byCrop = new Map<string, StdbMarketPrice[]>();
+      const byCrop = new Map<string, PriceRecord[]>();
       for (const p of $prices) {
         const existing = byCrop.get(p.crop) || [];
         existing.push(p);

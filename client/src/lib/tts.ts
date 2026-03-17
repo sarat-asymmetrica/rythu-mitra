@@ -204,3 +204,32 @@ export function buildPriceReadout(
 ): string {
   return `${mandiName} ${cropName} ధర క్వింటాలుకు రూపాయలు ${pricePerQuintal.toLocaleString('en-IN')}`;
 }
+
+// ---------------------------------------------------------------------------
+// TTS Enable/Disable toggle (persisted in localStorage)
+// Default: ON — farmers may not read well, voice confirmation is primary UX
+// ---------------------------------------------------------------------------
+
+const TTS_ENABLED_KEY = 'rythu_mitra_tts_enabled';
+
+/**
+ * Returns true if TTS is enabled (default: true).
+ * The toggle is stored as the string "false" to disable; anything else = enabled.
+ */
+export function isTTSEnabled(): boolean {
+  return localStorage.getItem(TTS_ENABLED_KEY) !== 'false';
+}
+
+/** Persist TTS enabled state. */
+export function setTTSEnabled(enabled: boolean): void {
+  localStorage.setItem(TTS_ENABLED_KEY, String(enabled));
+}
+
+/**
+ * Speak the given Telugu text only if TTS is enabled.
+ * Non-blocking and never throws.
+ */
+export async function speakIfEnabled(text: string): Promise<void> {
+  if (!isTTSEnabled()) return;
+  await speakTelugu(text);
+}
