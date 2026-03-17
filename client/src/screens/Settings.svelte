@@ -341,7 +341,7 @@
 
   <!-- Search Configuration -->
   <section class="config-section">
-    <label class="field-label">Web Search</label>
+    <p class="field-label" role="group" aria-label="Web Search">Web Search</p>
     <p class="field-hint">Select providers for AI web search queries</p>
 
     <div class="search-option">

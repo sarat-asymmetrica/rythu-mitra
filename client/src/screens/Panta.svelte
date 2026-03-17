@@ -341,7 +341,7 @@ Respond entirely in Telugu. Be concise and practical.`;
     </div>
 
     <div class="photo-preview-wrap">
-      <img src={capturedPhotoUrl} alt="crop photo" class="photo-preview-img" />
+      <img src={capturedPhotoUrl} alt="పంట విశ్లేషణ కోసం తీసిన చిత్రం" class="photo-preview-img" />
     </div>
 
     {#if analysisPending}
@@ -687,8 +687,7 @@ Respond entirely in Telugu. Be concise and practical.`;
   @keyframes expandForm { from { opacity: 0; transform: scaleY(0.75); } to { opacity: 1; transform: scaleY(1); } }
   .inline-form-title { font-size: var(--text-sm); font-weight: 600; color: var(--pacchi); }
   .inline-form-row { display: flex; gap: var(--space-8); align-items: center; }
-  .inline-form input, .inline-form textarea { flex: 1; padding: var(--space-8) var(--space-13); background: var(--patti); border: 1px solid var(--nalupurugu); border-radius: 3px 8px 3px 5px; font-family: var(--font-te); font-size: var(--text-sm); color: var(--ink-primary); outline: none; }
-  .inline-form textarea { resize: none; height: 60px; }
+  .inline-form input { flex: 1; padding: var(--space-8) var(--space-13); background: var(--patti); border: 1px solid var(--nalupurugu); border-radius: 3px 8px 3px 5px; font-family: var(--font-te); font-size: var(--text-sm); color: var(--ink-primary); outline: none; }
   .inline-form-actions { display: flex; gap: var(--space-8); justify-content: flex-end; padding-top: var(--space-5); }
   .btn-save { padding: var(--space-8) var(--space-21); background: var(--pacchi); color: var(--patti); border: none; border-radius: 2px 8px 3px 5px; font-family: var(--font-te); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
   .btn-cancel { padding: var(--space-8) var(--space-13); background: transparent; color: var(--ink-tertiary); border: 1px solid var(--nalupurugu); border-radius: 2px 8px 3px 5px; font-family: var(--font-te); font-size: var(--text-sm); cursor: pointer; }
