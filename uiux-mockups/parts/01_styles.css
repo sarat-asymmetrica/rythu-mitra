@@ -1,0 +1,1359 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   MATTI DESIGN SYSTEM v1 — "From the Earth"
+   Rythu Mitra Unified Prototype Foundation
+   Living Geometry invariants + Deccan aesthetics
+   Used by: v1_home, v2_dabbu, v3_market, v4_panta
+   ═══════════════════════════════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 1: CSS CUSTOM PROPERTIES (DESIGN TOKENS)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+:root {
+
+  /* ─── Earth Palette ─── */
+  --matti:           #8B4513;   /* Dark red-brown clay — primary brand */
+  --matti-light:     #A0522D;   /* Lighter clay for hover states */
+  --matti-glow:      rgba(139, 69, 19, 0.12);
+
+  --pasupu:          #E8A317;   /* Turmeric yellow — FAB, highlights */
+  --pasupu-soft:     #F5D98E;   /* Pale turmeric for soft fills */
+  --pasupu-glow:     rgba(232, 163, 23, 0.15);
+
+  --neeli:           #1B4F72;   /* Deep indigo — government, links */
+  --neeli-light:     #2980B9;   /* Brighter indigo for hover */
+  --neeli-glow:      rgba(27, 79, 114, 0.1);
+
+  --patti:           #FAF7F0;   /* Warm paper — app background */
+  --patti-warm:      #F5F0E6;   /* Warmer paper for card fills */
+
+  --nalupurugu:      #D4C5A9;   /* Sandy beige — borders, dividers */
+  --nalupurugu-soft: rgba(212, 197, 169, 0.4);
+
+  --pacchi:          #2D6A4F;   /* Forest green — income, crop health */
+  --pacchi-light:    #40916C;   /* Lighter green for bars, accents */
+  --pacchi-glow:     rgba(45, 106, 79, 0.1);
+
+  --erra:            #C0392B;   /* Vermillion — alerts, expenses */
+  --erra-soft:       rgba(192, 57, 43, 0.1);
+
+  --ittadi:          #B8860B;   /* Dark goldenrod — brass bar, money */
+  --ittadi-glow:     rgba(184, 134, 11, 0.2);
+
+  /* ─── Ink Hierarchy ─── */
+  --ink-primary:     #1C1410;   /* Near-black with warm brown tint */
+  --ink-secondary:   #5D4E37;   /* Mid-brown for supporting text */
+  --ink-tertiary:    #8B7D6B;   /* Light brown for labels, metadata */
+  --ink-faint:       #B8A99A;   /* Very faint for timestamps, hints */
+  --ink-on-dark:     #FAF7F0;   /* Patti color for text on dark bg */
+
+  /* ─── Typography Families ─── */
+  --font-te:         'Noto Sans Telugu', 'Noto Sans', sans-serif;
+  --font-te-display: 'Noto Serif Telugu', 'Noto Sans Telugu', serif;
+  --font-mono:       'Courier Prime', 'Courier New', monospace;
+
+  /* ─── Type Scale — Phi-derived (φ = 1.618) ─── */
+  --text-2xs:   0.6875rem;   /*  11px */
+  --text-xs:    0.8125rem;   /*  13px = 1/φ rem  */
+  --text-sm:    0.875rem;    /*  14px */
+  --text-base:  1rem;        /*  16px */
+  --text-lg:    1.25rem;     /*  20px */
+  --text-xl:    1.618rem;    /*  25.9px = φ rem  */
+  --text-2xl:   2rem;        /*  32px */
+  --text-hero:  2.618rem;    /*  41.9px = φ² rem */
+
+  /* ─── Spacing Scale — Fibonacci sequence ─── */
+  --space-1:    1px;
+  --space-2:    2px;
+  --space-3:    3px;
+  --space-5:    5px;
+  --space-8:    8px;
+  --space-13:   13px;
+  --space-21:   21px;
+  --space-34:   34px;
+  --space-55:   55px;
+  --space-89:   89px;
+
+  /* ─── Animation Durations — Fibonacci milliseconds ─── */
+  --dur-55:     55ms;
+  --dur-89:     89ms;
+  --dur-144:    144ms;
+  --dur-233:    233ms;
+  --dur-377:    377ms;
+  --dur-610:    610ms;
+  --dur-987:    987ms;
+  --dur-1597:   1597ms;
+
+  /* ─── Breathing Rhythm ─── */
+  --breathe:    4s;           /* Natural breath cycle for FAB ring */
+
+  /* ─── Border Radius — Irregular, handmade feel ─── */
+  --radius-card:    3px 13px 5px 8px;
+  --radius-card-sm: 2px 8px 3px 5px;
+  --radius-card-xs: 2px 5px 2px 4px;
+  --radius-pill:    999px;
+
+  /* ─── Shadow Tokens ─── */
+  --shadow-card:  0 2px 8px rgba(28, 20, 16, 0.05);
+  --shadow-lift:  0 8px 21px rgba(28, 20, 16, 0.08);
+  --shadow-fab:   0 4px 13px rgba(232, 163, 23, 0.35), 0 1px 3px rgba(0,0,0,0.10);
+  --shadow-fab-hover: 0 6px 21px rgba(232, 163, 23, 0.45), 0 2px 5px rgba(0,0,0,0.10);
+  --shadow-toast: 0 4px 21px rgba(0,0,0,0.08);
+
+  /* ─── Z-Index Scale ─── */
+  --z-canvas:   0;
+  --z-content:  1;
+  --z-nav:      99;
+  --z-fab:      100;
+  --z-toast:    200;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 2: RESET + BASE
+   ═══════════════════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  /* Prevent pull-to-refresh interference on mobile */
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: var(--font-te);
+  background: var(--patti);
+  color: var(--ink-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  /* Telugu script needs slightly more generous line height */
+  line-height: 1.6;
+}
+
+button {
+  font-family: var(--font-te);
+  cursor: pointer;
+  border: none;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+input, textarea {
+  font-family: var(--font-te);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 3: KOLAM BACKGROUND CANVAS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+#kolam-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: var(--z-canvas);
+  opacity: 0.025;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 4: APP SHELL
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.app-shell {
+  position: relative;
+  z-index: var(--z-content);
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--patti);
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.05);
+  overflow-x: hidden;
+}
+
+/* ─── Status Bar (mock iOS/Android bar) ─── */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-8) var(--space-21);
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+/* ─── App Header ─── */
+.app-header {
+  padding: var(--space-13) var(--space-21) var(--space-21);
+  position: relative;
+  overflow: hidden;
+}
+
+.greeting {
+  font-family: var(--font-te-display);
+  font-size: var(--text-xl);
+  font-weight: 400;
+  color: var(--ink-primary);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp var(--dur-610) cubic-bezier(0.34, 1.56, 0.64, 1) 300ms forwards;
+}
+
+.greeting-sub {
+  font-size: var(--text-sm);
+  color: var(--ink-tertiary);
+  margin-top: var(--space-5);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fadeUp var(--dur-610) cubic-bezier(0.34, 1.56, 0.64, 1) 500ms forwards;
+}
+
+.greeting-date {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  margin-top: var(--space-3);
+  letter-spacing: 1px;
+  opacity: 0;
+  animation: fadeUp var(--dur-377) ease 700ms forwards;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 5: SCREEN SYSTEM (multi-screen SPA routing)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.screen {
+  display: none;
+  opacity: 0;
+  transform: translateY(8px);
+  will-change: opacity, transform;
+}
+
+.screen.active {
+  display: block;
+  animation: screenEnter var(--dur-233) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.screen.exit {
+  display: block;
+  animation: screenExit var(--dur-144) ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes screenEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes screenExit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* Slide variants for directional navigation */
+.screen.slide-in-right {
+  animation: slideInRight var(--dur-233) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.screen.slide-in-left {
+  animation: slideInLeft var(--dur-233) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 6: SECTION HEADERS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.section-header {
+  padding: var(--space-21) var(--space-21) var(--space-8);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.section-title {
+  font-family: var(--font-te-display);
+  font-size: var(--text-lg);
+  font-weight: 400;
+  color: var(--ink-primary);
+}
+
+.section-action {
+  font-size: var(--text-xs);
+  color: var(--neeli);
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color var(--dur-233) ease;
+  white-space: nowrap;
+}
+
+.section-action:hover {
+  color: var(--neeli-light);
+}
+
+.section-action:active {
+  opacity: 0.7;
+  transition-duration: var(--dur-89);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 7: MATTI CARD — base card component
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.matti-card {
+  padding: var(--space-21);
+  background: var(--patti);
+  border: 1px solid var(--nalupurugu);
+  border-radius: var(--radius-card);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  /* Lift transition */
+  transition:
+    transform var(--dur-377) cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow var(--dur-377) ease;
+  /* Initial hidden state for staggered animation */
+  opacity: 0;
+  transform: translateY(15px);
+}
+
+.matti-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+}
+
+.matti-card:active {
+  transform: translateY(0) scale(0.98);
+  transition-duration: var(--dur-89);
+  box-shadow: var(--shadow-card);
+}
+
+.matti-card.animate-in {
+  animation: cardSlideIn var(--dur-610) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ─── Card Accent Left Stripe ─── */
+.card-accent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  border-radius: 3px 0 0 3px;
+}
+
+.card-accent.market { background: var(--pasupu); }
+.card-accent.govt   { background: var(--neeli); }
+.card-accent.crop   { background: var(--pacchi); }
+.card-accent.alert  { background: var(--erra); }
+.card-accent.money  { background: var(--ittadi); }
+
+/* ─── Card Icon Circle ─── */
+.card-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-bottom: var(--space-8);
+}
+
+.card-icon.market { background: var(--pasupu-glow); }
+.card-icon.govt   { background: var(--neeli-glow); }
+.card-icon.crop   { background: var(--pacchi-glow); }
+.card-icon.alert  { background: var(--erra-soft); }
+.card-icon.money  { background: var(--ittadi-glow); }
+
+/* ─── Card Typography ─── */
+.card-title {
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--ink-primary);
+  margin-bottom: var(--space-5);
+  line-height: 1.5;
+}
+
+.card-body {
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+  line-height: 1.7;
+}
+
+.card-meta {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  margin-top: var(--space-8);
+  font-family: var(--font-mono);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 8: MATTI BUTTON
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.matti-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-8);
+  padding: var(--space-13) var(--space-21);
+  background: var(--matti);
+  color: var(--ink-on-dark);
+  font-family: var(--font-te);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  border-radius: var(--radius-card-xs);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow var(--dur-233) ease,
+    background var(--dur-144) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.matti-btn:hover {
+  background: var(--matti-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 13px rgba(139, 69, 19, 0.25);
+}
+
+.matti-btn:active {
+  transform: scale(0.96);
+  transition-duration: var(--dur-89);
+  box-shadow: none;
+}
+
+/* Secondary variant */
+.matti-btn.secondary {
+  background: transparent;
+  color: var(--matti);
+  border: 1px solid var(--nalupurugu);
+}
+
+.matti-btn.secondary:hover {
+  background: var(--matti-glow);
+  box-shadow: none;
+}
+
+/* Pasupu (turmeric) variant */
+.matti-btn.pasupu {
+  background: var(--pasupu);
+  color: var(--ink-primary);
+}
+
+.matti-btn.pasupu:hover {
+  background: #d4940f;
+  box-shadow: 0 4px 13px rgba(232, 163, 23, 0.3);
+}
+
+/* Small variant */
+.matti-btn.sm {
+  padding: var(--space-8) var(--space-13);
+  font-size: var(--text-xs);
+}
+
+/* Full width */
+.matti-btn.full {
+  width: 100%;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 9: MATTI INPUT — bottom-border style with floating label
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.matti-field {
+  position: relative;
+  padding-top: var(--space-21);
+  margin-bottom: var(--space-13);
+}
+
+.matti-input {
+  width: 100%;
+  padding: var(--space-8) 0;
+  font-family: var(--font-te);
+  font-size: var(--text-base);
+  color: var(--ink-primary);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--nalupurugu);
+  border-radius: 0;
+  outline: none;
+  transition: border-color var(--dur-233) ease;
+  -webkit-appearance: none;
+}
+
+.matti-input:focus {
+  border-bottom-color: var(--matti);
+}
+
+.matti-input::placeholder {
+  color: transparent; /* hidden — label floats instead */
+}
+
+/* Floating label */
+.matti-label {
+  position: absolute;
+  top: var(--space-34);
+  left: 0;
+  font-size: var(--text-base);
+  color: var(--ink-tertiary);
+  pointer-events: none;
+  transition:
+    top var(--dur-233) cubic-bezier(0.22, 1, 0.36, 1),
+    font-size var(--dur-233) ease,
+    color var(--dur-233) ease;
+}
+
+.matti-input:focus ~ .matti-label,
+.matti-input:not(:placeholder-shown) ~ .matti-label {
+  top: 0;
+  font-size: var(--text-xs);
+  color: var(--matti);
+}
+
+/* Underline focus indicator */
+.matti-field::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--matti);
+  border-radius: 1px;
+  transition: width var(--dur-377) cubic-bezier(0.34, 1.56, 0.64, 1),
+              left var(--dur-377) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.matti-field:focus-within::after {
+  width: 100%;
+  left: 0;
+}
+
+/* Currency prefix for amount inputs */
+.matti-field.amount .matti-input {
+  padding-left: var(--space-21);
+}
+
+.matti-field.amount::before {
+  content: '₹';
+  position: absolute;
+  bottom: var(--space-8);
+  left: 0;
+  font-size: var(--text-base);
+  color: var(--ink-tertiary);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 10: BALANCE HERO
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.balance-hero {
+  margin: var(--space-8) var(--space-21) var(--space-21);
+  padding: var(--space-21);
+  background: linear-gradient(135deg, var(--patti-warm) 0%, var(--patti) 100%);
+  border: 1px solid var(--nalupurugu);
+  border-radius: var(--radius-card);
+  position: relative;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeUp var(--dur-610) cubic-bezier(0.22, 1, 0.36, 1) 800ms forwards;
+}
+
+/* Brass shimmer bar at top edge */
+.balance-hero::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: var(--space-21);
+  width: 40px;
+  height: 3px;
+  background: var(--ittadi);
+  border-radius: 0 0 2px 2px;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.balance-label {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: var(--space-8);
+}
+
+/* Counter element — animates via JS */
+.balance-amount {
+  font-family: var(--font-te-display);
+  font-size: var(--text-hero);
+  font-weight: 700;
+  color: var(--pacchi);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.balance-amount .currency {
+  font-size: var(--text-lg);
+  font-weight: 400;
+  color: var(--ink-tertiary);
+  margin-right: var(--space-3);
+}
+
+.balance-breakdown {
+  display: flex;
+  gap: var(--space-21);
+  margin-top: var(--space-13);
+  padding-top: var(--space-13);
+  border-top: 1px solid var(--nalupurugu);
+  flex-wrap: wrap;
+}
+
+.balance-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.balance-item-label {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+}
+
+.balance-item-value {
+  font-size: var(--text-base);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.balance-item-value.income  { color: var(--pacchi); }
+.balance-item-value.expense { color: var(--erra); }
+.balance-item-value.neutral { color: var(--ink-secondary); }
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 11: TRANSACTION LIST
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.txn-list {
+  padding: 0 var(--space-21);
+}
+
+.txn-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-13);
+  padding: var(--space-13) var(--space-8);
+  border-bottom: 1px solid var(--nalupurugu-soft);
+  margin: 0 calc(-1 * var(--space-8));
+  border-radius: 4px;
+  cursor: pointer;
+  /* Initial hidden state for stagger animation */
+  opacity: 0;
+  transform: translateX(-10px);
+  /* Hover transition */
+  transition: background var(--dur-233) ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.txn-item:hover {
+  background: rgba(212, 197, 169, 0.15);
+}
+
+.txn-item:active {
+  background: rgba(212, 197, 169, 0.30);
+  transition-duration: var(--dur-89);
+}
+
+.txn-item.animate-in {
+  animation: slideInLeft var(--dur-377) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ─── Transaction Icon ─── */
+.txn-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.txn-icon.income  { background: var(--pacchi-glow); }
+.txn-icon.expense { background: var(--erra-soft); }
+.txn-icon.govt    { background: var(--neeli-glow); }
+
+/* ─── Transaction Details ─── */
+.txn-details {
+  flex: 1;
+  min-width: 0; /* Allow text truncation */
+}
+
+.txn-desc {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.txn-category {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  margin-top: 2px;
+}
+
+/* ─── Transaction Amount ─── */
+.txn-amount {
+  font-size: var(--text-base);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.txn-amount.income  { color: var(--pacchi); }
+.txn-amount.expense { color: var(--erra); }
+.txn-amount.govt    { color: var(--neeli); }
+
+.txn-time {
+  font-size: 10px;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  text-align: right;
+  margin-top: 2px;
+}
+
+/* Right-aligned amount + time container */
+.txn-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 12: VOICE FAB (Floating Action Button)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.voice-fab {
+  position: fixed;
+  /* Centered within 420px shell — 28px = half of 56px button */
+  bottom: 89px;
+  right: 50%;
+  transform: translateX(calc(210px - 28px));
+
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--pasupu);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: var(--shadow-fab);
+  z-index: var(--z-fab);
+  -webkit-tap-highlight-color: transparent;
+
+  transition:
+    transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow var(--dur-233) ease,
+    background var(--dur-233) ease;
+
+  /* Spring entry animation after page loads */
+  animation: fabEntry var(--dur-610) cubic-bezier(0.34, 1.56, 0.64, 1) 1800ms both;
+}
+
+.voice-fab:hover {
+  transform: translateX(calc(210px - 28px)) scale(1.08);
+  box-shadow: var(--shadow-fab-hover);
+}
+
+.voice-fab:active {
+  transform: translateX(calc(210px - 28px)) scale(0.92);
+  transition-duration: var(--dur-89);
+}
+
+.voice-fab svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--patti);
+  transition: transform var(--dur-233) ease;
+}
+
+/* ─── Listening State (active recording) ─── */
+.voice-fab.listening {
+  background: var(--erra);
+  animation: breathePulse var(--breathe) ease-in-out infinite;
+}
+
+.voice-fab.listening svg {
+  animation: micBounce 1s ease-in-out infinite;
+}
+
+/* ─── Breathing Ring (ambient pulse around FAB) ─── */
+.voice-fab::before {
+  content: '';
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--pasupu);
+  opacity: 0;
+  animation: breatheRing var(--breathe) ease-in-out infinite;
+  pointer-events: none;
+}
+
+.voice-fab.listening::before {
+  border-color: var(--erra);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 13: BOTTOM NAVIGATION
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
+  height: 68px;
+  background: var(--patti);
+  border-top: 1px solid var(--nalupurugu);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 var(--space-8);
+  z-index: var(--z-nav);
+}
+
+/* ─── Nav Item ─── */
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: var(--space-8);
+  min-width: 56px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  position: relative;
+  color: var(--ink-tertiary);
+  transition: color var(--dur-233) ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* FAB center spacer — wider gap for the floating button */
+.nav-item.fab-spacer {
+  min-width: 64px;
+  pointer-events: none;
+}
+
+/* Active state */
+.nav-item.active {
+  color: var(--matti);
+}
+
+/* Active indicator bar at top */
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: var(--matti);
+  border-radius: 0 0 2px 2px;
+}
+
+.nav-item svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+  transition: transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-item:active svg {
+  transform: scale(0.85);
+}
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  line-height: 1;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 14: TOAST NOTIFICATION SYSTEM
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.toast-container {
+  position: fixed;
+  top: var(--space-21);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 42px);
+  max-width: 378px;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  pointer-events: none;
+}
+
+/* ─── Mango Leaf Toast ─── */
+.mango-toast {
+  padding: var(--space-13) var(--space-21);
+  background: var(--patti);
+  border: 1px solid var(--nalupurugu);
+  /* Default: pacchi (green) left accent */
+  border-left: 4px solid var(--pacchi);
+  border-radius: 2px 8px 8px 2px;
+
+  box-shadow: var(--shadow-toast);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  display: flex;
+  align-items: center;
+  gap: var(--space-13);
+  pointer-events: auto;
+  cursor: pointer;
+
+  /* Entry state */
+  opacity: 0;
+  transform: translateY(-20px) rotate(2deg);
+  animation: toastIn var(--dur-610) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Color variants via left border */
+.mango-toast.warning { border-left-color: var(--pasupu); }
+.mango-toast.alert   { border-left-color: var(--erra); }
+.mango-toast.info    { border-left-color: var(--neeli); }
+
+.toast-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.toast-text {
+  font-size: var(--text-sm);
+  color: var(--ink-primary);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.toast-dismiss {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity var(--dur-233) ease;
+  cursor: pointer;
+  padding: 2px var(--space-5);
+}
+
+.mango-toast:hover .toast-dismiss {
+  opacity: 0.6;
+}
+
+.mango-toast:hover .toast-dismiss:hover {
+  opacity: 1;
+  color: var(--ink-secondary);
+}
+
+/* Floating bob animation applied after entry (via JS) */
+.mango-toast.floating {
+  animation: toastFloat 2s ease-in-out infinite;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 15: ALL KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ─── Core Motion ─── */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ─── Brass Bar Shimmer ─── */
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0.6;
+    width: 40px;
+  }
+  50% {
+    opacity: 1;
+    width: 60px;
+  }
+}
+
+/* ─── FAB Breathing ─── */
+
+/* Ambient pulse when idle */
+@keyframes breathePulse {
+  0%, 100% {
+    transform: translateX(calc(210px - 28px)) scale(1);
+    box-shadow: 0 4px 13px rgba(192, 57, 43, 0.35);
+  }
+  50% {
+    transform: translateX(calc(210px - 28px)) scale(1.06);
+    box-shadow: 0 6px 21px rgba(192, 57, 43, 0.50);
+  }
+}
+
+/* Expanding ring around FAB */
+@keyframes breatheRing {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.30;
+    transform: scale(1.4);
+  }
+}
+
+/* ─── Listening State ─── */
+
+@keyframes micBounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-2px); }
+}
+
+/* ─── FAB Spring Entry (delayed after page loads) ─── */
+
+@keyframes fabEntry {
+  from {
+    opacity: 0;
+    transform: translateX(calc(210px - 28px)) scale(0) rotate(-90deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(calc(210px - 28px)) scale(1) rotate(0deg);
+  }
+}
+
+/* ─── Toast Motion ─── */
+
+/* Slide in with slight wrist-flick rotation */
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) rotate(3deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+/* Gentle bob while visible */
+@keyframes toastFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-3px); }
+}
+
+/* ─── Ripple ─── */
+
+@keyframes rippleExpand {
+  from {
+    transform: scale(0);
+    opacity: 1;
+  }
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ─── Season / Crop SVG Rings ─── */
+
+/* Stroke-dashoffset draw animation for SVG progress rings */
+@keyframes rangoli-draw {
+  from { stroke-dashoffset: 314; }
+  to   { stroke-dashoffset: 94;  }
+}
+
+/* ─── Mandi Price Bars (grow from bottom) ─── */
+
+@keyframes priceGrow {
+  from { height: 0; }
+}
+
+/* ─── Pest Alert Pulse Border ─── */
+
+@keyframes borderPulse {
+  0%, 100% { border-color: var(--erra); }
+  50%       { border-color: transparent; }
+}
+
+/* ─── Crop Stage Pulse Ring ─── */
+
+@keyframes pulseRing {
+  0%   { transform: scale(1);    opacity: 0.6; }
+  70%  { transform: scale(1.35); opacity: 0;   }
+  100% { transform: scale(1.35); opacity: 0;   }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 16: UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Trigger class — JS adds this to kick off staggered animations */
+.animate-in {
+  animation-play-state: running !important;
+}
+
+/* Spacer so last content doesn't hide under bottom nav + FAB */
+.bottom-spacer {
+  height: 160px;
+}
+
+/* Ripple element injected by JS */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(184, 134, 11, 0.15) 0%,
+    transparent 70%
+  );
+  transform: scale(0);
+  animation: rippleExpand var(--dur-610) linear forwards;
+  pointer-events: none;
+}
+
+/* Text utilities */
+.text-income  { color: var(--pacchi) !important; }
+.text-expense { color: var(--erra) !important; }
+.text-govt    { color: var(--neeli) !important; }
+.text-muted   { color: var(--ink-tertiary); }
+.text-faint   { color: var(--ink-faint); }
+.text-mono    { font-family: var(--font-mono); }
+.text-tabular { font-variant-numeric: tabular-nums; }
+
+/* Flex helpers */
+.flex         { display: flex; }
+.flex-col     { display: flex; flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-5        { gap: var(--space-5); }
+.gap-8        { gap: var(--space-8); }
+.gap-13       { gap: var(--space-13); }
+.gap-21       { gap: var(--space-21); }
+
+/* Card scroll container (horizontal scroll for market cards) */
+.card-scroll {
+  padding: 0 var(--space-21);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-13);
+}
+
+.card-scroll-h {
+  padding: 0 var(--space-21);
+  display: flex;
+  gap: var(--space-13);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.card-scroll-h::-webkit-scrollbar { display: none; }
+
+.card-scroll-h .matti-card {
+  scroll-snap-align: start;
+  min-width: 280px;
+  flex-shrink: 0;
+}
+
+/* Pulse ring helper (crop stage indicator) */
+.pulse-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  animation: pulseRing 2s ease-out infinite;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SECTION 17: RESPONSIVE — max-width 420px (full-bleed mobile)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 420px) {
+
+  /* App shell goes full bleed */
+  .app-shell {
+    max-width: 100%;
+    box-shadow: none;
+  }
+
+  /* FAB anchors to right edge on narrow screens
+     (no longer needs to offset from center of 420px shell) */
+  .voice-fab {
+    right: var(--space-21);
+    transform: none;
+  }
+
+  .voice-fab:hover {
+    transform: scale(1.08);
+  }
+
+  .voice-fab:active {
+    transform: scale(0.92);
+  }
+
+  /* Redefine breathing animations without the X translation */
+  @keyframes breathePulse {
+    0%, 100% {
+      transform: scale(1);
+      box-shadow: 0 4px 13px rgba(192, 57, 43, 0.35);
+    }
+    50% {
+      transform: scale(1.06);
+      box-shadow: 0 6px 21px rgba(192, 57, 43, 0.50);
+    }
+  }
+
+  @keyframes fabEntry {
+    from {
+      opacity: 0;
+      transform: scale(0) rotate(-90deg);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
+  /* Bottom nav also full bleed */
+  .bottom-nav {
+    max-width: 100%;
+  }
+
+  /* Slightly tighter horizontal padding */
+  .section-header,
+  .briefing-scroll,
+  .txn-list,
+  .card-scroll,
+  .card-scroll-h {
+    padding-left: var(--space-13);
+    padding-right: var(--space-13);
+  }
+
+  .balance-hero {
+    margin-left: var(--space-13);
+    margin-right: var(--space-13);
+  }
+
+  /* Toast sits tighter to edges */
+  .toast-container {
+    width: calc(100% - 26px);
+  }
+}

@@ -1,0 +1,195 @@
+<!-- ═══════════════════════════════════════════════
+     HOME SCREEN — inner content for:
+     <section id="screen-home" class="screen active">
+     ═══════════════════════════════════════════════ -->
+
+<!-- Greeting -->
+<div class="greeting" data-delay="300">శుభోదయం, లక్ష్మి 🙏</div>
+<div class="greeting-sub" data-delay="500">మీ పొలం యొక్క నేటి సారాంశం</div>
+<div class="greeting-date" data-delay="700">15 మార్చి 2026 · రబీ సీజన్</div>
+
+<!-- Balance Hero -->
+<div class="balance-hero" data-delay="800">
+  <div class="balance-label">ఈ నెల మిగులు</div>
+  <div class="balance-amount">
+    <span class="currency">₹</span>6,200
+  </div>
+  <div class="balance-breakdown">
+    <div class="balance-item">
+      <span class="balance-item-label">ఆదాయం</span>
+      <span class="balance-item-value income">+₹12,400</span>
+    </div>
+    <div class="balance-item">
+      <span class="balance-item-label">ఖర్చులు</span>
+      <span class="balance-item-value expense">−₹6,200</span>
+    </div>
+  </div>
+</div>
+
+<!-- Season Progress Ring -->
+<div class="season-ring-wrap" data-delay="1200">
+  <svg width="48" height="48" viewBox="0 0 48 48" aria-hidden="true">
+    <!-- Background ring -->
+    <circle cx="24" cy="24" r="20" fill="none" stroke="var(--nalupurugu)" stroke-width="3"/>
+    <!-- Progress arc — 70% complete: circumference=125.66, offset=37.7 (30% of 125.66) -->
+    <circle cx="24" cy="24" r="20" fill="none"
+            stroke="var(--pacchi)" stroke-width="3"
+            stroke-linecap="round"
+            stroke-dasharray="125.66"
+            stroke-dashoffset="37.7"
+            transform="rotate(-90 24 24)"
+            style="animation: rangoli-draw 1.5s ease-out 1400ms both"/>
+    <!-- Centre dot -->
+    <circle cx="24" cy="24" r="3" fill="var(--pacchi-light)" opacity="0.6"/>
+  </svg>
+  <div class="season-ring-label">
+    <div class="season-ring-title">రబీ సీజన్ — 70% పూర్తి</div>
+    <div class="season-ring-sub">వేరుశెనగ · కోత: ఏప్రిల్</div>
+  </div>
+</div>
+
+<!-- Morning Briefing Section Header -->
+<div class="section-header">
+  <span class="section-title">నేటి సారాంశం</span>
+  <span class="section-action">అన్నీ చూడండి →</span>
+</div>
+
+<!-- Briefing Cards -->
+<div class="briefing-scroll">
+
+  <!-- (a) Mandi Prices -->
+  <div class="briefing-card" data-delay="1000">
+    <div class="card-accent market"></div>
+    <div class="card-icon market">📊</div>
+    <div class="card-title">మార్కెట్ ధరలు నవీకరించబడ్డాయి</div>
+    <div class="card-body">వేరుశెనగ ధరలు మూడు మండీలలో:</div>
+    <div class="price-compare">
+      <div class="price-bar-wrap">
+        <div class="price-bar" data-height="75" style="height:0; background: var(--pasupu);">
+          <span class="value" style="color: var(--ink-primary);">₹5,840</span>
+        </div>
+        <span class="price-bar-label">అనంతపురం</span>
+      </div>
+      <div class="price-bar-wrap">
+        <div class="price-bar" data-height="85" style="height:0; background: var(--pacchi-light);">
+          <span class="value" style="color: var(--ink-primary);">₹5,920</span>
+        </div>
+        <span class="price-bar-label">కర్నూలు</span>
+      </div>
+      <div class="price-bar-wrap">
+        <div class="price-bar" data-height="60" style="height:0; background: var(--nalupurugu);">
+          <span class="value" style="color: var(--ink-secondary);">₹5,680</span>
+        </div>
+        <span class="price-bar-label">హిందూపురం</span>
+      </div>
+    </div>
+    <div class="card-meta">MSP: ₹5,850/క్వింటాల్ · 10 ని. క్రితం</div>
+  </div>
+
+  <!-- (b) PM-KISAN -->
+  <div class="briefing-card" data-delay="1200">
+    <div class="card-accent govt"></div>
+    <div class="card-icon govt">🏛️</div>
+    <div class="card-title">PM-KISAN: తదుపరి వాయిదా</div>
+    <div class="card-body">చివరి వాయిదా: 14 జూన్ 2025 · ₹2,000
+      <br>తదుపరి వాయిదా ఇంకా జమ కాలేదు. మార్చి చివరి వారంలో అంచనా.</div>
+    <div class="card-meta">చివరిసారి తనిఖీ: నిన్న 18:30</div>
+  </div>
+
+  <!-- (c) Overcharge Alert -->
+  <div class="briefing-card" data-delay="1400">
+    <div class="card-accent alert"></div>
+    <div class="card-icon alert">⚠️</div>
+    <div class="card-title">⚠️ ధర హెచ్చరిక</div>
+    <div class="card-body">నంది విత్తనాల దుకాణం — వేరుశెనగ విత్తనాలు
+      <br><strong>డీలర్ ధర: ₹320/kg</strong> · MRP: ₹290/kg
+      <br><strong style="color: var(--erra);">₹30/kg ఎక్కువ!</strong></div>
+    <div class="card-meta">OCR విశ్లేషణ · నిన్న బిల్ ఫోటో నుండి</div>
+  </div>
+
+  <!-- (d) Crop Health -->
+  <div class="briefing-card" data-delay="1600">
+    <div class="card-accent crop"></div>
+    <div class="card-icon crop">🌱</div>
+    <div class="card-title">పంట: వేరుశెనగ — మంచి స్థితి</div>
+    <div class="card-body">చివరి నమోదు: 3 రోజుల క్రితం పురుగు గుర్తింపు
+      <br>బోల్ వార్మ్ — 35% ప్రభావం
+      <br>చికిత్స: వేప నూనె పిచికారీ ✓ పూర్తయింది</div>
+    <div class="card-meta">తదుపరి: 2 రోజుల్లో పరిశీలన</div>
+  </div>
+
+</div>
+
+<!-- Recent Transactions Section Header -->
+<div class="section-header">
+  <span class="section-title">ఇటీవలి లావాదేవీలు</span>
+  <span class="section-action">అన్నీ →</span>
+</div>
+
+<!-- Transaction List -->
+<div class="txn-list">
+
+  <div class="txn-item" data-delay="1800">
+    <div class="txn-icon expense">🧑‍🌾</div>
+    <div class="txn-details">
+      <div class="txn-desc">కూలి — 2 మంది</div>
+      <div class="txn-category">కూలి ఖర్చు</div>
+    </div>
+    <div style="text-align: right">
+      <div class="txn-amount expense">−₹800</div>
+      <div class="txn-time">ఈ రోజు 7:00</div>
+    </div>
+  </div>
+
+  <div class="txn-item" data-delay="1900">
+    <div class="txn-icon expense">🌾</div>
+    <div class="txn-details">
+      <div class="txn-desc">నంది విత్తనాలు — వేరుశెనగ</div>
+      <div class="txn-category">విత్తన ఖర్చు</div>
+    </div>
+    <div style="text-align: right">
+      <div class="txn-amount expense">−₹640</div>
+      <div class="txn-time">నిన్న 13:00</div>
+    </div>
+  </div>
+
+  <div class="txn-item" data-delay="2000">
+    <div class="txn-icon expense">💧</div>
+    <div class="txn-details">
+      <div class="txn-desc">బోరు మోటర్ డీజిల్</div>
+      <div class="txn-category">నీటిపారుదల</div>
+    </div>
+    <div style="text-align: right">
+      <div class="txn-amount expense">−₹450</div>
+      <div class="txn-time">నిన్న 06:30</div>
+    </div>
+  </div>
+
+  <div class="txn-item" data-delay="2100">
+    <div class="txn-icon govt">🏛️</div>
+    <div class="txn-details">
+      <div class="txn-desc">PM-KISAN వాయిదా</div>
+      <div class="txn-category">ప్రభుత్వ సబ్సిడీ</div>
+    </div>
+    <div style="text-align: right">
+      <div class="txn-amount govt">+₹2,000</div>
+      <div class="txn-time">14 జూన్</div>
+    </div>
+  </div>
+
+  <div class="txn-item" data-delay="2200">
+    <div class="txn-icon income">💰</div>
+    <div class="txn-details">
+      <div class="txn-desc">వేరుశెనగ అమ్మకం — 2 క్వింటాళ్ళు</div>
+      <div class="txn-category">పంట అమ్మకం</div>
+    </div>
+    <div style="text-align: right">
+      <div class="txn-amount income">+₹10,400</div>
+      <div class="txn-time">10 మార్చి</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Bottom spacer — clears fixed bottom nav -->
+<div class="bottom-spacer"></div>

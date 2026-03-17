@@ -1,0 +1,548 @@
+<!-- ═══════════════════════════════════════════════
+     SCREEN: దబ్బు (Money)
+     Inner content for <section id="screen-dabbu" class="screen">
+     Depends on: 03_styles_dabbu.css + shared Matti token :root
+     ═══════════════════════════════════════════════ -->
+
+<!-- 1. Header: title + month selector + balance pill -->
+<div class="dabbu-header">
+  <div class="dabbu-header-left">
+    <div class="dabbu-screen-title">దబ్బు</div>
+    <div class="dabbu-screen-subtitle">మార్చి 2026 · రబీ సీజన్</div>
+  </div>
+  <div class="dabbu-header-right">
+    <div class="balance-pill">
+      <span class="balance-pill-label">మిగులు</span>
+      <span class="balance-pill-amount" id="headerBalance">+₹6,200</span>
+    </div>
+    <button class="month-selector" id="monthSelector"
+            onclick="const c=this.querySelector('.chevron');c.style.transform='rotate(180deg)';setTimeout(()=>c.style.transform='',987);">
+      <span>మార్చి 2026</span>
+      <span class="chevron">▾</span>
+    </button>
+  </div>
+</div>
+
+<!-- 2. Donut Chart Card -->
+<div class="donut-card" id="overviewCard">
+  <div class="donut-card-inner">
+
+    <!-- Donut canvas (200×200) + centered label -->
+    <div class="donut-wrap">
+      <canvas id="donutChart" width="200" height="200"></canvas>
+      <div class="donut-center">
+        <span class="donut-center-label">ఖర్చులు</span>
+        <span class="donut-center-amount" id="donutTotal">₹8,200</span>
+      </div>
+    </div>
+
+    <!-- Legend: 6 categories + totals row -->
+    <div class="donut-legend" id="donutLegend">
+
+      <!-- కూలి — Labor -->
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--matti);"></div>
+        <span class="legend-text">కూలి</span>
+        <span class="legend-amount">₹3,200</span>
+        <span class="legend-percent">38%</span>
+      </div>
+
+      <!-- విత్తనాలు — Seeds -->
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--pacchi);"></div>
+        <span class="legend-text">విత్తనాలు</span>
+        <span class="legend-amount">₹1,280</span>
+        <span class="legend-percent">15%</span>
+      </div>
+
+      <!-- ఎరువులు — Fertilizer -->
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--neeli);"></div>
+        <span class="legend-text">ఎరువులు</span>
+        <span class="legend-amount">₹1,800</span>
+        <span class="legend-percent">22%</span>
+      </div>
+
+      <!-- నీటిపారుదల — Irrigation -->
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--neeli-light);"></div>
+        <span class="legend-text">నీటిపారుదల</span>
+        <span class="legend-amount">₹900</span>
+        <span class="legend-percent">11%</span>
+      </div>
+
+      <!-- రవాణా — Transport -->
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--pasupu);"></div>
+        <span class="legend-text">రవాణా</span>
+        <span class="legend-amount">₹520</span>
+        <span class="legend-percent">6%</span>
+      </div>
+
+      <!-- ఇతర — Other -->
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--ink-tertiary);"></div>
+        <span class="legend-text">ఇతర</span>
+        <span class="legend-amount">₹500</span>
+        <span class="legend-percent">6%</span>
+      </div>
+
+      <!-- Total row -->
+      <div class="legend-totals">
+        <div class="legend-total-row">
+          <span class="legend-total-label">ఆదాయం</span>
+          <span class="legend-total-value income">+₹12,400</span>
+        </div>
+        <div class="legend-total-row">
+          <span class="legend-total-label">ఖర్చు</span>
+          <span class="legend-total-value expense">−₹8,200</span>
+        </div>
+      </div>
+
+    </div><!-- /donut-legend -->
+  </div><!-- /donut-card-inner -->
+</div><!-- /donut-card -->
+
+<!-- 3. Quick Entry Buttons -->
+<div class="quick-entry-section">
+  <div class="quick-entry-label">త్వరిత నమోదు</div>
+  <div class="quick-entry-row">
+    <button class="quick-btn" data-type="labor"
+            onclick="showQuickToast('కూలి')">
+      <span class="quick-btn-icon">🧑‍🌾</span>
+      <span class="quick-btn-label">కూలి</span>
+    </button>
+    <button class="quick-btn" data-type="seeds"
+            onclick="showQuickToast('విత్తనం')">
+      <span class="quick-btn-icon">🌾</span>
+      <span class="quick-btn-label">విత్తనం</span>
+    </button>
+    <button class="quick-btn" data-type="water"
+            onclick="showQuickToast('నీరు')">
+      <span class="quick-btn-icon">💧</span>
+      <span class="quick-btn-label">నీరు</span>
+    </button>
+    <button class="quick-btn" data-type="other"
+            onclick="showQuickToast('ఇతర')">
+      <span class="quick-btn-icon">➕</span>
+      <span class="quick-btn-label">ఇతర</span>
+    </button>
+  </div>
+</div>
+
+<!-- 4. Transaction Timeline -->
+<div class="txn-section-header">
+  <span class="txn-section-title">లావాదేవీలు</span>
+  <span class="txn-section-action">ఫిల్టర్ →</span>
+</div>
+
+<div class="txn-timeline">
+
+  <!-- Group: ఈ రోజు -->
+  <div class="date-group">
+    <div class="date-label">ఈ రోజు — 15 మార్చి</div>
+
+    <div class="txn-item" data-delay="800">
+      <div class="txn-icon labor">🧑‍🌾</div>
+      <div class="txn-details">
+        <div class="txn-desc">కూలి — రామారావు, సుభద్ర</div>
+        <div><span class="txn-category-tag labor">కూలి</span></div>
+      </div>
+      <div class="txn-right">
+        <div class="txn-amount expense">−₹800</div>
+        <div class="txn-time">07:00</div>
+      </div>
+    </div>
+
+    <div class="txn-item" data-delay="900">
+      <div class="txn-icon irrigation">💧</div>
+      <div class="txn-details">
+        <div class="txn-desc">మోటర్ డీజిల్ — 5 లీటర్లు</div>
+        <div><span class="txn-category-tag irrigation">నీటిపారుదల</span></div>
+      </div>
+      <div class="txn-right">
+        <div class="txn-amount expense">−₹450</div>
+        <div class="txn-time">06:30</div>
+      </div>
+    </div>
+  </div><!-- /date-group: ఈ రోజు -->
+
+  <!-- Group: నిన్న -->
+  <div class="date-group">
+    <div class="date-label">నిన్న — 14 మార్చి</div>
+
+    <div class="txn-item" data-delay="1000">
+      <div class="txn-icon seeds">🌾</div>
+      <div class="txn-details">
+        <div class="txn-desc">నంది విత్తనాలు — 2 kg</div>
+        <div><span class="txn-category-tag seeds">విత్తనాలు</span></div>
+      </div>
+      <div class="txn-right">
+        <div class="txn-amount expense">−₹640</div>
+        <div class="txn-time">13:00</div>
+      </div>
+    </div>
+
+    <div class="txn-item" data-delay="1100">
+      <div class="txn-icon fertilizer">🧪</div>
+      <div class="txn-details">
+        <div class="txn-desc">DAP ఎరువు — 1 బస్తా</div>
+        <div><span class="txn-category-tag fertilizer">ఎరువులు</span></div>
+      </div>
+      <div class="txn-right">
+        <div class="txn-amount expense">−₹1,050</div>
+        <div class="txn-time">11:15</div>
+      </div>
+    </div>
+
+    <div class="txn-item" data-delay="1200">
+      <div class="txn-icon labor">🧑‍🌾</div>
+      <div class="txn-details">
+        <div class="txn-desc">కూలి — 4 మంది (కలుపు తీత)</div>
+        <div><span class="txn-category-tag labor">కూలి</span></div>
+      </div>
+      <div class="txn-right">
+        <div class="txn-amount expense">−₹1,600</div>
+        <div class="txn-time">17:00</div>
+      </div>
+    </div>
+  </div><!-- /date-group: నిన్న -->
+
+  <!-- Group: 10 మార్చి -->
+  <div class="date-group">
+    <div class="date-label">10 మార్చి</div>
+
+    <div class="txn-item" data-delay="1300">
+      <div class="txn-icon income">💰</div>
+      <div class="txn-details">
+        <div class="txn-desc">వేరుశెనగ అమ్మకం — 2 క్వింటాళ్ళు</div>
+        <div><span class="txn-category-tag income">పంట అమ్మకం</span></div>
+      </div>
+      <div class="txn-right">
+        <div class="txn-amount income">+₹10,400</div>
+        <div class="txn-time">14:30</div>
+      </div>
+    </div>
+
+    <div class="txn-item" data-delay="1400">
+      <div class="txn-icon transport">🚛</div>
+      <div class="txn-details">
+        <div class="txn-desc">రవాణా — మండీకి లోడ్</div>
+        <div><span class="txn-category-tag transport">రవాణా</span></div>
+      </div>
+      <div class="txn-right">
+        <div class="txn-amount expense">−₹370</div>
+        <div class="txn-time">09:00</div>
+      </div>
+    </div>
+  </div><!-- /date-group: 10 మార్చి -->
+
+</div><!-- /txn-timeline -->
+
+<!-- 5. Season P&L Card -->
+<div class="txn-section-header">
+  <span class="txn-section-title">సీజన్ సారాంశం</span>
+  <span class="txn-section-action">వివరాలు →</span>
+</div>
+
+<div class="pnl-card" id="pnlCard">
+  <div class="pnl-card-label">ఈ రబీ సీజన్</div>
+
+  <!-- Net profit in large ittadi text -->
+  <div class="pnl-net-section">
+    <div class="pnl-net-sublabel">మొత్తం నికర లాభం</div>
+    <div class="pnl-net-amount" id="pnlNetAmount">లాభం ₹10,750</div>
+  </div>
+
+  <!-- Income bar (full width baseline = ₹28,400) -->
+  <div class="pnl-bar-section">
+    <div class="pnl-bar-sublabel">ఆదాయం</div>
+    <div class="pnl-track income-track">
+      <div class="pnl-bar income-bar" id="pnlIncomeBar">
+        <span class="pnl-bar-label">₹28,400</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expense bar (proportional: 17650/28400 ≈ 62%) -->
+  <div class="pnl-bar-section">
+    <div class="pnl-bar-sublabel">ఖర్చులు</div>
+    <div class="pnl-track expense-track">
+      <div class="pnl-bar expense-bar" id="pnlExpenseBar">
+        <span class="pnl-bar-label">₹17,650</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pnl-bar-footer">
+    <span class="pnl-bar-meta">సీజన్ ప్రారంభం: <span>నవంబర్ 2025</span></span>
+    <span class="pnl-bar-meta">కోత: <span>ఏప్రిల్ 2026</span></span>
+  </div>
+</div><!-- /pnl-card -->
+
+<!-- 6. Voice Bottom Sheet (hidden initially) -->
+<div id="voiceSheet">
+  <!-- Overlay -->
+  <div class="voice-overlay" id="voiceOverlay"></div>
+
+  <!-- Sheet panel sliding up from bottom -->
+  <div class="voice-sheet" id="voiceSheetPanel">
+    <div class="voice-sheet-handle"></div>
+    <div class="voice-sheet-title" id="voiceSheetTitle">వింటున్నాను...</div>
+
+    <!-- Listening dots: 3 pulsing spans -->
+    <div class="listening-dots" id="listeningDots">
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+
+    <!-- Waveform canvas -->
+    <canvas id="waveformCanvas" width="280" height="60"></canvas>
+
+    <!-- Result card (hidden initially, shown after parse) -->
+    <div class="voice-result" id="voiceResult">
+      <div class="voice-result-detected">
+        గుర్తించబడింది: <strong>"రెండు కూలీలకు నాలుగు వందలు"</strong>
+      </div>
+      <div class="voice-result-row">
+        <span class="voice-result-icon">🧑‍🌾</span>
+        <div class="voice-result-text">
+          <div class="voice-result-category">కూలి ఖర్చు · 2 × ₹400</div>
+        </div>
+        <span class="voice-result-amount">−₹800</span>
+      </div>
+    </div>
+
+    <!-- Confirm / Edit buttons -->
+    <div class="voice-actions" id="voiceActions" style="display: none;">
+      <button class="voice-btn confirm" id="voiceConfirm">✓ నిర్ధారించు</button>
+      <button class="voice-btn edit"    id="voiceEdit">✎ మార్చు</button>
+    </div>
+  </div><!-- /voice-sheet panel -->
+</div><!-- /voiceSheet wrapper -->
+
+<!-- ─── Screen-Specific Initialisation Script ─── -->
+<script>
+(function initDabbuScreen() {
+
+  /* ── Donut Chart ── */
+  (function drawDonut() {
+    const canvas = document.getElementById('donutChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const cx = w / 2, cy = h / 2;
+    const outerR = w * 0.44;   /* 44% of width */
+    const innerR = w * 0.28;   /* punched hole */
+
+    const cats = [
+      { value: 3200, color: '#8B4513' }, /* కూలి */
+      { value: 1280, color: '#2D6A4F' }, /* విత్తనాలు */
+      { value: 1800, color: '#1B4F72' }, /* ఎరువులు */
+      { value:  900, color: '#2980B9' }, /* నీటిపారుదల */
+      { value:  520, color: '#E8A317' }, /* రవాణా */
+      { value:  500, color: '#B8A99A' }, /* ఇతర */
+    ];
+
+    const total    = cats.reduce((s, c) => s + c.value, 0);
+    const gapAngle = 0.04; /* radians gap between slices */
+
+    function drawFrame(progress) {
+      ctx.clearRect(0, 0, w, h);
+      let startAngle = -Math.PI / 2;
+
+      cats.forEach(cat => {
+        const fraction    = cat.value / total;
+        const sweepTarget = fraction * Math.PI * 2 - gapAngle;
+        const sweep       = sweepTarget * progress;
+        if (sweep <= 0) return;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, outerR, startAngle, startAngle + sweep);
+        ctx.closePath();
+        ctx.fillStyle = cat.color;
+        ctx.fill();
+
+        startAngle += sweepTarget + gapAngle;
+      });
+
+      /* Punch inner hole */
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath();
+      ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    function animate(ts) {
+      if (!animate.start) animate.start = ts;
+      const elapsed  = ts - animate.start;
+      const p        = Math.min(elapsed / 987, 1);
+      const eased    = 1 - Math.pow(1 - p, 3);
+      drawFrame(eased);
+      if (p < 1) requestAnimationFrame(animate);
+    }
+
+    setTimeout(() => requestAnimationFrame(animate), 600);
+  })();
+
+  /* ── Legend staggered animate-in ── */
+  setTimeout(() => {
+    document.querySelectorAll('#donutLegend .legend-item').forEach((el, i) => {
+      setTimeout(() => el.classList.add('animate-in'), i * 89);
+    });
+  }, 800);
+
+  /* ── Transaction items: IntersectionObserver animate-in ── */
+  if ('IntersectionObserver' in window) {
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const delay = parseInt(entry.target.dataset.delay || '0');
+        setTimeout(() => entry.target.classList.add('animate-in'), delay);
+        obs.unobserve(entry.target);
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.txn-item').forEach(el => obs.observe(el));
+  } else {
+    /* Fallback for no IO support */
+    document.querySelectorAll('.txn-item').forEach(el => el.classList.add('animate-in'));
+  }
+
+  /* ── P&L card: IntersectionObserver animate bars + counter ── */
+  const pnlCard = document.getElementById('pnlCard');
+  if (pnlCard && 'IntersectionObserver' in window) {
+    const pnlObs = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('animate-in');
+        setTimeout(() => {
+          const ib = document.getElementById('pnlIncomeBar');
+          const eb = document.getElementById('pnlExpenseBar');
+          if (ib) ib.style.width = '100%';
+          if (eb) eb.style.width = '62%'; /* 17650/28400 */
+        }, 377);
+        pnlObs.unobserve(entry.target);
+      });
+    }, { threshold: 0.2 });
+    pnlObs.observe(pnlCard);
+  }
+
+  /* ── Quick entry toast helper ── */
+  window.showQuickToast = function(category) {
+    /* Fires toast if host page exposes showToast(); silently skips otherwise */
+    if (typeof showToast === 'function') {
+      showToast('\uD83C\uDF3F ' + category + ' \u0C28\u0C2E\u0C4B\u0C26\u0C41 \u2014 \u0C2E\u0C4A\u0C24\u0C4D\u0C24\u0C02 \u0C1A\u0C46\u0C2A\u0C4D\u0C2A\u0C02\u0C21\u0C3F', 'default', 3500);
+    }
+  };
+
+  /* ── Voice Bottom Sheet ── */
+  const overlay    = document.getElementById('voiceOverlay');
+  const sheetPanel = document.getElementById('voiceSheetPanel');
+  const sheetTitle = document.getElementById('voiceSheetTitle');
+  const listenDots = document.getElementById('listeningDots');
+  const voiceResult= document.getElementById('voiceResult');
+  const voiceActions= document.getElementById('voiceActions');
+  const waveCanvas = document.getElementById('waveformCanvas');
+  let   voiceState = 'idle';
+  let   waveRaf;
+
+  function openSheet() {
+    voiceState = 'listening';
+    overlay.classList.add('show');
+    sheetPanel.classList.add('show');
+    sheetTitle.textContent = '\u0C35\u0C3F\u0C02\u0C1F\u0C41\u0C28\u0C4D\u0C28\u0C3E\u0C28\u0C41...';
+    voiceResult.classList.remove('show');
+    voiceActions.style.display = 'none';
+    listenDots.style.display   = 'flex';
+    startWaveform();
+
+    /* Simulate parse after 2.5s */
+    setTimeout(() => {
+      if (voiceState !== 'listening') return;
+      voiceState = 'parsed';
+      sheetTitle.textContent = '\u0C05\u0C30\u0C4D\u0C25\u0C2E\u0C48\u0C02\u0C26\u0C3F!';
+      listenDots.style.display = 'none';
+      stopWaveform();
+      voiceResult.classList.add('show');
+      voiceActions.style.display = 'flex';
+    }, 2500);
+  }
+
+  function closeSheet() {
+    voiceState = 'idle';
+    overlay.classList.remove('show');
+    sheetPanel.classList.remove('show');
+    stopWaveform();
+    setTimeout(() => {
+      voiceResult.classList.remove('show');
+      voiceActions.style.display = 'none';
+      listenDots.style.display   = 'flex';
+    }, 400);
+  }
+
+  if (overlay)   overlay.addEventListener('click', closeSheet);
+
+  const confirmBtn = document.getElementById('voiceConfirm');
+  const editBtn    = document.getElementById('voiceEdit');
+  if (confirmBtn) confirmBtn.addEventListener('click', () => {
+    closeSheet();
+    if (typeof showToast === 'function')
+      setTimeout(() => showToast('\u2713 \u0C15\u0C42\u0C32\u0C3F \u20B9800 \u0C28\u0C2E\u0C4B\u0C26\u0C41 \u0C05\u0C2F\u0C3F\u0C02\u0C26\u0C3F', 'default', 4000), 300);
+  });
+  if (editBtn)    editBtn.addEventListener('click', () => {
+    closeSheet();
+    if (typeof showToast === 'function')
+      showToast('\u270E \u0C2E\u0C4A\u0C24\u0C4D\u0C24\u0C02 \u0C2E\u0C3E\u0C30\u0C4D\u0C1A\u0C21\u0C3E\u0C28\u0C3F\u0C15\u0C3F \u0C1F\u0C48\u0C2A\u0C4D \u0C1A\u0C47\u0C2F\u0C02\u0C21\u0C3F', 'default', 3000);
+  });
+
+  /* Expose open trigger for host FAB button */
+  window.openDabbuVoiceSheet  = openSheet;
+  window.closeDabbuVoiceSheet = closeSheet;
+
+  /* ── Waveform canvas ── */
+  function startWaveform() {
+    if (!waveCanvas) return;
+    const ctx = waveCanvas.getContext('2d');
+    const W = waveCanvas.width, H = waveCanvas.height;
+    let t = 0;
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.strokeStyle = '#8B4513';
+      ctx.lineWidth   = 1.5;
+      ctx.beginPath();
+
+      for (let x = 0; x < W; x++) {
+        const freq1 = 0.05 + Math.sin(t * 0.7)  * 0.02;
+        const freq2 = 0.09 + Math.cos(t * 0.5)  * 0.03;
+        const amp1  = 12  + Math.sin(t * 1.1)   * 7;
+        const amp2  = 7   + Math.cos(t * 0.8)   * 4;
+        const y     = H / 2
+                    + Math.sin(x * freq1 + t * 3)   * amp1
+                    + Math.sin(x * freq2 + t * 2.3) * amp2;
+        if (x === 0) ctx.moveTo(x, y);
+        else         ctx.lineTo(x, y);
+      }
+
+      ctx.stroke();
+      t += 0.05;
+      waveRaf = requestAnimationFrame(draw);
+    }
+
+    waveRaf = requestAnimationFrame(draw);
+  }
+
+  function stopWaveform() {
+    if (waveRaf) cancelAnimationFrame(waveRaf);
+    if (waveCanvas) {
+      const ctx = waveCanvas.getContext('2d');
+      ctx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+    }
+  }
+
+})();
+</script>

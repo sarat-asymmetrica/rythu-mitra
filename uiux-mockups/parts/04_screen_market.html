@@ -1,0 +1,562 @@
+<!-- ═══════════════════════════════════════════════
+     MATTI DESIGN SYSTEM v3 — Market Screen Fragment
+     Screen: మార్కెట్ (Market) — mandi price tracking
+     Part: 04_screen_market.html
+     Companion CSS: 04_styles_market.css
+     ═══════════════════════════════════════════════ -->
+
+<!-- 1. Crop Filter Pills -->
+<nav class="crop-pills" role="tablist" aria-label="పంట ఫిల్టర్">
+  <button class="crop-pill active" role="tab" aria-selected="true" data-crop="groundnut" onclick="selectCrop(this)">
+    వేరుశెనగ
+  </button>
+  <button class="crop-pill" role="tab" aria-selected="false" data-crop="cotton" onclick="selectCrop(this)">
+    పత్తి
+  </button>
+  <button class="crop-pill" role="tab" aria-selected="false" data-crop="chilli" onclick="selectCrop(this)">
+    మిర్చి
+  </button>
+  <button class="crop-pill" role="tab" aria-selected="false" data-crop="tomato" onclick="selectCrop(this)">
+    టమాటా
+  </button>
+</nav>
+
+<!-- 2. Hero Price Card -->
+<article class="hero-price-card" aria-label="ప్రస్తుత ధర">
+  <div class="hero-mandi-row">
+    <span class="hero-mandi-name">అనంతపురం మండీ</span>
+    <span class="hero-timestamp" id="heroTimestamp">10 నిమిషాల క్రితం</span>
+  </div>
+
+  <div class="hero-crop-name">వేరుశెనగ</div>
+
+  <div class="hero-price-row">
+    <div>
+      <span class="hero-price" id="heroPrice" aria-live="polite">₹5,840</span>
+      <span class="price-unit">/ క్వింటాల్</span>
+    </div>
+    <span class="trend-badge down" id="trendBadge" aria-label="ధర తగ్గింది">
+      <span aria-hidden="true">↓</span> ₹40
+    </span>
+  </div>
+
+  <div class="msp-line" role="note" aria-label="కనీస మద్దతు ధర సమాచారం">
+    <span class="msp-label">MSP</span>
+    <span class="msp-value">₹5,850</span>
+    <span class="msp-dot" aria-hidden="true"></span>
+    <span class="msp-diff below" aria-label="MSP కంటే తక్కువ">₹10 తక్కువ</span>
+  </div>
+</article>
+
+<!-- 3. Trend Chart -->
+<section class="trend-chart-card" id="trendChartCard" aria-label="30 రోజుల ధర చరిత్ర">
+  <div class="chart-header-row">
+    <span class="chart-title-text">30 రోజుల ట్రెండ్</span>
+    <div class="chart-legend" aria-hidden="true">
+      <div class="legend-item">
+        <div class="legend-swatch-price"></div>
+        <span>మార్కెట్ ధర</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch-msp"></div>
+        <span>MSP</span>
+      </div>
+    </div>
+  </div>
+  <div class="chart-wrap">
+    <canvas id="trendChart" role="img" aria-label="వేరుశెనగ ధర చరిత్ర చార్ట్"></canvas>
+    <div class="chart-tooltip" id="chartTooltip"></div>
+  </div>
+</section>
+
+<!-- 4. Mandi Comparison -->
+<section class="mandi-comparison-section" id="mandiSection" aria-label="మండీల పోలిక">
+  <h2 class="section-header">మండీల పోలిక</h2>
+
+  <ul class="mandi-list" role="list">
+
+    <!-- Row 1: Anantapur — nearest -->
+    <li class="mandi-row nearest" data-price="5840" data-max="5920">
+      <div class="mandi-bar-track" aria-hidden="true">
+        <div class="mandi-bar-fill"></div>
+      </div>
+      <div class="mandi-row-inner">
+        <div class="mandi-name-row">
+          <span class="mandi-name">అనంతపురం</span>
+          <span class="mandi-badge nearest">సమీపం</span>
+        </div>
+        <span class="mandi-price">₹5,840</span>
+        <span class="mandi-meta">12 కి.మీ దూరం</span>
+        <span class="mandi-transport">రవాణా ~₹120</span>
+        <div class="mandi-inline-bar" aria-hidden="true">
+          <div class="mandi-inline-bar-fill" data-width="98"></div>
+        </div>
+      </div>
+    </li>
+
+    <!-- Row 2: Kurnool — best price -->
+    <li class="mandi-row best-price" data-price="5920" data-max="5920">
+      <div class="mandi-bar-track" aria-hidden="true">
+        <div class="mandi-bar-fill"></div>
+      </div>
+      <div class="mandi-row-inner">
+        <div class="mandi-name-row">
+          <span class="mandi-name">కర్నూలు</span>
+          <span class="mandi-badge best-price">ఉత్తమ ధర</span>
+        </div>
+        <span class="mandi-price">₹5,920</span>
+        <span class="mandi-meta">85 కి.మీ దూరం</span>
+        <span class="mandi-transport">రవాణా ~₹680</span>
+        <div class="mandi-inline-bar" aria-hidden="true">
+          <div class="mandi-inline-bar-fill" data-width="100"></div>
+        </div>
+      </div>
+    </li>
+
+    <!-- Row 3: Hindupur -->
+    <li class="mandi-row" data-price="5680" data-max="5920">
+      <div class="mandi-bar-track" aria-hidden="true">
+        <div class="mandi-bar-fill"></div>
+      </div>
+      <div class="mandi-row-inner">
+        <div class="mandi-name-row">
+          <span class="mandi-name">హిందూపురం</span>
+        </div>
+        <span class="mandi-price">₹5,680</span>
+        <span class="mandi-meta">45 కి.మీ దూరం</span>
+        <span class="mandi-transport">రవాణా ~₹360</span>
+        <div class="mandi-inline-bar" aria-hidden="true">
+          <div class="mandi-inline-bar-fill" data-width="96"></div>
+        </div>
+      </div>
+    </li>
+
+    <!-- Row 4: Guntur -->
+    <li class="mandi-row" data-price="5760" data-max="5920">
+      <div class="mandi-bar-track" aria-hidden="true">
+        <div class="mandi-bar-fill"></div>
+      </div>
+      <div class="mandi-row-inner">
+        <div class="mandi-name-row">
+          <span class="mandi-name">గుంటూరు</span>
+        </div>
+        <span class="mandi-price">₹5,760</span>
+        <span class="mandi-meta">230 కి.మీ దూరం</span>
+        <span class="mandi-transport">రవాణా ~₹1,840</span>
+        <div class="mandi-inline-bar" aria-hidden="true">
+          <div class="mandi-inline-bar-fill" data-width="97"></div>
+        </div>
+      </div>
+    </li>
+
+    <!-- Row 5: Ongole -->
+    <li class="mandi-row" data-price="5800" data-max="5920">
+      <div class="mandi-bar-track" aria-hidden="true">
+        <div class="mandi-bar-fill"></div>
+      </div>
+      <div class="mandi-row-inner">
+        <div class="mandi-name-row">
+          <span class="mandi-name">ఒంగోలు</span>
+        </div>
+        <span class="mandi-price">₹5,800</span>
+        <span class="mandi-meta">310 కి.మీ దూరం</span>
+        <span class="mandi-transport">రవాణా ~₹2,480</span>
+        <div class="mandi-inline-bar" aria-hidden="true">
+          <div class="mandi-inline-bar-fill" data-width="98"></div>
+        </div>
+      </div>
+    </li>
+
+  </ul>
+</section>
+
+<!-- 5. Price Alert Card -->
+<section class="price-alert-card" id="alertCard" aria-label="ధర హెచ్చరిక సెట్టింగ్">
+  <div class="alert-card-header">
+    <span class="alert-bell-icon" aria-hidden="true">🔔</span>
+    <h2 class="alert-card-title">ధర హెచ్చరిక</h2>
+  </div>
+
+  <div class="alert-slider-row">
+    <span class="alert-slider-label">₹5,000</span>
+    <div class="alert-slider-wrap">
+      <input
+        type="range"
+        class="alert-slider"
+        id="alertSlider"
+        min="5000"
+        max="7000"
+        value="6000"
+        step="50"
+        aria-label="హెచ్చరిక ధర నిర్ణయించండి"
+        oninput="updateAlertText(this.value)"
+      />
+    </div>
+    <span class="alert-price-value" id="alertPriceValue">₹6,000</span>
+  </div>
+
+  <div class="alert-live-text" id="alertLiveText" aria-live="polite">
+    ₹6,000 కంటే ఎక్కువైతే తెలియజేయండి
+  </div>
+
+  <div class="alert-toggle-row">
+    <div class="toggle-text-wrap">
+      <span class="toggle-label">హెచ్చరికలు ఆన్ చేయండి</span>
+      <span class="toggle-sublabel">SMS మరియు WhatsApp ద్వారా</span>
+    </div>
+    <label class="shibui-toggle" aria-label="ధర హెచ్చరిక టోగుల్">
+      <input type="checkbox" id="alertToggle" checked onchange="handleAlertToggle(this)" />
+      <span class="toggle-track"></span>
+    </label>
+  </div>
+</section>
+
+<!-- 6. Historical Comparison Card -->
+<section class="historical-card" id="historyCard" aria-label="గత సీజన్ పోలిక">
+  <h2 class="historical-card-title">గత సీజన్ పోలిక</h2>
+
+  <div class="compare-grid">
+    <!-- This season -->
+    <div class="compare-column">
+      <span class="compare-col-label">ఈ సీజన్ సగటు</span>
+      <div class="compare-bar-track" aria-hidden="true">
+        <div class="compare-bar-fill current" data-width="100"></div>
+      </div>
+      <span class="compare-price current">₹5,780</span>
+      <span class="compare-sub">2024–25</span>
+    </div>
+
+    <!-- Last season -->
+    <div class="compare-column">
+      <span class="compare-col-label">గత సీజన్ సగటు</span>
+      <div class="compare-bar-track" aria-hidden="true">
+        <div class="compare-bar-fill last" data-width="94"></div>
+      </div>
+      <span class="compare-price">₹5,460</span>
+      <span class="compare-sub">2023–24</span>
+    </div>
+  </div>
+
+  <div>
+    <span class="delta-badge positive" aria-label="మెరుగుదల: 320 రూపాయలు, 5.9 శాతం">
+      <span aria-hidden="true">↑</span> +₹320 (+5.9%)
+    </span>
+  </div>
+</section>
+
+
+<!-- ─── Screen JavaScript ─── -->
+<script>
+(function () {
+  /* ── Crop pill selection ── */
+  function selectCrop(btn) {
+    document.querySelectorAll('.crop-pill').forEach(function (p) {
+      p.classList.remove('active');
+      p.setAttribute('aria-selected', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+
+    // Ripple
+    var r = document.createElement('span');
+    r.className = 'pill-ripple';
+    var size = Math.max(btn.offsetWidth, btn.offsetHeight);
+    r.style.cssText = 'width:' + size + 'px;height:' + size + 'px;top:50%;left:50%;margin-top:-' + (size / 2) + 'px;margin-left:-' + (size / 2) + 'px;';
+    btn.appendChild(r);
+    setTimeout(function () { r.remove(); }, 620);
+  }
+  window.selectCrop = selectCrop;
+
+
+  /* ── Alert slider ── */
+  function updateAlertText(val) {
+    var n = parseInt(val, 10);
+    var formatted = '₹' + n.toLocaleString('te-IN');
+    document.getElementById('alertPriceValue').textContent = formatted;
+    document.getElementById('alertLiveText').textContent = formatted + ' కంటే ఎక్కువైతే తెలియజేయండి';
+
+    // Update slider gradient
+    var pct = ((n - 5000) / 2000) * 100;
+    var sl = document.getElementById('alertSlider');
+    sl.style.background = 'linear-gradient(to right, var(--neeli-light) 0%, var(--neeli-light) ' + pct + '%, var(--nalupurugu) ' + pct + '%)';
+  }
+  window.updateAlertText = updateAlertText;
+
+  function handleAlertToggle(cb) {
+    // visual feedback only in mockup
+    var label = document.querySelector('.toggle-sublabel');
+    label.textContent = cb.checked ? 'SMS మరియు WhatsApp ద్వారా' : 'హెచ్చరికలు నిలిపివేయబడ్డాయి';
+  }
+  window.handleAlertToggle = handleAlertToggle;
+
+
+  /* ── Intersection Observer for scroll animations ── */
+  var observerOptions = { threshold: 0.15 };
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-in');
+        // Animate mandi bar fills
+        entry.target.querySelectorAll('.mandi-bar-fill').forEach(function (fill) {
+          var row = fill.closest('.mandi-row');
+          if (!row) return;
+          var price = parseFloat(row.dataset.price || 0);
+          var max = parseFloat(row.dataset.max || 6000);
+          var pct = Math.round((price / max) * 100);
+          fill.style.width = pct + '%';
+        });
+        // Animate inline bars
+        entry.target.querySelectorAll('.mandi-inline-bar-fill').forEach(function (fill) {
+          var w = fill.dataset.width || 50;
+          fill.style.width = w + '%';
+        });
+        // Animate compare bars
+        entry.target.querySelectorAll('.compare-bar-fill').forEach(function (fill) {
+          var w = fill.dataset.width || 50;
+          fill.style.width = w + '%';
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, observerOptions);
+
+  var animated = document.querySelectorAll(
+    '#trendChartCard, #mandiSection, #alertCard, #historyCard'
+  );
+  animated.forEach(function (el) { observer.observe(el); });
+
+
+  /* ── Hero price counter animation ── */
+  function animateCounter(el, from, to, duration) {
+    var start = null;
+    var diff = to - from;
+    function step(ts) {
+      if (!start) start = ts;
+      var pct = Math.min((ts - start) / duration, 1);
+      // Ease out cubic
+      var ease = 1 - Math.pow(1 - pct, 3);
+      var val = Math.round(from + diff * ease);
+      el.textContent = '₹' + val.toLocaleString('te-IN');
+      if (pct < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  var heroPriceEl = document.getElementById('heroPrice');
+  if (heroPriceEl) {
+    setTimeout(function () {
+      animateCounter(heroPriceEl, 5000, 5840, 900);
+    }, 700);
+  }
+
+
+  /* ── Turmeric wash trend chart ── */
+  function drawTrendChart() {
+    var canvas = document.getElementById('trendChart');
+    if (!canvas) return;
+
+    var dpr = window.devicePixelRatio || 1;
+    var W = canvas.parentElement.clientWidth;
+    var H = 180;
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    // 30 days of mock price data — realistic groundnut volatility
+    var basePrice = 5840;
+    var rawPrices = [
+      5620, 5680, 5710, 5660, 5700, 5750, 5790, 5820, 5760, 5800,
+      5830, 5870, 5910, 5890, 5860, 5840, 5820, 5800, 5780, 5760,
+      5780, 5800, 5820, 5840, 5860, 5880, 5860, 5840, 5820, 5840
+    ];
+    var MSP = 5850;
+    var PAD_L = 8, PAD_R = 8, PAD_T = 20, PAD_B = 28;
+    var chartW = W - PAD_L - PAD_R;
+    var chartH = H - PAD_T - PAD_B;
+    var minP = 5580, maxP = 6100;
+
+    function priceToY(p) {
+      return PAD_T + chartH - ((p - minP) / (maxP - minP)) * chartH;
+    }
+    function indexToX(i) {
+      return PAD_L + (i / (rawPrices.length - 1)) * chartW;
+    }
+
+    // Velocity for brush width
+    var velocities = rawPrices.map(function (p, i) {
+      if (i === 0) return 0;
+      return Math.abs(p - rawPrices[i - 1]);
+    });
+    var maxVel = Math.max.apply(null, velocities) || 1;
+
+    // Draw animation progress
+    var progress = 0;
+    var animDuration = 1200;
+    var startTime = null;
+
+    function render(ts) {
+      if (!startTime) startTime = ts;
+      progress = Math.min((ts - startTime) / animDuration, 1);
+      var ease = 1 - Math.pow(1 - progress, 2);
+      var drawCount = Math.floor(ease * rawPrices.length);
+      if (drawCount < 2) drawCount = 2;
+      var pts = rawPrices.slice(0, drawCount);
+
+      ctx.clearRect(0, 0, W, H);
+
+      // Background subtle gradient
+      var bgGrad = ctx.createLinearGradient(0, PAD_T, 0, H - PAD_B);
+      bgGrad.addColorStop(0, 'rgba(250, 247, 240, 0)');
+      bgGrad.addColorStop(1, 'rgba(250, 247, 240, 0)');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // MSP dashed line
+      var mspY = priceToY(MSP);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(41, 128, 185, 0.65)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 5]);
+      ctx.beginPath();
+      ctx.moveTo(PAD_L, mspY);
+      ctx.lineTo(W - PAD_R, mspY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // Fill gradient under line
+      var fillGrad = ctx.createLinearGradient(0, PAD_T, 0, H - PAD_B);
+      fillGrad.addColorStop(0, 'rgba(232, 163, 23, 0.14)');
+      fillGrad.addColorStop(0.6, 'rgba(232, 163, 23, 0.05)');
+      fillGrad.addColorStop(1, 'rgba(232, 163, 23, 0.0)');
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(indexToX(0), priceToY(pts[0]));
+      for (var i = 1; i < pts.length; i++) {
+        var x0 = indexToX(i - 1), y0 = priceToY(pts[i - 1]);
+        var x1 = indexToX(i), y1 = priceToY(pts[i]);
+        var cpx = (x0 + x1) / 2;
+        ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
+      }
+      ctx.lineTo(indexToX(pts.length - 1), H - PAD_B);
+      ctx.lineTo(indexToX(0), H - PAD_B);
+      ctx.closePath();
+      ctx.fillStyle = fillGrad;
+      ctx.fill();
+      ctx.restore();
+
+      // Turmeric brush strokes: variable width, fading alpha for older data
+      for (var i = 1; i < pts.length; i++) {
+        var ageFactor = i / (pts.length - 1);           // 0=old, 1=recent
+        var vel = velocities[i] / maxVel;                // 0=slow, 1=fast
+        var brushW = 1.5 + vel * 2.5;                    // 1.5–4px based on velocity
+        var alpha = 0.25 + ageFactor * 0.65;             // older = more transparent
+
+        var x0 = indexToX(i - 1), y0 = priceToY(pts[i - 1]);
+        var x1 = indexToX(i), y1 = priceToY(pts[i]);
+        var cpx = (x0 + x1) / 2;
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(184, 134, 11, ' + alpha + ')';
+        ctx.lineWidth = brushW;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.bezierCurveTo(cpx, y0, cpx, y1, x1, y1);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Current price dot
+      if (pts.length >= 2) {
+        var lastX = indexToX(pts.length - 1);
+        var lastY = priceToY(pts[pts.length - 1]);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 4, 0, Math.PI * 2);
+        ctx.fillStyle = 'var(--pasupu, #E8A317)';
+        ctx.shadowColor = 'rgba(232, 163, 23, 0.5)';
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Labels: first date, last date
+      ctx.save();
+      ctx.font = '10px monospace';
+      ctx.fillStyle = 'rgba(139, 125, 107, 0.8)';
+      ctx.textAlign = 'left';
+      ctx.fillText('ఫిబ్ 13', PAD_L, H - 6);
+      ctx.textAlign = 'right';
+      ctx.fillText('మా 14', W - PAD_R, H - 6);
+      ctx.restore();
+
+      // Min/max price labels
+      var minIdx = rawPrices.indexOf(Math.min.apply(null, rawPrices.slice(0, drawCount)));
+      var maxIdx = rawPrices.indexOf(Math.max.apply(null, rawPrices.slice(0, drawCount)));
+      if (drawCount > 2) {
+        ctx.save();
+        ctx.font = '10px monospace';
+        ctx.fillStyle = 'rgba(192, 57, 43, 0.7)';
+        ctx.textAlign = 'center';
+        ctx.fillText('↓₹' + rawPrices[minIdx].toLocaleString(), indexToX(minIdx), priceToY(rawPrices[minIdx]) + 14);
+        ctx.fillStyle = 'rgba(45, 106, 79, 0.75)';
+        ctx.fillText('↑₹' + rawPrices[maxIdx].toLocaleString(), indexToX(maxIdx), priceToY(rawPrices[maxIdx]) - 6);
+        ctx.restore();
+      }
+
+      if (progress < 1) {
+        requestAnimationFrame(render);
+      }
+    }
+
+    // Observe chart visibility
+    var chartObs = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) {
+        requestAnimationFrame(render);
+        chartObs.unobserve(canvas);
+      }
+    }, { threshold: 0.2 });
+    chartObs.observe(canvas);
+
+    // Tooltip on mousemove
+    canvas.addEventListener('mousemove', function (e) {
+      var rect = canvas.getBoundingClientRect();
+      var mx = e.clientX - rect.left;
+      var idx = Math.round(((mx - PAD_L) / chartW) * (rawPrices.length - 1));
+      idx = Math.max(0, Math.min(idx, rawPrices.length - 1));
+      var tip = document.getElementById('chartTooltip');
+      if (!tip) return;
+      tip.textContent = '₹' + rawPrices[idx].toLocaleString('te-IN');
+      tip.style.left = (indexToX(idx) - 20) + 'px';
+      tip.style.top = (priceToY(rawPrices[idx]) - 30) + 'px';
+      tip.style.opacity = '1';
+    });
+    canvas.addEventListener('mouseleave', function () {
+      var tip = document.getElementById('chartTooltip');
+      if (tip) tip.style.opacity = '0';
+    });
+  }
+
+  // Draw after DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', drawTrendChart);
+  } else {
+    drawTrendChart();
+  }
+
+  // Redraw on resize
+  var resizeTimer;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(drawTrendChart, 200);
+  });
+
+}());
+</script>

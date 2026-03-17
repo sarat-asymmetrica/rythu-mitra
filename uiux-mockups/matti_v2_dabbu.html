@@ -1,0 +1,1871 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Rythu Mitra — Matti v2 · దబ్బు</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@300;400;500;600;700&family=Noto+Serif+Telugu:wght@400;700&family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   MATTI DESIGN SYSTEM v2 — "దబ్బు" (Money)
+   Exact token inheritance from Matti v1
+   ═══════════════════════════════════════════════ */
+
+:root {
+  /* Earth Palette — identical to v1 */
+  --matti:        #8B4513;
+  --matti-light:  #A0522D;
+  --pasupu:       #E8A317;
+  --pasupu-soft:  #F5D98E;
+  --pasupu-glow:  rgba(232, 163, 23, 0.15);
+  --neeli:        #1B4F72;
+  --neeli-light:  #2980B9;
+  --patti:        #FAF7F0;
+  --patti-warm:   #F5F0E6;
+  --nalupurugu:   #D4C5A9;
+  --pacchi:       #2D6A4F;
+  --pacchi-light: #40916C;
+  --erra:         #C0392B;
+  --erra-soft:    rgba(192, 57, 43, 0.1);
+  --ittadi:       #B8860B;
+  --ittadi-glow:  rgba(184, 134, 11, 0.2);
+
+  /* Category colors for donut */
+  --cat-labor:     #8B4513;   /* కూలి — earth brown */
+  --cat-seeds:     #2D6A4F;   /* విత్తనాలు — pacchi green */
+  --cat-fertilizer:#1B4F72;   /* ఎరువులు — neeli blue */
+  --cat-irrigation:#2980B9;   /* నీటిపారుదల — neeli light */
+  --cat-transport: #E8A317;   /* రవాణా — pasupu yellow */
+  --cat-other:     #B8A99A;   /* ఇతర — warm grey */
+
+  /* Ink Hierarchy */
+  --ink-primary:   #1C1410;
+  --ink-secondary: #5D4E37;
+  --ink-tertiary:  #8B7D6B;
+  --ink-faint:     #B8A99A;
+
+  /* Typography — phi-derived scale */
+  --font-te:         'Noto Sans Telugu', 'Noto Sans', sans-serif;
+  --font-te-display: 'Noto Serif Telugu', 'Noto Sans Telugu', serif;
+  --font-mono:       'Courier New', monospace;
+
+  --text-xs:    0.8125rem;
+  --text-sm:    0.875rem;
+  --text-base:  1rem;
+  --text-lg:    1.25rem;
+  --text-xl:    1.618rem;
+  --text-2xl:   2rem;
+  --text-hero:  2.618rem;
+
+  /* Fibonacci spacing */
+  --space-1:  1px;
+  --space-2:  2px;
+  --space-3:  3px;
+  --space-5:  5px;
+  --space-8:  8px;
+  --space-13: 13px;
+  --space-21: 21px;
+  --space-34: 34px;
+  --space-55: 55px;
+
+  /* Animation — Fibonacci durations */
+  --dur-89:  89ms;
+  --dur-144: 144ms;
+  --dur-233: 233ms;
+  --dur-377: 377ms;
+  --dur-610: 610ms;
+  --dur-987: 987ms;
+
+  /* Spring easing — same as v1 */
+  --spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:  cubic-bezier(0.22, 1, 0.36, 1);
+
+  --breathe: 4s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-te);
+  background: var(--patti);
+  color: var(--ink-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ═══ Kolam Background Canvas ═══ */
+#kolam-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.025;
+}
+
+/* ═══ App Shell ═══ */
+.app-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--patti);
+  box-shadow: 0 0 80px rgba(0,0,0,0.05);
+}
+
+/* ═══ Status Bar (mock) ═══ */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-8) var(--space-21);
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
+}
+
+/* ═══ Header ═══ */
+.app-header {
+  padding: var(--space-13) var(--space-21) var(--space-13);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+}
+
+.header-left {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fadeUp var(--dur-610) var(--spring) 200ms forwards;
+}
+
+.screen-title {
+  font-family: var(--font-te-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--ink-primary);
+  line-height: 1.1;
+}
+
+.screen-subtitle {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  margin-top: var(--space-3);
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fadeUp var(--dur-610) var(--spring) 350ms forwards;
+}
+
+/* Month Selector Dropdown */
+.month-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-13);
+  background: var(--patti-warm);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 5px 2px 8px 3px;
+  cursor: pointer;
+  font-family: var(--font-te);
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+  transition: background var(--dur-233) ease,
+              transform var(--dur-233) var(--spring);
+  position: relative;
+  overflow: hidden;
+}
+
+.month-selector:hover {
+  background: var(--nalupurugu);
+  transform: translateY(-1px);
+}
+
+.month-selector:active {
+  transform: scale(0.96);
+  transition-duration: var(--dur-89);
+}
+
+.month-selector .chevron {
+  font-size: 10px;
+  color: var(--ink-tertiary);
+  transition: transform var(--dur-233) ease;
+}
+
+/* Balance Pill in Header */
+.balance-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.balance-pill-label {
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.balance-pill-amount {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--pacchi);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ═══ Monthly Overview Card ═══ */
+.overview-card {
+  margin: 0 var(--space-21) var(--space-21);
+  padding: var(--space-21);
+  background: var(--patti-warm);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 3px 13px 5px 8px;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(14px);
+  animation: fadeUp var(--dur-610) var(--ease-out) 500ms forwards;
+}
+
+.overview-card::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: var(--space-21);
+  width: 40px; height: 3px;
+  background: var(--ittadi);
+  border-radius: 0 0 2px 2px;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.overview-card-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-21);
+}
+
+/* Donut Chart Canvas */
+.donut-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 110px;
+  height: 110px;
+}
+
+#donutChart {
+  display: block;
+}
+
+.donut-center {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+
+.donut-center-label {
+  font-size: 9px;
+  color: var(--ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.donut-center-amount {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--ink-primary);
+  font-variant-numeric: tabular-nums;
+  display: block;
+  margin-top: 1px;
+}
+
+/* Category Legend */
+.donut-legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  opacity: 0;
+  transform: translateX(8px);
+}
+
+.legend-item.animate-in {
+  animation: slideInRight var(--dur-377) var(--ease-out) forwards;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-text {
+  flex: 1;
+  font-size: 11px;
+  color: var(--ink-secondary);
+}
+
+.legend-amount {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Income/Expense Totals below chart */
+.overview-totals {
+  display: flex;
+  gap: var(--space-13);
+  margin-top: var(--space-21);
+  padding-top: var(--space-13);
+  border-top: 1px solid var(--nalupurugu);
+}
+
+.overview-total-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.overview-total-label {
+  font-size: 10px;
+  color: var(--ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.overview-total-value {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.overview-total-value.income { color: var(--pacchi); }
+.overview-total-value.expense { color: var(--erra); }
+
+/* ═══ Quick Entry Buttons ═══ */
+.quick-entry-section {
+  padding: 0 var(--space-21) var(--space-21);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp var(--dur-610) var(--ease-out) 700ms forwards;
+}
+
+.quick-entry-label {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: var(--space-13);
+}
+
+.quick-entry-row {
+  display: flex;
+  gap: var(--space-8);
+}
+
+.quick-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-13) var(--space-5);
+  background: var(--patti);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 3px 13px 5px 8px;
+  cursor: pointer;
+  transition: transform var(--dur-233) var(--spring),
+              box-shadow var(--dur-233) ease,
+              background var(--dur-233) ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.quick-btn:nth-child(1) { border-radius: 3px 13px 5px 8px; }
+.quick-btn:nth-child(2) { border-radius: 8px 3px 13px 5px; }
+.quick-btn:nth-child(3) { border-radius: 13px 5px 3px 8px; }
+.quick-btn:nth-child(4) { border-radius: 5px 8px 13px 3px; }
+
+.quick-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 21px rgba(0,0,0,0.08);
+  background: var(--patti-warm);
+}
+
+.quick-btn:active {
+  transform: translateY(0) scale(0.95);
+  transition-duration: var(--dur-89);
+}
+
+.quick-btn-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.quick-btn-label {
+  font-family: var(--font-te);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-secondary);
+  white-space: nowrap;
+}
+
+/* ═══ Section Headers ═══ */
+.section-header {
+  padding: var(--space-21) var(--space-21) var(--space-8);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.section-title {
+  font-family: var(--font-te-display);
+  font-size: var(--text-lg);
+  font-weight: 400;
+  color: var(--ink-primary);
+}
+
+.section-action {
+  font-size: var(--text-xs);
+  color: var(--neeli);
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: color var(--dur-233) ease;
+}
+
+.section-action:hover { color: var(--neeli-light); }
+
+/* ═══ Transaction Timeline ═══ */
+.txn-timeline {
+  padding: 0 var(--space-21);
+}
+
+.txn-date-group {
+  margin-bottom: var(--space-8);
+}
+
+.txn-date-label {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid rgba(212, 197, 169, 0.3);
+  margin-bottom: var(--space-5);
+}
+
+.txn-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-13);
+  padding: var(--space-13) var(--space-8);
+  border-radius: 4px;
+  opacity: 0;
+  transform: translateX(-8px);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background var(--dur-233) ease;
+}
+
+.txn-item:hover {
+  background: rgba(212, 197, 169, 0.15);
+}
+
+.txn-item:active {
+  background: rgba(212, 197, 169, 0.3);
+  transition-duration: var(--dur-89);
+}
+
+.txn-item.animate-in {
+  animation: slideInLeft var(--dur-377) var(--ease-out) forwards;
+}
+
+/* Swipe hint arrow */
+.txn-item::after {
+  content: '›';
+  position: absolute;
+  right: var(--space-8);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--nalupurugu);
+  font-size: 18px;
+  opacity: 0;
+  transition: opacity var(--dur-377) ease, transform var(--dur-377) ease;
+  pointer-events: none;
+}
+
+.txn-item:hover::after {
+  opacity: 0.6;
+  transform: translateY(-50%) translateX(2px);
+}
+
+.txn-icon {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.txn-icon.labor      { background: rgba(139, 69, 19, 0.1); }
+.txn-icon.seeds      { background: rgba(45, 106, 79, 0.1); }
+.txn-icon.irrigation { background: rgba(41, 128, 185, 0.1); }
+.txn-icon.transport  { background: var(--pasupu-glow); }
+.txn-icon.income     { background: rgba(45, 106, 79, 0.1); }
+.txn-icon.govt       { background: rgba(27, 79, 114, 0.1); }
+.txn-icon.other      { background: rgba(184, 169, 154, 0.2); }
+
+.txn-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.txn-desc {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: var(--space-21);
+}
+
+.txn-category-tag {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 3px;
+  padding: 1px var(--space-5);
+  border-radius: 2px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.txn-category-tag.labor      { background: rgba(139, 69, 19, 0.08); color: var(--matti); }
+.txn-category-tag.seeds      { background: rgba(45, 106, 79, 0.08); color: var(--pacchi); }
+.txn-category-tag.irrigation { background: rgba(41, 128, 185, 0.08); color: var(--neeli-light); }
+.txn-category-tag.transport  { background: rgba(232, 163, 23, 0.1); color: var(--ittadi); }
+.txn-category-tag.income     { background: rgba(45, 106, 79, 0.08); color: var(--pacchi); }
+.txn-category-tag.govt       { background: rgba(27, 79, 114, 0.08); color: var(--neeli); }
+.txn-category-tag.other      { background: rgba(184, 169, 154, 0.15); color: var(--ink-tertiary); }
+.txn-category-tag.fertilizer { background: rgba(27, 79, 114, 0.08); color: var(--neeli); }
+
+.txn-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.txn-amount {
+  font-size: var(--text-base);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.txn-amount.income { color: var(--pacchi); }
+.txn-amount.expense { color: var(--erra); }
+
+.txn-time {
+  font-size: 10px;
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  margin-top: 2px;
+}
+
+/* ═══ Season Profit/Loss Bar ═══ */
+.season-summary {
+  margin: var(--space-21);
+  padding: var(--space-21);
+  background: var(--patti-warm);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 5px 2px 8px 3px;
+  opacity: 0;
+  transform: translateY(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.season-summary.animate-in {
+  animation: fadeUp var(--dur-610) var(--ease-out) forwards;
+}
+
+.season-summary::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: var(--space-21);
+  width: 30px; height: 3px;
+  background: var(--pacchi);
+  border-radius: 0 0 2px 2px;
+}
+
+.season-label {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: var(--space-13);
+}
+
+.season-net {
+  margin-bottom: var(--space-21);
+}
+
+.season-net-label {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  margin-bottom: var(--space-5);
+}
+
+.season-net-amount {
+  font-family: var(--font-te-display);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--pacchi);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Season bar track */
+.season-bar-track {
+  height: 34px;
+  background: var(--erra-soft);
+  border-radius: 2px 5px 2px 5px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: var(--space-13);
+}
+
+.season-bar-income {
+  position: absolute;
+  left: 0; top: 0; height: 100%;
+  background: linear-gradient(90deg, var(--pacchi-light), var(--pacchi));
+  border-radius: 2px 5px 2px 5px;
+  width: 0;
+  transition: width var(--dur-987) var(--spring);
+  display: flex;
+  align-items: center;
+  padding-left: var(--space-13);
+}
+
+.season-bar-income-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--patti);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.season-bar-labels {
+  display: flex;
+  justify-content: space-between;
+}
+
+.season-bar-meta {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+}
+
+.season-bar-meta span {
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+
+/* ═══ Voice Input Bottom Sheet ═══ */
+.voice-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 20, 16, 0.45);
+  z-index: 150;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur-377) ease;
+  backdrop-filter: blur(2px);
+}
+
+.voice-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.voice-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 420px;
+  background: var(--patti);
+  border-radius: 13px 13px 0 0;
+  padding: var(--space-21);
+  z-index: 151;
+  transition: transform var(--dur-610) var(--spring);
+  box-shadow: 0 -8px 55px rgba(0,0,0,0.12);
+}
+
+.voice-sheet.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+.voice-sheet-handle {
+  width: 34px; height: 4px;
+  background: var(--nalupurugu);
+  border-radius: 2px;
+  margin: 0 auto var(--space-21);
+}
+
+.voice-sheet-title {
+  font-family: var(--font-te-display);
+  font-size: var(--text-lg);
+  text-align: center;
+  color: var(--ink-primary);
+  margin-bottom: var(--space-21);
+}
+
+/* Listening animation — 3 dots */
+.listen-dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-8);
+  margin-bottom: var(--space-21);
+  height: 34px;
+  align-items: center;
+}
+
+.listen-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--matti);
+  opacity: 0;
+  animation: listenPulse 1s ease-in-out infinite;
+}
+
+.listen-dot:nth-child(1) { animation-delay: 0ms; }
+.listen-dot:nth-child(2) { animation-delay: 144ms; }
+.listen-dot:nth-child(3) { animation-delay: 288ms; }
+
+/* Waveform Canvas */
+#waveformCanvas {
+  display: block;
+  margin: 0 auto var(--space-21);
+  border-radius: 4px;
+}
+
+/* Parsed Result Card */
+.parsed-card {
+  background: var(--patti-warm);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 3px 8px 5px 3px;
+  padding: var(--space-13) var(--space-21);
+  margin-bottom: var(--space-21);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity var(--dur-377) ease, transform var(--dur-377) var(--spring);
+}
+
+.parsed-card.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.parsed-detected {
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+  margin-bottom: var(--space-8);
+  line-height: 1.5;
+}
+
+.parsed-detected strong {
+  color: var(--ink-primary);
+}
+
+.parsed-result {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-8) var(--space-13);
+  background: rgba(45, 106, 79, 0.06);
+  border-radius: 2px 5px 2px 5px;
+  border-left: 3px solid var(--pacchi-light);
+}
+
+.parsed-icon { font-size: 18px; }
+.parsed-text {
+  flex: 1;
+}
+
+.parsed-category {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+}
+
+.parsed-amount {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--erra);
+  font-variant-numeric: tabular-nums;
+}
+
+.voice-actions {
+  display: flex;
+  gap: var(--space-13);
+}
+
+.voice-btn {
+  flex: 1;
+  padding: var(--space-13);
+  border: none;
+  border-radius: 3px 8px 3px 8px;
+  font-family: var(--font-te);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--dur-233) var(--spring),
+              box-shadow var(--dur-233) ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.voice-btn.confirm {
+  background: var(--pacchi);
+  color: var(--patti);
+}
+
+.voice-btn.edit {
+  background: var(--patti-warm);
+  border: 1px solid var(--nalupurugu);
+  color: var(--ink-secondary);
+}
+
+.voice-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 13px rgba(0,0,0,0.1);
+}
+
+.voice-btn:active {
+  transform: scale(0.96);
+  transition-duration: var(--dur-89);
+}
+
+/* ═══ Voice Input FAB ═══ */
+.voice-fab {
+  position: fixed;
+  bottom: 89px;
+  right: 50%;
+  transform: translateX(calc(210px - 28px));
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--pasupu);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 13px rgba(232, 163, 23, 0.35),
+              0 1px 3px rgba(0,0,0,0.1);
+  z-index: 100;
+  transition: transform var(--dur-233) var(--spring),
+              box-shadow var(--dur-233) ease;
+  animation: fabEntry var(--dur-610) var(--spring) 1800ms both;
+}
+
+.voice-fab:hover {
+  transform: translateX(calc(210px - 28px)) scale(1.08);
+  box-shadow: 0 6px 21px rgba(232, 163, 23, 0.45),
+              0 2px 5px rgba(0,0,0,0.1);
+}
+
+.voice-fab:active {
+  transform: translateX(calc(210px - 28px)) scale(0.92);
+  transition-duration: var(--dur-89);
+}
+
+.voice-fab svg {
+  width: 24px; height: 24px;
+  fill: var(--patti);
+}
+
+.voice-fab.listening {
+  animation: breathePulse var(--breathe) ease-in-out infinite;
+  background: var(--erra);
+}
+
+.voice-fab::before {
+  content: '';
+  position: absolute;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--pasupu);
+  opacity: 0;
+  animation: breatheRing var(--breathe) ease-in-out infinite;
+}
+
+/* ═══ Bottom Navigation ═══ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
+  height: 68px;
+  background: var(--patti);
+  border-top: 1px solid var(--nalupurugu);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 var(--space-8);
+  z-index: 99;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: var(--space-8);
+  cursor: pointer;
+  border: none;
+  background: none;
+  position: relative;
+  overflow: hidden;
+  transition: color var(--dur-233) ease;
+  color: var(--ink-tertiary);
+  min-width: 56px;
+}
+
+.nav-item.active { color: var(--matti); }
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 20px; height: 2px;
+  background: var(--matti);
+  border-radius: 0 0 2px 2px;
+}
+
+.nav-item svg {
+  width: 22px; height: 22px;
+  fill: currentColor;
+  transition: transform var(--dur-233) var(--spring);
+}
+
+.nav-item:active svg { transform: scale(0.85); }
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* ═══ Mango Leaf Toast ═══ */
+.toast-container {
+  position: fixed;
+  top: var(--space-21);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 42px);
+  max-width: 378px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  pointer-events: none;
+}
+
+.mango-toast {
+  padding: var(--space-13) var(--space-21);
+  background: var(--patti);
+  border: 1px solid var(--nalupurugu);
+  border-left: 4px solid var(--pacchi);
+  border-radius: 2px 8px 8px 2px;
+  box-shadow: 0 4px 21px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: var(--space-13);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(-20px) rotate(2deg);
+  animation: toastIn var(--dur-610) var(--spring) forwards;
+}
+
+.mango-toast.warning { border-left-color: var(--pasupu); }
+.mango-toast.alert   { border-left-color: var(--erra); }
+
+.toast-icon { font-size: 18px; flex-shrink: 0; }
+.toast-text { font-size: var(--text-sm); color: var(--ink-primary); line-height: 1.4; }
+
+/* ═══ Ripple ═══ */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(184, 134, 11, 0.15) 0%, transparent 70%);
+  transform: scale(0);
+  animation: rippleExpand var(--dur-610) linear forwards;
+  pointer-events: none;
+}
+
+/* ═══ Keyframes ═══ */
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.6; width: 30px; }
+  50%       { opacity: 1;   width: 50px; }
+}
+
+@keyframes rippleExpand {
+  to { transform: scale(4); opacity: 0; }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-20px) rotate(3deg); }
+  to   { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes toastFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-3px); }
+}
+
+@keyframes listenPulse {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50%       { opacity: 1;   transform: scale(1.2); }
+}
+
+@keyframes breathePulse {
+  0%, 100% {
+    transform: translateX(calc(210px - 28px)) scale(1);
+    box-shadow: 0 4px 13px rgba(192, 57, 43, 0.35);
+  }
+  50% {
+    transform: translateX(calc(210px - 28px)) scale(1.06);
+    box-shadow: 0 6px 21px rgba(192, 57, 43, 0.5);
+  }
+}
+
+@keyframes breatheRing {
+  0%, 100% { opacity: 0; transform: scale(1); }
+  50%       { opacity: 0.3; transform: scale(1.4); }
+}
+
+@keyframes fabEntry {
+  from { opacity: 0; transform: translateX(calc(210px - 28px)) scale(0) rotate(-90deg); }
+  to   { opacity: 1; transform: translateX(calc(210px - 28px)) scale(1) rotate(0deg); }
+}
+
+@keyframes donutDraw {
+  from { stroke-dashoffset: 314; }
+}
+
+/* ═══ Bottom padding ═══ */
+.bottom-spacer { height: 140px; }
+
+/* ═══ Responsive ═══ */
+@media (max-width: 420px) {
+  .app-shell { max-width: 100%; box-shadow: none; }
+  .voice-fab { right: var(--space-21); transform: none; }
+  .voice-fab:hover  { transform: scale(1.08); }
+  .voice-fab:active { transform: scale(0.92); }
+  .voice-sheet { max-width: 100%; }
+
+  @keyframes breathePulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 4px 13px rgba(192,57,43,0.35); }
+    50%       { transform: scale(1.06); box-shadow: 0 6px 21px rgba(192,57,43,0.5); }
+  }
+  @keyframes fabEntry {
+    from { opacity: 0; transform: scale(0) rotate(-90deg); }
+    to   { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Kolam Background -->
+<canvas id="kolam-bg"></canvas>
+
+<!-- App Shell -->
+<div class="app-shell">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>BSNL 4G ··· 72%</span>
+  </div>
+
+  <!-- Header -->
+  <div class="app-header">
+    <div class="header-left">
+      <div class="screen-title">దబ్బు</div>
+      <div class="screen-subtitle">మార్చి 2026 · రబీ సీజన్</div>
+    </div>
+    <div class="header-right">
+      <div class="balance-pill">
+        <span class="balance-pill-label">మిగులు</span>
+        <span class="balance-pill-amount" id="headerBalance">+₹6,200</span>
+      </div>
+      <button class="month-selector" id="monthSelector">
+        <span>మార్చి 2026</span>
+        <span class="chevron">▾</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Monthly Overview Card -->
+  <div class="overview-card" id="overviewCard">
+    <div class="overview-card-inner">
+
+      <!-- Donut Chart -->
+      <div class="donut-wrap">
+        <canvas id="donutChart" width="110" height="110"></canvas>
+        <div class="donut-center">
+          <span class="donut-center-label">ఖర్చులు</span>
+          <span class="donut-center-amount" id="donutTotal">₹6,200</span>
+        </div>
+      </div>
+
+      <!-- Legend -->
+      <div class="donut-legend" id="donutLegend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background: var(--cat-labor)"></div>
+          <span class="legend-text">కూలి</span>
+          <span class="legend-amount">₹2,400</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: var(--cat-seeds)"></div>
+          <span class="legend-text">విత్తనాలు</span>
+          <span class="legend-amount">₹1,280</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: var(--cat-fertilizer)"></div>
+          <span class="legend-text">ఎరువులు</span>
+          <span class="legend-amount">₹1,050</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: var(--cat-irrigation)"></div>
+          <span class="legend-text">నీటిపారుదల</span>
+          <span class="legend-amount">₹900</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: var(--cat-transport)"></div>
+          <span class="legend-text">రవాణా</span>
+          <span class="legend-amount">₹370</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background: var(--cat-other)"></div>
+          <span class="legend-text">ఇతర</span>
+          <span class="legend-amount">₹200</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Totals -->
+    <div class="overview-totals">
+      <div class="overview-total-item">
+        <span class="overview-total-label">ఆదాయం</span>
+        <span class="overview-total-value income" id="totalIncome">+₹12,400</span>
+      </div>
+      <div class="overview-total-item">
+        <span class="overview-total-label">ఖర్చులు</span>
+        <span class="overview-total-value expense" id="totalExpense">−₹6,200</span>
+      </div>
+      <div class="overview-total-item">
+        <span class="overview-total-label">నికర లాభం</span>
+        <span class="overview-total-value income">+₹6,200</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Entry Buttons -->
+  <div class="quick-entry-section">
+    <div class="quick-entry-label">త్వరిత నమోదు</div>
+    <div class="quick-entry-row">
+      <button class="quick-btn" data-type="labor">
+        <span class="quick-btn-icon">🧑‍🌾</span>
+        <span class="quick-btn-label">కూలి</span>
+      </button>
+      <button class="quick-btn" data-type="seeds">
+        <span class="quick-btn-icon">🌾</span>
+        <span class="quick-btn-label">విత్తనం</span>
+      </button>
+      <button class="quick-btn" data-type="water">
+        <span class="quick-btn-icon">💧</span>
+        <span class="quick-btn-label">నీరు</span>
+      </button>
+      <button class="quick-btn" data-type="other">
+        <span class="quick-btn-icon">➕</span>
+        <span class="quick-btn-label">ఇతర</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Transaction Timeline -->
+  <div class="section-header">
+    <span class="section-title">లావాదేవీలు</span>
+    <span class="section-action">ఫిల్టర్ →</span>
+  </div>
+
+  <div class="txn-timeline">
+
+    <!-- Today -->
+    <div class="txn-date-group">
+      <div class="txn-date-label">ఈ రోజు — 15 మార్చి</div>
+
+      <div class="txn-item" data-delay="800">
+        <div class="txn-icon labor">🧑‍🌾</div>
+        <div class="txn-details">
+          <div class="txn-desc">కూలి — రామారావు, సుభద్ర</div>
+          <div><span class="txn-category-tag labor">కూలి</span></div>
+        </div>
+        <div class="txn-right">
+          <div class="txn-amount expense">−₹800</div>
+          <div class="txn-time">7:00</div>
+        </div>
+      </div>
+
+      <div class="txn-item" data-delay="900">
+        <div class="txn-icon irrigation">💧</div>
+        <div class="txn-details">
+          <div class="txn-desc">మోటర్ డీజిల్ — 5 లీటర్లు</div>
+          <div><span class="txn-category-tag irrigation">నీటిపారుదల</span></div>
+        </div>
+        <div class="txn-right">
+          <div class="txn-amount expense">−₹450</div>
+          <div class="txn-time">6:30</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Yesterday -->
+    <div class="txn-date-group">
+      <div class="txn-date-label">నిన్న — 14 మార్చి</div>
+
+      <div class="txn-item" data-delay="1000">
+        <div class="txn-icon seeds">🌾</div>
+        <div class="txn-details">
+          <div class="txn-desc">నంది విత్తనాలు — 2 kg</div>
+          <div><span class="txn-category-tag seeds">విత్తనాలు</span></div>
+        </div>
+        <div class="txn-right">
+          <div class="txn-amount expense">−₹640</div>
+          <div class="txn-time">13:00</div>
+        </div>
+      </div>
+
+      <div class="txn-item" data-delay="1100">
+        <div class="txn-icon other">🧪</div>
+        <div class="txn-details">
+          <div class="txn-desc">DAP ఎరువు — 1 బస్తా</div>
+          <div><span class="txn-category-tag fertilizer">ఎరువులు</span></div>
+        </div>
+        <div class="txn-right">
+          <div class="txn-amount expense">−₹1,050</div>
+          <div class="txn-time">11:15</div>
+        </div>
+      </div>
+
+      <div class="txn-item" data-delay="1200">
+        <div class="txn-icon labor">🧑‍🌾</div>
+        <div class="txn-details">
+          <div class="txn-desc">కూలి — 4 మంది (కలుపు తీత)</div>
+          <div><span class="txn-category-tag labor">కూలి</span></div>
+        </div>
+        <div class="txn-right">
+          <div class="txn-amount expense">−₹1,600</div>
+          <div class="txn-time">17:00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- March 10 -->
+    <div class="txn-date-group">
+      <div class="txn-date-label">10 మార్చి</div>
+
+      <div class="txn-item" data-delay="1300">
+        <div class="txn-icon income">💰</div>
+        <div class="txn-details">
+          <div class="txn-desc">వేరుశెనగ అమ్మకం — 2 క్వింటాళ్ళు</div>
+          <div><span class="txn-category-tag income">పంట అమ్మకం</span></div>
+        </div>
+        <div class="txn-right">
+          <div class="txn-amount income">+₹10,400</div>
+          <div class="txn-time">14:30</div>
+        </div>
+      </div>
+
+      <div class="txn-item" data-delay="1400">
+        <div class="txn-icon transport">🚛</div>
+        <div class="txn-details">
+          <div class="txn-desc">రవాణా — మండీకి లోడ్</div>
+          <div><span class="txn-category-tag transport">రవాణా</span></div>
+        </div>
+        <div class="txn-right">
+          <div class="txn-amount expense">−₹370</div>
+          <div class="txn-time">09:00</div>
+        </div>
+      </div>
+
+      <div class="txn-item" data-delay="1500">
+        <div class="txn-icon govt">🏛️</div>
+        <div class="txn-details">
+          <div class="txn-desc">PM-KISAN — 16వ వాయిదా</div>
+          <div><span class="txn-category-tag govt">ప్రభుత్వ సబ్సిడీ</span></div>
+        </div>
+        <div class="txn-right">
+          <div class="txn-amount income">+₹2,000</div>
+          <div class="txn-time">08:00</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Season Profit/Loss Summary -->
+  <div class="section-header">
+    <span class="section-title">సీజన్ సారాంశం</span>
+    <span class="section-action">వివరాలు →</span>
+  </div>
+
+  <div class="season-summary" id="seasonSummary">
+    <div class="season-label">ఈ రబీ సీజన్ లాభం</div>
+    <div class="season-net">
+      <div class="season-net-label">మొత్తం నికర లాభం</div>
+      <div class="season-net-amount" id="seasonNet">+₹0</div>
+    </div>
+
+    <!-- Income bar -->
+    <div style="margin-bottom: var(--space-8);">
+      <div style="font-size: 11px; color: var(--ink-tertiary); margin-bottom: var(--space-5);">ఆదాయం</div>
+      <div class="season-bar-track" style="background: rgba(45,106,79,0.08);">
+        <div class="season-bar-income" id="incomeBar" style="width:0">
+          <span class="season-bar-income-label">₹28,400</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expense bar -->
+    <div style="margin-bottom: var(--space-13);">
+      <div style="font-size: 11px; color: var(--ink-tertiary); margin-bottom: var(--space-5);">ఖర్చులు</div>
+      <div class="season-bar-track">
+        <div class="season-bar-income" id="expenseBar"
+             style="width:0; background: linear-gradient(90deg, #e05b4b, var(--erra));">
+          <span class="season-bar-income-label">₹17,650</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="season-bar-labels">
+      <span class="season-bar-meta">సీజన్ ప్రారంభం: <span>నవంబర్ 2025</span></span>
+      <span class="season-bar-meta">కోత: <span>ఏప్రిల్ 2026</span></span>
+    </div>
+  </div>
+
+  <div class="bottom-spacer"></div>
+</div>
+
+<!-- Voice FAB -->
+<button class="voice-fab" id="voiceFab" aria-label="Voice input">
+  <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+</button>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <button class="nav-item" id="nav-home">
+    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    <span class="nav-label">హోం</span>
+  </button>
+  <button class="nav-item active" id="nav-dabbu">
+    <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+    <span class="nav-label">దబ్బు</span>
+  </button>
+  <button class="nav-item" style="min-width: 64px; pointer-events: none;">
+    <!-- FAB spacer -->
+  </button>
+  <button class="nav-item" id="nav-market">
+    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    <span class="nav-label">మార్కెట్</span>
+  </button>
+  <button class="nav-item" id="nav-crop">
+    <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21.15L5.71 22l1-2.3A4.49 4.49 0 008 20c9 0 11-8 11-8h-2zm-1.61 6.59A6.48 6.48 0 0110 18a6.32 6.32 0 01-.68-.04C11.28 14.29 14.13 12.38 17 12c-.04.41-.22 1.83-1.61 2.59z"/></svg>
+    <span class="nav-label">పంట</span>
+  </button>
+</nav>
+
+<!-- Voice Bottom Sheet -->
+<div class="voice-overlay" id="voiceOverlay"></div>
+<div class="voice-sheet" id="voiceSheet">
+  <div class="voice-sheet-handle"></div>
+  <div class="voice-sheet-title" id="sheetTitle">వింటున్నాను...</div>
+
+  <!-- Listening dots -->
+  <div class="listen-dots" id="listenDots">
+    <div class="listen-dot"></div>
+    <div class="listen-dot"></div>
+    <div class="listen-dot"></div>
+  </div>
+
+  <!-- Waveform Canvas -->
+  <canvas id="waveformCanvas" width="330" height="55"></canvas>
+
+  <!-- Parsed Result (hidden initially) -->
+  <div class="parsed-card" id="parsedCard">
+    <div class="parsed-detected">
+      గుర్తించబడింది: <strong>"రెండు కూలీలకు నాలుగు వందలు"</strong>
+    </div>
+    <div class="parsed-result">
+      <span class="parsed-icon">🧑‍🌾</span>
+      <div class="parsed-text">
+        <div class="parsed-category">కూలి ఖర్చు · 2 × ₹400</div>
+      </div>
+      <span class="parsed-amount">−₹800</span>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="voice-actions" id="voiceActions" style="display: none;">
+    <button class="voice-btn confirm" id="voiceConfirm">✓ నిర్ధారించు</button>
+    <button class="voice-btn edit"    id="voiceEdit">✎ మార్చు</button>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// MATTI v2 — దబ్బు Interaction Engine
+// Fibonacci timing, spring physics, Living Geometry
+// ═══════════════════════════════════════════════
+
+// ─── Kolam Background (same as v1) ───
+(function drawKolam() {
+  const canvas = document.getElementById('kolam-bg');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    draw();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const spacing    = 34; // Fibonacci
+    const dotR       = 1.5;
+    const goldenAngle = 137.508 * (Math.PI / 180);
+
+    for (let x = spacing; x < canvas.width; x += spacing) {
+      for (let y = spacing; y < canvas.height; y += spacing) {
+        ctx.beginPath();
+        ctx.arc(x, y, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = '#8B4513';
+        ctx.fill();
+
+        if ((Math.floor(x / spacing) + Math.floor(y / spacing)) % 3 === 0) {
+          ctx.beginPath();
+          ctx.arc(x, y, spacing * 0.3,
+                  goldenAngle * Math.floor(x / spacing),
+                  goldenAngle * Math.floor(x / spacing) + Math.PI * 0.8);
+          ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+})();
+
+// ─── Donut Chart ───
+(function drawDonut() {
+  const canvas = document.getElementById('donutChart');
+  const ctx    = canvas.getContext('2d');
+  const cx = 55, cy = 55, outerR = 48, innerR = 30;
+
+  const categories = [
+    { value: 2400, color: '#8B4513' }, // కూలి
+    { value: 1280, color: '#2D6A4F' }, // విత్తనాలు
+    { value: 1050, color: '#1B4F72' }, // ఎరువులు
+    { value:  900, color: '#2980B9' }, // నీటిపారుదల
+    { value:  370, color: '#E8A317' }, // రవాణా
+    { value:  200, color: '#B8A99A' }, // ఇతర
+  ];
+
+  const total     = categories.reduce((s, c) => s + c.value, 0);
+  const gapAngle  = 0.04; // radians gap between slices
+  let   startAngle = -Math.PI / 2;
+  let   progress   = 0;    // 0→1, animated
+  let   raf;
+
+  function drawFrame(p) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    categories.forEach(cat => {
+      const fraction    = cat.value / total;
+      const sweepTarget = fraction * Math.PI * 2 - gapAngle;
+      const sweep       = sweepTarget * p;
+
+      if (sweep <= 0) return;
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, outerR, startAngle, startAngle + sweep);
+      ctx.closePath();
+
+      // Donut hole cutout
+      ctx.save();
+      ctx.fillStyle = cat.color;
+      ctx.fill();
+      ctx.restore();
+
+      startAngle += sweepTarget + gapAngle;
+    });
+
+    // Punch inner hole for donut
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function animate(timestamp) {
+    if (!animate.start) animate.start = timestamp;
+    const elapsed = timestamp - animate.start;
+    const dur     = 987; // Fibonacci ms
+    progress = Math.min(elapsed / dur, 1);
+
+    // Ease out cubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    startAngle  = -Math.PI / 2;
+    drawFrame(eased);
+
+    if (progress < 1) raf = requestAnimationFrame(animate);
+  }
+
+  // Start when overview card is visible
+  setTimeout(() => requestAnimationFrame(animate), 700);
+})();
+
+// ─── Legend Staggered Animate-In ───
+setTimeout(() => {
+  document.querySelectorAll('#donutLegend .legend-item').forEach((item, i) => {
+    setTimeout(() => {
+      item.classList.add('animate-in');
+    }, 800 + i * 89); // 89ms Fibonacci stagger
+  });
+}, 500);
+
+// ─── Intersection Observer for Transactions ───
+const txnObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const delay = parseInt(entry.target.dataset.delay || '0');
+      setTimeout(() => {
+        entry.target.classList.add('animate-in');
+      }, delay);
+      txnObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.txn-item').forEach(el => txnObserver.observe(el));
+
+// Season summary observe
+const seasonEl = document.getElementById('seasonSummary');
+const seasonObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('animate-in');
+
+      // Animate season bars
+      setTimeout(() => {
+        document.getElementById('incomeBar').style.width  = '100%';
+        document.getElementById('expenseBar').style.width = '62%'; // 17650/28400
+      }, 377);
+
+      // Animate net profit counter
+      animateCounter('seasonNet', 10750, '₹', '+');
+
+      seasonObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.2 });
+seasonObserver.observe(seasonEl);
+
+// ─── Counter Animation ───
+function animateCounter(elId, target, prefix = '₹', sign = '') {
+  const el  = document.getElementById(elId);
+  if (!el) return;
+  const dur   = 987;
+  const start = performance.now();
+
+  function tick(now) {
+    const elapsed  = now - start;
+    const progress = Math.min(elapsed / dur, 1);
+    const eased    = 1 - Math.pow(1 - progress, 3);
+    const current  = Math.round(target * eased);
+    el.textContent = sign + prefix + current.toLocaleString('en-IN');
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ─── Ripple Effect ───
+function addRipple(el) {
+  el.style.position = 'relative';
+  el.style.overflow = 'hidden';
+  el.addEventListener('click', function(e) {
+    const rect   = this.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const size   = Math.max(rect.width, rect.height) * 2;
+    ripple.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      left: ${e.clientX - rect.left - size/2}px;
+      top:  ${e.clientY - rect.top  - size/2}px;
+    `;
+    this.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 610);
+  });
+}
+
+document.querySelectorAll('.txn-item, .nav-item, .quick-btn, .month-selector').forEach(addRipple);
+
+// ─── Quick Entry Toast ───
+const quickLabels = {
+  labor: 'కూలి',
+  seeds: 'విత్తనం',
+  water: 'నీరు',
+  other: 'ఇతర'
+};
+
+document.querySelectorAll('.quick-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const type = btn.dataset.type;
+    const label = quickLabels[type] || type;
+    showToast(`🌿 ${label} నమోదు — మొత్తం చెప్పండి`, 'default', 3500);
+  });
+});
+
+// ─── Month Selector Click ───
+document.getElementById('monthSelector').addEventListener('click', () => {
+  const chevron = document.querySelector('.month-selector .chevron');
+  chevron.style.transform = 'rotate(180deg)';
+  setTimeout(() => { chevron.style.transform = ''; }, 987);
+  showToast('📅 నెల ఎంపిక త్వరలో వస్తుంది', 'default', 2500);
+});
+
+// ─── Voice FAB → Bottom Sheet ───
+const voiceFab     = document.getElementById('voiceFab');
+const voiceOverlay = document.getElementById('voiceOverlay');
+const voiceSheet   = document.getElementById('voiceSheet');
+const parsedCard   = document.getElementById('parsedCard');
+const voiceActions = document.getElementById('voiceActions');
+const sheetTitle   = document.getElementById('sheetTitle');
+let   voiceState   = 'idle'; // idle | listening | parsed
+let   waveRaf;
+
+function openVoiceSheet() {
+  voiceState = 'listening';
+  voiceFab.classList.add('listening');
+  voiceOverlay.classList.add('show');
+  voiceSheet.classList.add('show');
+  sheetTitle.textContent = 'వింటున్నాను...';
+  parsedCard.classList.remove('show');
+  voiceActions.style.display = 'none';
+  document.getElementById('listenDots').style.display = 'flex';
+  startWaveform();
+
+  // Simulate transcription after 2.5s
+  setTimeout(() => {
+    if (voiceState !== 'listening') return;
+    voiceState = 'parsed';
+    sheetTitle.textContent = 'అర్థమైంది!';
+    document.getElementById('listenDots').style.display = 'none';
+    stopWaveform();
+    parsedCard.classList.add('show');
+    voiceActions.style.display = 'flex';
+    voiceFab.classList.remove('listening');
+  }, 2500);
+}
+
+function closeVoiceSheet() {
+  voiceState = 'idle';
+  voiceFab.classList.remove('listening');
+  voiceOverlay.classList.remove('show');
+  voiceSheet.classList.remove('show');
+  stopWaveform();
+  // Reset for next open
+  setTimeout(() => {
+    parsedCard.classList.remove('show');
+    voiceActions.style.display = 'none';
+    document.getElementById('listenDots').style.display = 'flex';
+  }, 400);
+}
+
+voiceFab.addEventListener('click', () => {
+  if (voiceState === 'idle') {
+    openVoiceSheet();
+  } else {
+    closeVoiceSheet();
+  }
+});
+
+voiceOverlay.addEventListener('click', closeVoiceSheet);
+
+document.getElementById('voiceConfirm').addEventListener('click', () => {
+  closeVoiceSheet();
+  setTimeout(() => {
+    showToast('✓ కూలి ₹800 నమోదు అయింది', 'default', 4000);
+  }, 300);
+});
+
+document.getElementById('voiceEdit').addEventListener('click', () => {
+  showToast('✎ మొత్తం మార్చడానికి టైప్ చేయండి', 'default', 3000);
+  closeVoiceSheet();
+});
+
+// ─── Waveform Canvas Animation ───
+function startWaveform() {
+  const canvas = document.getElementById('waveformCanvas');
+  const ctx    = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  let   t = 0;
+
+  function drawWave() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.strokeStyle = '#8B4513';
+    ctx.lineWidth   = 1.5;
+    ctx.beginPath();
+
+    for (let x = 0; x < W; x++) {
+      // Sum of multiple sine waves — organic feel
+      const freq1 = 0.05 + Math.sin(t * 0.7) * 0.02;
+      const freq2 = 0.09 + Math.cos(t * 0.5) * 0.03;
+      const amp1  = 14 + Math.sin(t * 1.1) * 8;
+      const amp2  = 8  + Math.cos(t * 0.8) * 5;
+      const y     = H/2
+                  + Math.sin(x * freq1 + t * 3) * amp1
+                  + Math.sin(x * freq2 + t * 2.3) * amp2;
+
+      if (x === 0) ctx.moveTo(x, y);
+      else         ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    t += 0.04;
+    waveRaf = requestAnimationFrame(drawWave);
+  }
+
+  drawWave();
+}
+
+function stopWaveform() {
+  cancelAnimationFrame(waveRaf);
+  const canvas = document.getElementById('waveformCanvas');
+  const ctx    = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// ─── Nav Item Tap ───
+document.querySelectorAll('.nav-item').forEach(item => {
+  addRipple(item);
+  item.addEventListener('click', function() {
+    if (this.style.pointerEvents === 'none') return;
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ─── Toast System (exact copy from v1) ───
+function showToast(message, type = 'default', duration = 4000) {
+  const container = document.getElementById('toastContainer');
+  const toast     = document.createElement('div');
+  toast.className = `mango-toast ${type === 'default' ? '' : type}`;
+
+  const icons = { default: '🍃', warning: '⚠️', alert: '🔔' };
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type] || '🍃'}</span>
+    <span class="toast-text">${message}</span>
+  `;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.animation = 'toastFloat 2s ease-in-out infinite';
+  }, 610);
+
+  setTimeout(() => {
+    toast.style.transition = 'opacity 377ms ease, transform 377ms ease';
+    toast.style.opacity    = '0';
+    toast.style.transform  = 'translateY(-10px) rotate(-2deg)';
+    setTimeout(() => toast.remove(), 377);
+  }, duration);
+}
+
+// ─── Welcome Toast ───
+setTimeout(() => {
+  showToast('💰 మార్చి నెల సారాంశం సిద్ధంగా ఉంది', 'default', 5000);
+}, 2000);
+
+// ─── Txn item tap feedback ───
+document.querySelectorAll('.txn-item').forEach(item => {
+  item.addEventListener('click', function() {
+    // Brief scale pop
+    this.style.transition = 'transform 89ms ease';
+    this.style.transform  = 'scale(0.98)';
+    setTimeout(() => {
+      this.style.transform  = '';
+      this.style.transition = '';
+    }, 144);
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,573 @@
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 05 — పంట (Crop Journal)
+     Depends on: 05_styles_panta.css + shared design tokens
+     Interactions: inline-form toggle, IntersectionObserver
+     stagger on journal events and cost bar, lifecycle SVG
+     auto-scroll to current stage, ripple on cards.
+     ═══════════════════════════════════════════════════════════ -->
+
+<!-- ── Header: Screen title + Field Selector ── -->
+<div class="panta-header">
+  <div class="panta-title">పంట</div>
+  <div class="field-selector" id="fieldSelector" role="button" tabindex="0">
+    <div class="field-selector-text">
+      <span class="field-selector-name">పొలం 1 — వేరుశెనగ</span>
+      <span class="field-selector-sub">4 ఎకరాలు · అనంతపురం</span>
+    </div>
+    <span class="field-selector-chevron">▾</span>
+  </div>
+</div>
+
+<!-- ── Pest Alert Banner ── -->
+<div class="pest-alert" role="alert">
+  <div class="pest-alert-title">
+    <span aria-hidden="true">⚠️</span>
+    <span>బోల్ వార్మ్ — 35% ప్రభావం</span>
+  </div>
+  <div class="pest-alert-treatment">
+    చికిత్స: వేప నూనె పిచికారీ · మార్చి 12 వేయడం అయింది ✓
+  </div>
+  <div class="pest-alert-next">
+    <span aria-hidden="true">🔍</span>
+    తదుపరి పరిశీలన: 2 రోజుల్లో
+  </div>
+</div>
+
+<!-- ── Crop Lifecycle Timeline ── -->
+<div class="lifecycle-scroll" id="lifecycleScroll" role="region" aria-label="పంట జీవిత చక్రం">
+  <div class="lifecycle-wrap">
+
+    <svg viewBox="0 0 520 90" xmlns="http://www.w3.org/2000/svg" overflow="visible" aria-hidden="true">
+      <defs>
+        <!-- Glow filter for current stage -->
+        <filter id="panta-glow-green" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <!-- Radial halo for current stage -->
+        <radialGradient id="panta-currentGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stop-color="#40916C" stop-opacity="0.3"/>
+          <stop offset="100%" stop-color="#40916C" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Upcoming path segment (faint, static) -->
+      <path
+        d="M 280 45 C 310 22, 345 68, 370 45 C 398 22, 432 68, 460 45"
+        fill="none"
+        stroke="#D4C5A9"
+        stroke-width="2.5"
+        stroke-linecap="round"
+      />
+
+      <!-- Completed path: seed → plant → growth (animated draw) -->
+      <path
+        class="lifecycle-path-done"
+        d="M 60 45 C 88 22, 122 68, 150 45 C 178 22, 212 68, 240 45 C 258 32, 270 36, 280 45"
+        fill="none"
+        stroke="#B8860B"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        opacity="0.85"
+      />
+
+      <!-- ── Stage 1: విత్తు (Seed) — completed ── -->
+      <g class="stage-node" role="img" aria-label="విత్తు — పూర్తయింది" transform="translate(60, 45)">
+        <circle r="18" fill="#FAF7F0" stroke="#B8860B" stroke-width="2"/>
+        <circle r="13" fill="rgba(232,163,23,0.13)"/>
+        <!-- Checkmark -->
+        <polyline
+          points="-6,0 -2,5 8,-6"
+          fill="none"
+          stroke="#B8860B"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+
+      <!-- ── Stage 2: నాటు (Plant) — completed ── -->
+      <g class="stage-node" role="img" aria-label="నాటు — పూర్తయింది" transform="translate(150, 45)">
+        <circle r="18" fill="#FAF7F0" stroke="#B8860B" stroke-width="2"/>
+        <circle r="13" fill="rgba(232,163,23,0.1)"/>
+        <polyline
+          points="-6,0 -2,5 8,-6"
+          fill="none"
+          stroke="#B8860B"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </g>
+
+      <!-- ── Stage 3: పెరుగుదల (Growth) — CURRENT ── -->
+      <!-- Outer breathing halo -->
+      <circle
+        cx="280" cy="45" r="30"
+        fill="url(#panta-currentGrad)"
+        style="animation: haloglow 3s ease-in-out infinite;"
+        aria-hidden="true"
+      />
+      <g
+        class="stage-node current-stage-group"
+        role="img"
+        aria-label="పెరుగుదల — ప్రస్తుత దశ"
+        transform="translate(280, 45)"
+      >
+        <circle r="20" fill="#FAF7F0" stroke="#2D6A4F" stroke-width="2.5"
+                filter="url(#panta-glow-green)"/>
+        <circle r="13" fill="rgba(45,106,79,0.16)"/>
+        <!-- Solid center dot: current -->
+        <circle r="6" fill="#2D6A4F"/>
+        <!-- Expanding pulse ring 1 -->
+        <circle r="20" fill="none" stroke="#40916C" stroke-width="1.5"
+                opacity="0"
+                style="animation: pulseRing 3s ease-out 0s infinite;"/>
+        <!-- Expanding pulse ring 2 (phase offset) -->
+        <circle r="20" fill="none" stroke="#40916C" stroke-width="1"
+                opacity="0"
+                style="animation: pulseRing 3s ease-out 1.1s infinite;"/>
+      </g>
+
+      <!-- ── Stage 4: కోత (Harvest) — upcoming ── -->
+      <g class="stage-node" role="img" aria-label="కోత — రాబోయే దశ" transform="translate(370, 45)">
+        <circle r="18" fill="#FAF7F0" stroke="#D4C5A9" stroke-width="1.5"/>
+        <circle r="6"  fill="#D4C5A9"/>
+      </g>
+
+      <!-- ── Stage 5: అమ్మకం (Sale) — upcoming ── -->
+      <g class="stage-node" role="img" aria-label="అమ్మకం — రాబోయే దశ" transform="translate(460, 45)">
+        <circle r="18" fill="#FAF7F0" stroke="#D4C5A9" stroke-width="1.5"/>
+        <circle r="6"  fill="#D4C5A9"/>
+      </g>
+    </svg>
+
+    <!-- Stage labels below nodes -->
+    <div class="stage-labels" aria-hidden="true">
+      <div class="stage-label" style="left: 60px;">
+        <span class="stage-label-name completed">విత్తు ✓</span>
+      </div>
+      <div class="stage-label" style="left: 150px;">
+        <span class="stage-label-name completed">నాటు ✓</span>
+      </div>
+      <div class="stage-label" style="left: 280px;">
+        <span class="stage-label-name current">పెరుగుదల ●</span>
+      </div>
+      <div class="stage-label" style="left: 370px;">
+        <span class="stage-label-name upcoming">కోత</span>
+      </div>
+      <div class="stage-label" style="left: 460px;">
+        <span class="stage-label-name upcoming">అమ్మకం</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Current Status Card ── -->
+<div class="status-card">
+  <div class="status-top">
+    <div class="status-health">
+      <div class="health-dot" aria-hidden="true"></div>
+      <span class="health-label">మంచి స్థితి</span>
+    </div>
+    <div class="status-weather" aria-label="వాతావరణం">
+      🌤 32°C · తేమ 45%<br>
+      <span style="color: var(--neeli-light); font-size: 10px;">వర్షం 0%</span>
+    </div>
+  </div>
+  <div class="status-grid">
+    <div class="status-item">
+      <span class="status-item-label">రోజులు</span>
+      <span class="status-item-value days">87 రోజులు</span>
+      <span style="font-size: 10px; color: var(--ink-tertiary);">నాటు నుండి</span>
+    </div>
+    <div class="status-item">
+      <span class="status-item-label">కోత అంచనా</span>
+      <span class="status-item-value">ఏప్రిల్<br>15–20</span>
+    </div>
+    <div class="status-item">
+      <span class="status-item-label">పెట్టుబడి</span>
+      <span class="status-item-value cost">₹4,200</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Quick Log Section ── -->
+<div class="panta-section-header">
+  <span class="panta-section-title">నమోదు చేయండి</span>
+</div>
+
+<div class="quick-log-row" role="toolbar" aria-label="త్వరిత నమోదు బటన్లు">
+  <button class="log-btn" data-panta-form="panta-form-photo">
+    <span class="btn-emoji" aria-hidden="true">📸</span>
+    <span>ఫోటో</span>
+  </button>
+  <button class="log-btn" data-panta-form="panta-form-water">
+    <span class="btn-emoji" aria-hidden="true">💧</span>
+    <span>నీరు</span>
+  </button>
+  <button class="log-btn" data-panta-form="panta-form-fertilizer">
+    <span class="btn-emoji" aria-hidden="true">🌿</span>
+    <span>ఎరువు</span>
+  </button>
+  <button class="log-btn" data-panta-form="panta-form-pest">
+    <span class="btn-emoji" aria-hidden="true">🐛</span>
+    <span>పురుగు</span>
+  </button>
+</div>
+
+<!-- Inline forms (only one open at a time via JS) -->
+<div class="inline-form" id="panta-form-photo">
+  <div class="inline-form-title">📸 పంట ఫోటో నమోదు</div>
+  <div class="inline-form-row">
+    <textarea placeholder="గమనికలు: పంట స్థితి, పురుగు చిహ్నాలు..."></textarea>
+  </div>
+  <div class="inline-form-actions">
+    <button class="btn-cancel" onclick="pantaCloseForm('panta-form-photo')">రద్దు</button>
+    <button class="btn-save"   onclick="pantaSaveForm('panta-form-photo', 'ఫోటో నమోదు అయింది ✓')">📸 సేవ్</button>
+  </div>
+</div>
+
+<div class="inline-form" id="panta-form-water">
+  <div class="inline-form-title">💧 నీటిపారుదల నమోదు</div>
+  <div class="inline-form-row">
+    <select aria-label="నీటి వనరు">
+      <option>బోరు మోటర్</option>
+      <option>కాలువ నీరు</option>
+      <option>వర్షపు నీరు</option>
+      <option>డ్రిప్ ఇరిగేషన్</option>
+    </select>
+  </div>
+  <div class="inline-form-row">
+    <input type="text" placeholder="వ్యవధి (గంటలు) — ఉదా: 2" aria-label="వ్యవధి">
+  </div>
+  <div class="inline-form-actions">
+    <button class="btn-cancel" onclick="pantaCloseForm('panta-form-water')">రద్దు</button>
+    <button class="btn-save"   onclick="pantaSaveForm('panta-form-water', 'నీటిపారుదల నమోదు అయింది ✓')">💧 సేవ్</button>
+  </div>
+</div>
+
+<div class="inline-form" id="panta-form-fertilizer">
+  <div class="inline-form-title">🌿 ఎరువు నమోదు</div>
+  <div class="inline-form-row">
+    <input type="text" placeholder="రకం — ఉదా: DAP, యూరియా" aria-label="ఎరువు రకం">
+    <input type="text" placeholder="పరిమాణం — ఉదా: 2 బస్తాలు" aria-label="పరిమాణం">
+  </div>
+  <div class="inline-form-actions">
+    <button class="btn-cancel" onclick="pantaCloseForm('panta-form-fertilizer')">రద్దు</button>
+    <button class="btn-save"   onclick="pantaSaveForm('panta-form-fertilizer', 'ఎరువు నమోదు అయింది ✓')">🌿 సేవ్</button>
+  </div>
+</div>
+
+<div class="inline-form" id="panta-form-pest">
+  <div class="inline-form-title">🐛 పురుగు నమోదు</div>
+  <div class="inline-form-row">
+    <input type="text" placeholder="పురుగు పేరు — ఉదా: బోల్ వార్మ్" aria-label="పురుగు పేరు">
+  </div>
+  <div class="inline-form-row">
+    <input type="text" placeholder="ప్రభావం % — ఉదా: 20%" aria-label="ప్రభావం శాతం">
+    <input type="text" placeholder="చికిత్స — ఉదా: వేప నూనె" aria-label="చికిత్స">
+  </div>
+  <div class="inline-form-actions">
+    <button class="btn-cancel" onclick="pantaCloseForm('panta-form-pest')">రద్దు</button>
+    <button class="btn-save"   onclick="pantaSaveForm('panta-form-pest', 'పురుగు నమోదు అయింది ✓')">🐛 సేవ్</button>
+  </div>
+</div>
+
+<!-- ── Crop Event Journal ── -->
+<div class="panta-section-header">
+  <span class="panta-section-title">పంట జర్నల్</span>
+  <span class="panta-section-action" role="button" tabindex="0">అన్నీ →</span>
+</div>
+
+<div class="event-journal" role="feed" aria-label="పంట సంఘటనల జర్నల్">
+  <!-- Continuous vertical connector line -->
+  <div class="journal-line" aria-hidden="true"></div>
+
+  <!-- Event 1: Pest identification — most recent first -->
+  <div class="journal-event" data-delay="0">
+    <div class="event-dot pest" aria-hidden="true">🐛</div>
+    <div class="event-card">
+      <div class="event-date">మార్చి 12, 2026</div>
+      <div class="event-title">పురుగు గుర్తింపు — బోల్ వార్మ్</div>
+      <div class="event-body">
+        35% పంటపై ప్రభావం గుర్తించబడింది.<br>
+        ముఖ్యంగా తూర్పు భాగంలో ఎక్కువగా ఉంది.
+      </div>
+      <div class="event-badge">✓ వేప నూనె పిచికారీ చేయబడింది</div>
+      <div class="journal-photos">
+        <div class="photo-thumb" role="img" aria-label="ఫోటో 1">📷</div>
+        <div class="photo-thumb" role="img" aria-label="ఫోటో 2">📷</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Event 2: Irrigation -->
+  <div class="journal-event" data-delay="100">
+    <div class="event-dot water" aria-hidden="true">💧</div>
+    <div class="event-card">
+      <div class="event-date">మార్చి 10, 2026</div>
+      <div class="event-title">నీటిపారుదల — బోరు మోటర్</div>
+      <div class="event-body">
+        3 గంటలు · పూర్తి పొలం కవర్ అయింది.<br>
+        డీజిల్: 4 లీటర్లు వాడినది.
+      </div>
+    </div>
+  </div>
+
+  <!-- Event 3: Fertilizer -->
+  <div class="journal-event" data-delay="200">
+    <div class="event-dot fertilizer" aria-hidden="true">🌿</div>
+    <div class="event-card">
+      <div class="event-date">మార్చి 5, 2026</div>
+      <div class="event-title">ఎరువు వేయడం</div>
+      <div class="event-body">
+        DAP — 2 బస్తాలు (100 kg)<br>
+        ఖర్చు: ₹1,200
+      </div>
+    </div>
+  </div>
+
+  <!-- Event 4: Crop inspection with photo -->
+  <div class="journal-event" data-delay="300">
+    <div class="event-dot inspect" aria-hidden="true">📸</div>
+    <div class="event-card">
+      <div class="event-date">ఫిబ్రవరి 28, 2026</div>
+      <div class="event-title">పంట పరిశీలన</div>
+      <div class="event-body">
+        మొత్తం స్థితి: మంచి పెరుగుదల.<br>
+        పువ్వులు కనిపిస్తున్నాయి — శుభ సూచన.
+      </div>
+      <div class="event-badge" style="background: rgba(184,134,11,0.08); border-color: rgba(184,134,11,0.25); color: var(--ittadi);">
+        ✓ మంచి స్థితి నిర్ధారించబడింది
+      </div>
+      <div class="journal-photos">
+        <div class="photo-thumb" role="img" aria-label="పరిశీలన ఫోటో">📷</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Event 5: Sowing — oldest -->
+  <div class="journal-event" data-delay="400">
+    <div class="event-dot seed" aria-hidden="true">🌱</div>
+    <div class="event-card">
+      <div class="event-date">జనవరి 15, 2026</div>
+      <div class="event-title">విత్తనం వేయడం — సీజన్ ప్రారంభం</div>
+      <div class="event-body">
+        వేరుశెనగ TMV-2 రకం · 4 ఎకరాలు<br>
+        విత్తన ఖర్చు: ₹640 · 2 మంది కూలీలు
+      </div>
+      <div class="event-badge" style="background: var(--pasupu-glow); border-color: rgba(232,163,23,0.3); color: var(--ittadi);">
+        🌱 రబీ సీజన్ 2025–26 ప్రారంభం
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Input Cost Breakdown ── -->
+<div class="panta-section-header">
+  <span class="panta-section-title">పెట్టుబడి వివరాలు</span>
+</div>
+
+<div class="cost-breakdown" data-delay="0" role="region" aria-label="పెట్టుబడి వివరాలు">
+
+  <div class="cost-row">
+    <span class="cost-label">
+      <span class="cost-dot" style="background: var(--pasupu);" aria-hidden="true"></span>
+      విత్తనాలు
+    </span>
+    <span class="cost-value">₹640</span>
+  </div>
+
+  <div class="cost-row">
+    <span class="cost-label">
+      <span class="cost-dot" style="background: var(--pacchi-light);" aria-hidden="true"></span>
+      ఎరువులు
+    </span>
+    <span class="cost-value">₹1,200</span>
+  </div>
+
+  <div class="cost-row">
+    <span class="cost-label">
+      <span class="cost-dot" style="background: var(--matti-light);" aria-hidden="true"></span>
+      కూలి
+    </span>
+    <span class="cost-value">₹1,600</span>
+  </div>
+
+  <div class="cost-row">
+    <span class="cost-label">
+      <span class="cost-dot" style="background: var(--neeli-light);" aria-hidden="true"></span>
+      నీటిపారుదల
+    </span>
+    <span class="cost-value">₹450</span>
+  </div>
+
+  <div class="cost-row">
+    <span class="cost-label">
+      <span class="cost-dot" style="background: var(--erra);" aria-hidden="true"></span>
+      పురుగు మందు
+    </span>
+    <span class="cost-value">₹310</span>
+  </div>
+
+  <div class="cost-total" aria-label="మొత్తం పెట్టుబడి ₹4,200">
+    <span class="cost-label">మొత్తం పెట్టుబడి</span>
+    <span class="cost-value" style="color: var(--ittadi);">₹4,200</span>
+  </div>
+
+  <!-- Stacked proportion bar: seed=15.2%, fertilizer=28.6%, labour=38.1%, water=10.7%, pest=7.4% -->
+  <div class="cost-bar-track" role="img" aria-label="ఖర్చుల నిష్పత్తి బార్">
+    <div class="cost-bar-segment" data-width="15.2" style="width: 0; background: var(--pasupu);"      title="విత్తనాలు 15%"></div>
+    <div class="cost-bar-segment" data-width="28.6" style="width: 0; background: var(--pacchi-light);" title="ఎరువులు 29%"></div>
+    <div class="cost-bar-segment" data-width="38.1" style="width: 0; background: var(--matti-light);"  title="కూలి 38%"></div>
+    <div class="cost-bar-segment" data-width="10.7" style="width: 0; background: var(--neeli-light);"  title="నీటిపారుదల 11%"></div>
+    <div class="cost-bar-segment" data-width="7.4"  style="width: 0; background: var(--erra);"         title="పురుగు మందు 7%"></div>
+  </div>
+
+</div>
+<!-- end .cost-breakdown -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 05 — Interaction Scripts
+     Scoped to this screen via panta* prefixes to avoid
+     collision with other screen scripts in the same shell.
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+(function pantaScreen() {
+  'use strict';
+
+  // ── Inline form toggle (one open at a time) ──
+  let pantaActiveForm = null;
+
+  document.querySelectorAll('[data-panta-form]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var formId = this.dataset.pantaForm;
+      var form   = document.getElementById(formId);
+      if (!form) return;
+
+      // Close currently open form if different
+      if (pantaActiveForm && pantaActiveForm !== form) {
+        pantaActiveForm.classList.remove('open');
+      }
+
+      if (form.classList.contains('open')) {
+        form.classList.remove('open');
+        pantaActiveForm = null;
+      } else {
+        form.classList.add('open');
+        pantaActiveForm = form;
+        // Smooth scroll so the form is visible
+        setTimeout(function() {
+          form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 120);
+      }
+    });
+  });
+
+  window.pantaCloseForm = function(formId) {
+    var form = document.getElementById(formId);
+    if (!form) return;
+    form.classList.remove('open');
+    if (pantaActiveForm === form) pantaActiveForm = null;
+  };
+
+  window.pantaSaveForm = function(formId, message) {
+    window.pantaCloseForm(formId);
+    // Emit to shared toast system if present, otherwise console
+    if (typeof window.showToast === 'function') {
+      window.showToast('✓ ' + message, 'default', 3500);
+    } else {
+      console.log('[panta] saved:', message);
+    }
+  };
+
+  // ── IntersectionObserver: journal event stagger ──
+  var journalObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        var delay = parseInt(entry.target.dataset.delay || '0', 10);
+        setTimeout(function() {
+          entry.target.classList.add('animate-in');
+        }, delay);
+        journalObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.journal-event').forEach(function(el) {
+    journalObserver.observe(el);
+  });
+
+  // ── IntersectionObserver: cost bar animated width ──
+  var costObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate-in');
+        setTimeout(function() {
+          entry.target.querySelectorAll('.cost-bar-segment').forEach(function(seg) {
+            seg.style.transition = 'width 987ms cubic-bezier(0.34, 1.56, 0.64, 1)';
+            seg.style.width = seg.dataset.width + '%';
+          });
+        }, 250);
+        costObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.25 });
+
+  document.querySelectorAll('.cost-breakdown').forEach(function(el) {
+    costObserver.observe(el);
+  });
+
+  // ── Lifecycle scroll: auto-center current stage on load ──
+  var scroll = document.getElementById('lifecycleScroll');
+  if (scroll) {
+    // Current stage node is at x=280 in a 520px container.
+    // Centering: scroll to (280 - containerWidth/2).
+    setTimeout(function() {
+      var containerW = scroll.offsetWidth;
+      var targetScroll = 280 - containerW / 2;
+      scroll.scrollTo({ left: Math.max(0, targetScroll), behavior: 'smooth' });
+    }, 900); // After entrance animation
+  }
+
+  // ── Ripple effect on interactive cards ──
+  function addRipple(el) {
+    el.addEventListener('click', function(e) {
+      var rect   = el.getBoundingClientRect();
+      var ripple = document.createElement('span');
+      var size   = Math.max(rect.width, rect.height) * 2;
+      ripple.style.cssText = [
+        'position:absolute',
+        'border-radius:50%',
+        'pointer-events:none',
+        'background:radial-gradient(circle,rgba(184,134,11,0.14) 0%,transparent 70%)',
+        'width:'  + size + 'px',
+        'height:' + size + 'px',
+        'left:'   + (e.clientX - rect.left  - size / 2) + 'px',
+        'top:'    + (e.clientY - rect.top   - size / 2) + 'px',
+        'transform:scale(0)',
+        'animation:rippleExpand 610ms linear forwards'
+      ].join(';');
+      el.appendChild(ripple);
+      setTimeout(function() { ripple.remove(); }, 620);
+    });
+  }
+
+  document.querySelectorAll('.event-card, .log-btn').forEach(addRipple);
+
+  // Inject rippleExpand keyframe if not already present from shell
+  if (!document.getElementById('panta-ripple-style')) {
+    var s = document.createElement('style');
+    s.id = 'panta-ripple-style';
+    s.textContent = '@keyframes rippleExpand{to{transform:scale(4);opacity:0}}';
+    document.head.appendChild(s);
+  }
+
+})();
+</script>

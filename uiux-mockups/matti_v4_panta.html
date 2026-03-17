@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Rythu Mitra — Matti v4 · పంట</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@300;400;500;600;700&family=Noto+Serif+Telugu:wght@400;700&family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   MATTI DESIGN SYSTEM v4 — పంట (Crop Journal)
+   Inherits v1 foundation exactly. New: timeline,
+   lifecycle SVG, journal, cost breakdown.
+   ═══════════════════════════════════════════════ */
+
+:root {
+  /* Earth Palette — identical to v1 */
+  --matti:        #8B4513;
+  --matti-light:  #A0522D;
+  --pasupu:       #E8A317;
+  --pasupu-soft:  #F5D98E;
+  --pasupu-glow:  rgba(232, 163, 23, 0.15);
+  --neeli:        #1B4F72;
+  --neeli-light:  #2980B9;
+  --patti:        #FAF7F0;
+  --patti-warm:   #F5F0E6;
+  --nalupurugu:   #D4C5A9;
+  --pacchi:       #2D6A4F;
+  --pacchi-light: #40916C;
+  --erra:         #C0392B;
+  --erra-soft:    rgba(192, 57, 43, 0.1);
+  --ittadi:       #B8860B;
+  --ittadi-glow:  rgba(184, 134, 11, 0.2);
+
+  /* Ink Hierarchy */
+  --ink-primary:   #1C1410;
+  --ink-secondary: #5D4E37;
+  --ink-tertiary:  #8B7D6B;
+  --ink-faint:     #B8A99A;
+
+  /* Typography — phi-derived scale */
+  --font-te:         'Noto Sans Telugu', 'Noto Sans', sans-serif;
+  --font-te-display: 'Noto Serif Telugu', 'Noto Sans Telugu', serif;
+  --font-mono:       'Courier Prime', 'Courier New', monospace;
+
+  --text-xs:   0.8125rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.25rem;
+  --text-xl:   1.618rem;
+  --text-2xl:  2rem;
+  --text-hero: 2.618rem;
+
+  /* Fibonacci spacing */
+  --space-1:  1px;
+  --space-2:  2px;
+  --space-3:  3px;
+  --space-5:  5px;
+  --space-8:  8px;
+  --space-13: 13px;
+  --space-21: 21px;
+  --space-34: 34px;
+  --space-55: 55px;
+
+  /* Animation — Fibonacci durations */
+  --dur-89:  89ms;
+  --dur-144: 144ms;
+  --dur-233: 233ms;
+  --dur-377: 377ms;
+  --dur-610: 610ms;
+  --dur-987: 987ms;
+
+  /* Breathing */
+  --breathe: 4s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-te);
+  background: var(--patti);
+  color: var(--ink-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ═══ Kolam Background Canvas ═══ */
+#kolam-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.025;
+}
+
+/* ═══ App Shell ═══ */
+.app-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--patti);
+  box-shadow: 0 0 80px rgba(0,0,0,0.05);
+}
+
+/* ═══ Status Bar (mock) ═══ */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-8) var(--space-21);
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
+}
+
+/* ═══════════════════════════════
+   PANTA SCREEN — Header
+   ══════════════════════════════ */
+.panta-header {
+  padding: var(--space-13) var(--space-21) var(--space-8);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-13);
+}
+
+.panta-title {
+  font-family: var(--font-te-display);
+  font-size: var(--text-xl);
+  font-weight: 400;
+  color: var(--ink-primary);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp var(--dur-610) cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards;
+}
+
+/* Field selector dropdown */
+.field-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-13);
+  background: var(--patti-warm);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 2px 8px 3px 5px;
+  cursor: pointer;
+  font-size: var(--text-xs);
+  color: var(--ink-secondary);
+  font-family: var(--font-te);
+  position: relative;
+  overflow: hidden;
+  transition: background var(--dur-233) ease, border-color var(--dur-233) ease;
+  opacity: 0;
+  animation: fadeUp var(--dur-610) cubic-bezier(0.34, 1.56, 0.64, 1) 350ms forwards;
+  max-width: 200px;
+}
+
+.field-selector:hover {
+  background: #EDE8DB;
+  border-color: var(--ittadi);
+}
+
+.field-selector:active {
+  background: #E5DFC9;
+}
+
+.field-selector-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.field-selector-name {
+  font-weight: 600;
+  color: var(--ink-primary);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.field-selector-sub {
+  font-size: 10px;
+  color: var(--ink-tertiary);
+  white-space: nowrap;
+}
+
+.field-selector-chevron {
+  font-size: 10px;
+  color: var(--ink-tertiary);
+  flex-shrink: 0;
+  transition: transform var(--dur-233) ease;
+}
+
+/* ═══════════════════════════════
+   PEST ALERT BANNER
+   ══════════════════════════════ */
+.pest-alert-banner {
+  margin: 0 var(--space-21) var(--space-13);
+  padding: var(--space-13) var(--space-21);
+  background: rgba(192, 57, 43, 0.04);
+  border: 1.5px solid rgba(192, 57, 43, 0.25);
+  border-radius: 3px 8px 5px 3px;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  animation: fadeUp var(--dur-610) cubic-bezier(0.22, 1, 0.36, 1) 500ms forwards;
+}
+
+.pest-alert-banner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--erra);
+  border-radius: 3px 0 0 3px;
+  animation: alertPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes alertPulse {
+  0%, 100% { opacity: 0.7; box-shadow: none; }
+  50%       { opacity: 1;   box-shadow: 0 0 8px rgba(192, 57, 43, 0.4); }
+}
+
+.pest-alert-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pest-alert-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--erra);
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.pest-alert-treatment {
+  font-size: var(--text-xs);
+  color: var(--ink-secondary);
+  line-height: 1.5;
+}
+
+.pest-alert-next {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  font-family: var(--font-mono);
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+/* Pulsing border animation */
+@keyframes borderPulse {
+  0%, 100% { border-color: rgba(192, 57, 43, 0.25); }
+  50%       { border-color: rgba(192, 57, 43, 0.55); }
+}
+
+.pest-alert-banner {
+  animation: fadeUp var(--dur-610) cubic-bezier(0.22, 1, 0.36, 1) 500ms forwards,
+             borderPulse 2.5s ease-in-out 1100ms infinite;
+}
+
+/* ═══════════════════════════════
+   CROP LIFECYCLE TIMELINE (horizontal scroll)
+   ══════════════════════════════ */
+.lifecycle-section {
+  padding: 0 0 var(--space-21);
+  opacity: 0;
+  animation: fadeUp var(--dur-610) cubic-bezier(0.22, 1, 0.36, 1) 650ms forwards;
+}
+
+.lifecycle-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: var(--space-34) var(--space-21) var(--space-21);
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+
+.lifecycle-scroll::-webkit-scrollbar { display: none; }
+
+.lifecycle-svg-wrap {
+  position: relative;
+  width: 520px;
+  height: 90px;
+}
+
+.lifecycle-svg-wrap svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 520px;
+  height: 90px;
+  overflow: visible;
+}
+
+/* Stage nodes */
+.stage-node {
+  cursor: pointer;
+  transition: transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.stage-node:hover { transform: scale(1.12); }
+.stage-node:active { transform: scale(0.92); }
+
+/* Labels below nodes */
+.stage-labels {
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 520px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.stage-label {
+  position: absolute;
+  text-align: center;
+  transform: translateX(-50%);
+  font-size: 11px;
+  line-height: 1.3;
+  pointer-events: none;
+}
+
+.stage-label-name {
+  font-weight: 500;
+  color: var(--ink-secondary);
+  display: block;
+}
+
+.stage-label-name.completed {
+  color: var(--ittadi);
+}
+
+.stage-label-name.current {
+  color: var(--pacchi);
+  font-weight: 600;
+}
+
+.stage-label-name.upcoming {
+  color: var(--ink-faint);
+}
+
+/* Glow pulse for current stage */
+@keyframes stageGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px rgba(45, 106, 79, 0.4));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(45, 106, 79, 0.7));
+    transform: scale(1.06);
+  }
+}
+
+.current-stage-group {
+  animation: stageGlow 3s ease-in-out infinite;
+  transform-origin: 50% 45px;
+}
+
+/* SVG path draw animation */
+@keyframes pathDraw {
+  from { stroke-dashoffset: 600; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.lifecycle-path {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: pathDraw 1.2s cubic-bezier(0.22, 1, 0.36, 1) 800ms forwards;
+}
+
+/* Completed path segment */
+.lifecycle-path-done {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: pathDraw 0.9s cubic-bezier(0.22, 1, 0.36, 1) 700ms forwards;
+}
+
+/* ═══════════════════════════════
+   CURRENT STATUS CARD
+   ══════════════════════════════ */
+.status-card {
+  margin: 0 var(--space-21) var(--space-13);
+  padding: var(--space-21);
+  background: linear-gradient(135deg, var(--patti-warm) 0%, var(--patti) 100%);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 3px 13px 5px 8px;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeUp var(--dur-610) cubic-bezier(0.22, 1, 0.36, 1) 900ms forwards;
+}
+
+.status-card::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: var(--space-21);
+  width: 50px; height: 3px;
+  background: var(--pacchi);
+  border-radius: 0 0 2px 2px;
+  animation: shimmerGreen 3s ease-in-out infinite;
+}
+
+@keyframes shimmerGreen {
+  0%, 100% { opacity: 0.7; width: 50px; }
+  50%       { opacity: 1;   width: 70px; }
+}
+
+.status-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-13);
+}
+
+.status-health {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.health-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--pacchi-light);
+  animation: healthPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes healthPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(64, 145, 108, 0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(64, 145, 108, 0); }
+}
+
+.health-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--pacchi);
+}
+
+.status-weather {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  text-align: right;
+  line-height: 1.6;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-13);
+  padding-top: var(--space-13);
+  border-top: 1px solid var(--nalupurugu);
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.status-item-label {
+  font-size: 10px;
+  color: var(--ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.status-item-value {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
+}
+
+.status-item-value.days {
+  font-family: var(--font-te-display);
+  font-size: var(--text-lg);
+  color: var(--matti);
+}
+
+.status-item-value.cost {
+  color: var(--ittadi);
+}
+
+/* ═══════════════════════════════
+   SECTION HEADERS
+   ══════════════════════════════ */
+.section-header {
+  padding: var(--space-21) var(--space-21) var(--space-8);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.section-title {
+  font-family: var(--font-te-display);
+  font-size: var(--text-lg);
+  font-weight: 400;
+  color: var(--ink-primary);
+}
+
+.section-action {
+  font-size: var(--text-xs);
+  color: var(--neeli);
+  cursor: pointer;
+  transition: color var(--dur-233) ease;
+  letter-spacing: 0.5px;
+}
+
+.section-action:hover { color: var(--neeli-light); }
+
+/* ═══════════════════════════════
+   QUICK LOG BUTTONS
+   ══════════════════════════════ */
+.quick-log-row {
+  display: flex;
+  gap: var(--space-8);
+  padding: 0 var(--space-21) var(--space-13);
+  overflow-x: auto;
+  scrollbar-width: none;
+  opacity: 0;
+  animation: fadeUp var(--dur-610) cubic-bezier(0.22, 1, 0.36, 1) 1100ms forwards;
+}
+
+.quick-log-row::-webkit-scrollbar { display: none; }
+
+.quick-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-8) var(--space-13);
+  background: var(--patti-warm);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 2px 8px 3px 5px;
+  cursor: pointer;
+  font-family: var(--font-te);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--ink-secondary);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+  transition: background var(--dur-233) ease,
+              border-color var(--dur-233) ease,
+              transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1);
+  flex-shrink: 0;
+}
+
+.quick-btn:hover {
+  background: #EDE8DB;
+  border-color: var(--ittadi);
+  transform: translateY(-1px);
+}
+
+.quick-btn:active {
+  transform: translateY(0) scale(0.96);
+  transition-duration: var(--dur-89);
+}
+
+.quick-btn .btn-emoji {
+  font-size: 16px;
+}
+
+/* Inline form expansion */
+.quick-form {
+  margin: 0 var(--space-21) var(--space-13);
+  padding: var(--space-13) var(--space-21);
+  background: var(--patti-warm);
+  border: 1px solid var(--nalupurugu);
+  border-top: 2px solid var(--pacchi);
+  border-radius: 2px 8px 3px 5px;
+  display: none;
+  flex-direction: column;
+  gap: var(--space-8);
+  animation: expandForm var(--dur-377) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.quick-form.open {
+  display: flex;
+}
+
+@keyframes expandForm {
+  from { opacity: 0; transform: scaleY(0.8); transform-origin: top; }
+  to   { opacity: 1; transform: scaleY(1); }
+}
+
+.quick-form-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--pacchi);
+}
+
+.quick-form-row {
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+}
+
+.quick-form input,
+.quick-form textarea,
+.quick-form select {
+  flex: 1;
+  padding: var(--space-8) var(--space-13);
+  background: var(--patti);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 3px 8px 3px 5px;
+  font-family: var(--font-te);
+  font-size: var(--text-sm);
+  color: var(--ink-primary);
+  outline: none;
+  transition: border-color var(--dur-233) ease;
+}
+
+.quick-form input:focus,
+.quick-form textarea:focus,
+.quick-form select:focus {
+  border-color: var(--pacchi-light);
+}
+
+.quick-form textarea {
+  resize: none;
+  height: 60px;
+}
+
+.quick-form-actions {
+  display: flex;
+  gap: var(--space-8);
+  justify-content: flex-end;
+  padding-top: var(--space-5);
+}
+
+.btn-save {
+  padding: var(--space-8) var(--space-21);
+  background: var(--pacchi);
+  color: var(--patti);
+  border: none;
+  border-radius: 2px 8px 3px 5px;
+  font-family: var(--font-te);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--dur-233) ease, transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-save:hover { background: var(--pacchi-light); transform: translateY(-1px); }
+.btn-save:active { transform: scale(0.96); }
+
+.btn-cancel {
+  padding: var(--space-8) var(--space-13);
+  background: transparent;
+  color: var(--ink-tertiary);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 2px 8px 3px 5px;
+  font-family: var(--font-te);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--dur-233) ease;
+}
+
+.btn-cancel:hover { background: var(--patti-warm); }
+
+/* ═══════════════════════════════
+   CROP EVENT JOURNAL (vertical timeline)
+   ══════════════════════════════ */
+.journal-wrap {
+  padding: 0 var(--space-21);
+  position: relative;
+}
+
+/* Vertical connector line */
+.journal-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: calc(var(--space-21) + 17px);
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--nalupurugu), transparent);
+  pointer-events: none;
+}
+
+.journal-event {
+  display: flex;
+  gap: var(--space-13);
+  padding-bottom: var(--space-21);
+  position: relative;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: transform var(--dur-377) cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow var(--dur-233) ease;
+}
+
+.journal-event.animate-in {
+  animation: cardSlideIn var(--dur-610) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Timeline dot */
+.journal-dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  border: 2px solid var(--patti);
+  box-shadow: 0 0 0 2px var(--nalupurugu);
+  transition: transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.journal-event:hover .journal-dot {
+  transform: scale(1.15);
+}
+
+.journal-dot.pest    { background: var(--erra-soft); box-shadow: 0 0 0 2px rgba(192,57,43,0.3); }
+.journal-dot.water   { background: rgba(41, 128, 185, 0.1); box-shadow: 0 0 0 2px rgba(41,128,185,0.25); }
+.journal-dot.fertilizer { background: rgba(45, 106, 79, 0.1); box-shadow: 0 0 0 2px rgba(45,106,79,0.25); }
+.journal-dot.inspect { background: var(--ittadi-glow); box-shadow: 0 0 0 2px rgba(184,134,11,0.3); }
+.journal-dot.seed    { background: var(--pasupu-glow); box-shadow: 0 0 0 2px rgba(232,163,23,0.35); }
+
+/* Event card */
+.journal-card {
+  flex: 1;
+  background: var(--patti);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 2px 8px 5px 5px;
+  padding: var(--space-13) var(--space-13);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--dur-377) cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow var(--dur-233) ease;
+}
+
+.journal-card:hover {
+  transform: translateX(3px);
+  box-shadow: 0 4px 13px rgba(0,0,0,0.06);
+}
+
+.journal-card:active {
+  transform: translateX(0) scale(0.99);
+  transition-duration: var(--dur-89);
+}
+
+.journal-card-date {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  letter-spacing: 0.8px;
+  margin-bottom: var(--space-3);
+}
+
+.journal-card-title {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink-primary);
+  line-height: 1.4;
+  margin-bottom: var(--space-5);
+}
+
+.journal-card-body {
+  font-size: var(--text-xs);
+  color: var(--ink-secondary);
+  line-height: 1.6;
+}
+
+.journal-card-treatment {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-8);
+  padding: var(--space-3) var(--space-8);
+  background: rgba(45, 106, 79, 0.08);
+  border: 1px solid rgba(45, 106, 79, 0.2);
+  border-radius: 20px;
+  font-size: 10px;
+  color: var(--pacchi);
+  font-weight: 500;
+}
+
+/* Photo placeholder */
+.journal-photo {
+  margin-top: var(--space-8);
+  display: flex;
+  gap: var(--space-8);
+}
+
+.photo-thumb {
+  width: 56px;
+  height: 56px;
+  background: var(--patti-warm);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 3px 8px 3px 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-faint);
+  font-size: 18px;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: border-color var(--dur-233) ease, background var(--dur-233) ease;
+  flex-shrink: 0;
+}
+
+.photo-thumb:hover {
+  border-color: var(--ittadi);
+  background: #EDE8DB;
+}
+
+.photo-thumb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 60%, rgba(184,134,11,0.06));
+}
+
+/* ═══════════════════════════════
+   INPUT COST SUMMARY
+   ══════════════════════════════ */
+.cost-card {
+  margin: 0 var(--space-21) var(--space-13);
+  padding: var(--space-21);
+  background: var(--patti-warm);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 3px 8px 5px 3px;
+  opacity: 0;
+  animation: fadeUp var(--dur-610) cubic-bezier(0.22, 1, 0.36, 1) 200ms both;
+}
+
+.cost-card.animate-in {
+  animation: cardSlideIn var(--dur-610) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.cost-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid rgba(212, 197, 169, 0.4);
+}
+
+.cost-row:last-of-type {
+  border-bottom: none;
+}
+
+.cost-row.total {
+  padding-top: var(--space-13);
+  border-top: 2px solid var(--nalupurugu);
+  margin-top: var(--space-5);
+}
+
+.cost-label {
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.cost-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.cost-value {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.cost-row.total .cost-label {
+  font-weight: 700;
+  color: var(--ink-primary);
+  font-size: var(--text-base);
+}
+
+.cost-row.total .cost-value {
+  font-size: var(--text-base);
+  color: var(--ittadi);
+}
+
+/* Stacked proportion bar */
+.cost-bar-wrap {
+  margin-top: var(--space-13);
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  background: var(--nalupurugu);
+}
+
+.cost-bar-seg {
+  height: 100%;
+  transition: width var(--dur-987) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.cost-bar-seg:first-child { border-radius: 4px 0 0 4px; }
+.cost-bar-seg:last-child  { border-radius: 0 4px 4px 0; }
+
+/* ═══════════════════════════════
+   SHARED COMPONENTS (from v1)
+   ══════════════════════════════ */
+
+/* Ripple */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(184,134,11,0.15) 0%, transparent 70%);
+  transform: scale(0);
+  animation: rippleExpand var(--dur-610) linear forwards;
+  pointer-events: none;
+}
+
+@keyframes rippleExpand {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* Voice FAB */
+.voice-fab {
+  position: fixed;
+  bottom: 89px;
+  right: 50%;
+  transform: translateX(calc(210px - 28px));
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--pasupu);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 13px rgba(232, 163, 23, 0.35),
+              0 1px 3px rgba(0,0,0,0.1);
+  z-index: 100;
+  transition: transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow var(--dur-233) ease;
+  animation: fabEntry var(--dur-610) cubic-bezier(0.34, 1.56, 0.64, 1) 2000ms both;
+}
+
+.voice-fab:hover {
+  transform: translateX(calc(210px - 28px)) scale(1.08);
+  box-shadow: 0 6px 21px rgba(232, 163, 23, 0.45), 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.voice-fab:active {
+  transform: translateX(calc(210px - 28px)) scale(0.92);
+  transition-duration: var(--dur-89);
+}
+
+.voice-fab svg {
+  width: 24px; height: 24px;
+  fill: var(--patti);
+}
+
+.voice-fab.listening {
+  animation: breathePulse var(--breathe) ease-in-out infinite;
+  background: var(--erra);
+}
+
+.voice-fab::before {
+  content: '';
+  position: absolute;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--pasupu);
+  opacity: 0;
+  animation: breatheRing var(--breathe) ease-in-out infinite;
+}
+
+/* Bottom Nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
+  height: 68px;
+  background: var(--patti);
+  border-top: 1px solid var(--nalupurugu);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 var(--space-8);
+  z-index: 99;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: var(--space-8);
+  cursor: pointer;
+  border: none;
+  background: none;
+  position: relative;
+  transition: color var(--dur-233) ease;
+  color: var(--ink-tertiary);
+  min-width: 56px;
+}
+
+.nav-item.active { color: var(--matti); }
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 2px;
+  background: var(--matti);
+  border-radius: 0 0 2px 2px;
+}
+
+.nav-item svg {
+  width: 22px; height: 22px;
+  fill: currentColor;
+  transition: transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-item:active svg { transform: scale(0.85); }
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  top: var(--space-21);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 42px);
+  max-width: 378px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  pointer-events: none;
+}
+
+.mango-toast {
+  padding: var(--space-13) var(--space-21);
+  background: var(--patti);
+  border: 1px solid var(--nalupurugu);
+  border-left: 4px solid var(--pacchi);
+  border-radius: 2px 8px 8px 2px;
+  box-shadow: 0 4px 21px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: var(--space-13);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(-20px) rotate(2deg);
+  animation: toastIn var(--dur-610) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.mango-toast.warning { border-left-color: var(--pasupu); }
+.mango-toast.alert   { border-left-color: var(--erra); }
+
+.toast-icon { font-size: 18px; flex-shrink: 0; }
+.toast-text { font-size: var(--text-sm); color: var(--ink-primary); line-height: 1.4; }
+
+/* Bottom spacer */
+.bottom-spacer { height: 160px; }
+
+/* ═══════════════════════════════
+   KEYFRAME LIBRARY (all from v1 +
+   new ones for this screen)
+   ══════════════════════════════ */
+
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes breathePulse {
+  0%, 100% {
+    transform: translateX(calc(210px - 28px)) scale(1);
+    box-shadow: 0 4px 13px rgba(192, 57, 43, 0.35);
+  }
+  50% {
+    transform: translateX(calc(210px - 28px)) scale(1.06);
+    box-shadow: 0 6px 21px rgba(192, 57, 43, 0.5);
+  }
+}
+
+@keyframes breatheRing {
+  0%, 100% { opacity: 0; transform: scale(1); }
+  50%       { opacity: 0.3; transform: scale(1.4); }
+}
+
+@keyframes fabEntry {
+  from { opacity: 0; transform: translateX(calc(210px - 28px)) scale(0) rotate(-90deg); }
+  to   { opacity: 1; transform: translateX(calc(210px - 28px)) scale(1) rotate(0deg); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-20px) rotate(3deg); }
+  to   { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes toastFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-3px); }
+}
+
+/* ═══ Responsive ═══ */
+@media (max-width: 420px) {
+  .app-shell { max-width: 100%; box-shadow: none; }
+  .voice-fab { right: var(--space-21); transform: none; }
+  .voice-fab:hover { transform: scale(1.08); }
+  .voice-fab:active { transform: scale(0.92); }
+  @keyframes breathePulse {
+    0%, 100% { transform: scale(1); }
+    50%       { transform: scale(1.06); }
+  }
+  @keyframes fabEntry {
+    from { opacity: 0; transform: scale(0) rotate(-90deg); }
+    to   { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Kolam Background -->
+<canvas id="kolam-bg"></canvas>
+
+<!-- App Shell -->
+<div class="app-shell">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>BSNL 4G ··· 72%</span>
+  </div>
+
+  <!-- ── Header ── -->
+  <div class="panta-header">
+    <div class="panta-title">పంట</div>
+    <div class="field-selector" id="fieldSelector" role="button">
+      <div class="field-selector-text">
+        <span class="field-selector-name">పొలం 1 — వేరుశెనగ</span>
+        <span class="field-selector-sub">4 ఎకరాలు · అనంతపురం</span>
+      </div>
+      <span class="field-selector-chevron">▾</span>
+    </div>
+  </div>
+
+  <!-- ── Pest Alert Banner ── -->
+  <div class="pest-alert-banner">
+    <div class="pest-alert-inner">
+      <div class="pest-alert-title">
+        <span>⚠️</span>
+        <span>బోల్ వార్మ్ — 35% ప్రభావం</span>
+      </div>
+      <div class="pest-alert-treatment">
+        చికిత్స: వేప నూనె పిచికారీ · మార్చి 12 వేయడం అయింది ✓
+      </div>
+      <div class="pest-alert-next">
+        <span>🔍</span>
+        తదుపరి పరిశీలన: 2 రోజుల్లో
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Crop Lifecycle Timeline ── -->
+  <div class="lifecycle-section">
+    <div class="lifecycle-scroll" id="lifecycleScroll">
+      <div class="lifecycle-svg-wrap">
+
+        <!-- SVG: flowing curved river path + stage nodes -->
+        <svg viewBox="0 0 520 90" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+          <defs>
+            <filter id="glow-green">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+            <radialGradient id="currentGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"   stop-color="#40916C" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#40916C" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <!-- Faint upcoming path segment -->
+          <path d="M 280 45 C 310 25, 340 65, 370 45 C 400 25, 430 65, 460 45"
+                fill="none" stroke="#D4C5A9" stroke-width="2.5"
+                stroke-linecap="round"/>
+
+          <!-- Completed path (seed → plant → growth) drawn on load -->
+          <path class="lifecycle-path-done"
+                d="M 60 45 C 90 25, 120 65, 150 45 C 180 25, 210 65, 240 45 C 260 30, 270 35, 280 45"
+                fill="none" stroke="#B8860B" stroke-width="2.5"
+                stroke-linecap="round" opacity="0.85"/>
+
+          <!-- ── Stage 1: విత్తు (Seed) — completed ── -->
+          <g class="stage-node" transform="translate(60, 45)">
+            <!-- Completed ring -->
+            <circle r="18" fill="#FAF7F0" stroke="#B8860B" stroke-width="2"/>
+            <circle r="14" fill="rgba(232,163,23,0.12)"/>
+            <!-- Checkmark -->
+            <polyline points="-6,0 -2,5 8,-6" fill="none"
+                      stroke="#B8860B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+
+          <!-- ── Stage 2: నాటు (Plant) — completed ── -->
+          <g class="stage-node" transform="translate(150, 45)">
+            <circle r="18" fill="#FAF7F0" stroke="#B8860B" stroke-width="2"/>
+            <circle r="14" fill="rgba(232,163,23,0.1)"/>
+            <polyline points="-6,0 -2,5 8,-6" fill="none"
+                      stroke="#B8860B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+
+          <!-- ── Stage 3: పెరుగుదల (Growth) — CURRENT ── -->
+          <!-- Breathing glow halo -->
+          <circle cx="280" cy="45" r="28" fill="url(#currentGrad)"
+                  style="animation: haloglow 3s ease-in-out infinite"/>
+          <g class="stage-node current-stage-group" transform="translate(280, 45)">
+            <!-- Outer ring animated -->
+            <circle r="20" fill="#FAF7F0" stroke="#2D6A4F" stroke-width="2.5"
+                    filter="url(#glow-green)"/>
+            <circle r="14" fill="rgba(45,106,79,0.15)"/>
+            <!-- Center filled dot — current -->
+            <circle r="6" fill="#2D6A4F"/>
+            <!-- Pulse rings -->
+            <circle r="20" fill="none" stroke="#40916C" stroke-width="1.5"
+                    opacity="0"
+                    style="animation: pulseRing 3s ease-out 0s infinite"/>
+            <circle r="20" fill="none" stroke="#40916C" stroke-width="1"
+                    opacity="0"
+                    style="animation: pulseRing 3s ease-out 1s infinite"/>
+          </g>
+
+          <!-- ── Stage 4: కోత (Harvest) — upcoming ── -->
+          <g class="stage-node" transform="translate(370, 45)">
+            <circle r="18" fill="#FAF7F0" stroke="#D4C5A9" stroke-width="1.5"/>
+            <circle r="6" fill="#D4C5A9"/>
+          </g>
+
+          <!-- ── Stage 5: అమ్మకం (Sale) — upcoming ── -->
+          <g class="stage-node" transform="translate(460, 45)">
+            <circle r="18" fill="#FAF7F0" stroke="#D4C5A9" stroke-width="1.5"/>
+            <circle r="6" fill="#D4C5A9"/>
+          </g>
+        </svg>
+
+        <!-- Stage labels -->
+        <div class="stage-labels">
+          <div class="stage-label" style="left: 60px;">
+            <span class="stage-label-name completed">విత్తు</span>
+          </div>
+          <div class="stage-label" style="left: 150px;">
+            <span class="stage-label-name completed">నాటు</span>
+          </div>
+          <div class="stage-label" style="left: 280px;">
+            <span class="stage-label-name current">పెరుగుదల ●</span>
+          </div>
+          <div class="stage-label" style="left: 370px;">
+            <span class="stage-label-name upcoming">కోత</span>
+          </div>
+          <div class="stage-label" style="left: 460px;">
+            <span class="stage-label-name upcoming">అమ్మకం</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Current Status Card ── -->
+  <div class="status-card">
+    <div class="status-top">
+      <div class="status-health">
+        <div class="health-dot"></div>
+        <span class="health-label">మంచి స్థితి</span>
+      </div>
+      <div class="status-weather">
+        🌤 32°C · తేమ 45%<br>
+        <span style="color: var(--neeli-light); font-size: 10px;">వర్షం 0%</span>
+      </div>
+    </div>
+    <div class="status-grid">
+      <div class="status-item">
+        <span class="status-item-label">రోజులు</span>
+        <span class="status-item-value days" id="dayCounter">87</span>
+        <span style="font-size: 10px; color: var(--ink-tertiary);">నాటు నుండి</span>
+      </div>
+      <div class="status-item">
+        <span class="status-item-label">కోత అంచనా</span>
+        <span class="status-item-value">ఏప్రిల్<br>15–20</span>
+      </div>
+      <div class="status-item">
+        <span class="status-item-label">పెట్టుబడి</span>
+        <span class="status-item-value cost">₹4,200</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Quick Log Section ── -->
+  <div class="section-header" style="padding-bottom: var(--space-5);">
+    <span class="section-title">నమోదు చేయండి</span>
+  </div>
+
+  <div class="quick-log-row">
+    <button class="quick-btn" data-form="form-photo">
+      <span class="btn-emoji">📸</span>
+      <span>ఫోటో</span>
+    </button>
+    <button class="quick-btn" data-form="form-water">
+      <span class="btn-emoji">💧</span>
+      <span>నీరు</span>
+    </button>
+    <button class="quick-btn" data-form="form-fertilizer">
+      <span class="btn-emoji">🌿</span>
+      <span>ఎరువు</span>
+    </button>
+    <button class="quick-btn" data-form="form-pest">
+      <span class="btn-emoji">🐛</span>
+      <span>పురుగు</span>
+    </button>
+  </div>
+
+  <!-- Inline quick forms (one shown at a time) -->
+  <div class="quick-form" id="form-photo">
+    <div class="quick-form-title">📸 పంట ఫోటో నమోదు</div>
+    <div class="quick-form-row">
+      <textarea placeholder="గమనికలు: పంట స్థితి, పురుగు చిహ్నాలు..."></textarea>
+    </div>
+    <div class="quick-form-actions">
+      <button class="btn-cancel" onclick="closeForm('form-photo')">రద్దు</button>
+      <button class="btn-save" onclick="saveForm('form-photo', 'ఫోటో నమోదు అయింది ✓')">📸 సేవ్ చేయండి</button>
+    </div>
+  </div>
+
+  <div class="quick-form" id="form-water">
+    <div class="quick-form-title">💧 నీటిపారుదల నమోదు</div>
+    <div class="quick-form-row">
+      <select>
+        <option>బోరు మోటర్</option>
+        <option>కాలువ నీరు</option>
+        <option>వర్షపు నీరు</option>
+        <option>డ్రిప్ ఇరిగేషన్</option>
+      </select>
+    </div>
+    <div class="quick-form-row">
+      <input type="text" placeholder="వ్యవధి (గంటలు) — ఉదా: 2">
+    </div>
+    <div class="quick-form-actions">
+      <button class="btn-cancel" onclick="closeForm('form-water')">రద్దు</button>
+      <button class="btn-save" onclick="saveForm('form-water', 'నీటిపారుదల నమోదు అయింది ✓')">💧 సేవ్ చేయండి</button>
+    </div>
+  </div>
+
+  <div class="quick-form" id="form-fertilizer">
+    <div class="quick-form-title">🌿 ఎరువు నమోదు</div>
+    <div class="quick-form-row">
+      <input type="text" placeholder="రకం — ఉదా: DAP, యూరియా">
+      <input type="text" placeholder="పరిమాణం — ఉదా: 2 బస్తాలు">
+    </div>
+    <div class="quick-form-actions">
+      <button class="btn-cancel" onclick="closeForm('form-fertilizer')">రద్దు</button>
+      <button class="btn-save" onclick="saveForm('form-fertilizer', 'ఎరువు నమోదు అయింది ✓')">🌿 సేవ్ చేయండి</button>
+    </div>
+  </div>
+
+  <div class="quick-form" id="form-pest">
+    <div class="quick-form-title">🐛 పురుగు నమోదు</div>
+    <div class="quick-form-row">
+      <input type="text" placeholder="పురుగు పేరు — ఉదా: బోల్ వార్మ్">
+    </div>
+    <div class="quick-form-row">
+      <input type="text" placeholder="ప్రభావం % — ఉదా: 20%">
+      <input type="text" placeholder="చికిత్స — ఉదా: వేప నూనె">
+    </div>
+    <div class="quick-form-actions">
+      <button class="btn-cancel" onclick="closeForm('form-pest')">రద్దు</button>
+      <button class="btn-save" onclick="saveForm('form-pest', 'పురుగు నమోదు అయింది ✓')">🐛 సేవ్ చేయండి</button>
+    </div>
+  </div>
+
+  <!-- ── Crop Event Journal ── -->
+  <div class="section-header">
+    <span class="section-title">పంట జర్నల్</span>
+    <span class="section-action">అన్నీ →</span>
+  </div>
+
+  <div class="journal-wrap">
+
+    <!-- Event 1: Pest identification -->
+    <div class="journal-event" data-delay="0">
+      <div class="journal-dot pest">🐛</div>
+      <div class="journal-card">
+        <div class="journal-card-date">మార్చి 12, 2026</div>
+        <div class="journal-card-title">పురుగు గుర్తింపు — బోల్ వార్మ్</div>
+        <div class="journal-card-body">
+          35% పంటపై ప్రభావం గుర్తించబడింది.<br>
+          ముఖ్యంగా తూర్పు భాగంలో ఎక్కువగా ఉంది.
+        </div>
+        <div class="journal-card-treatment">✓ వేప నూనె పిచికారీ చేయబడింది</div>
+        <div class="journal-photo">
+          <div class="photo-thumb">📷</div>
+          <div class="photo-thumb">📷</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 2: Irrigation -->
+    <div class="journal-event" data-delay="100">
+      <div class="journal-dot water">💧</div>
+      <div class="journal-card">
+        <div class="journal-card-date">మార్చి 10, 2026</div>
+        <div class="journal-card-title">నీటిపారుదల — బోరు మోటర్</div>
+        <div class="journal-card-body">
+          3 గంటలు · పూర్తి పొలం కవర్ అయింది.<br>
+          డీజిల్: 4 లీటర్లు వాడినది.
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 3: Fertilizer -->
+    <div class="journal-event" data-delay="200">
+      <div class="journal-dot fertilizer">🌿</div>
+      <div class="journal-card">
+        <div class="journal-card-date">మార్చి 5, 2026</div>
+        <div class="journal-card-title">ఎరువు వేయడం</div>
+        <div class="journal-card-body">
+          DAP — 2 బస్తాలు (100 kg)<br>
+          ఖర్చు: ₹1,200
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 4: Crop inspection with photo -->
+    <div class="journal-event" data-delay="300">
+      <div class="journal-dot inspect">📸</div>
+      <div class="journal-card">
+        <div class="journal-card-date">ఫిబ్రవరి 28, 2026</div>
+        <div class="journal-card-title">పంట పరిశీలన</div>
+        <div class="journal-card-body">
+          మొత్తం స్థితి: మంచి పెరుగుదల.<br>
+          పువ్వులు కనిపిస్తున్నాయి — శుభ సూచన.
+        </div>
+        <div class="journal-card-treatment" style="background: rgba(184,134,11,0.08); border-color: rgba(184,134,11,0.25); color: var(--ittadi);">
+          ✓ మంచి స్థితి నిర్ధారించబడింది
+        </div>
+        <div class="journal-photo">
+          <div class="photo-thumb">📷</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event 5: Sowing -->
+    <div class="journal-event" data-delay="400">
+      <div class="journal-dot seed">🌱</div>
+      <div class="journal-card">
+        <div class="journal-card-date">జనవరి 15, 2026</div>
+        <div class="journal-card-title">విత్తనం వేయడం — సీజన్ ప్రారంభం</div>
+        <div class="journal-card-body">
+          వేరుశెనగ TMV-2 రకం · 4 ఎకరాలు<br>
+          విత్తన ఖర్చు: ₹640 · 2 మంది కూలీలు
+        </div>
+        <div class="journal-card-treatment" style="background: var(--pasupu-glow); border-color: rgba(232,163,23,0.3); color: var(--ittadi);">
+          🌱 రబీ సీజన్ 2025–26 ప్రారంభం
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Input Cost Summary ── -->
+  <div class="section-header">
+    <span class="section-title">పెట్టుబడి వివరాలు</span>
+  </div>
+
+  <div class="cost-card" data-delay="0">
+    <div class="cost-row">
+      <span class="cost-label">
+        <span class="cost-dot" style="background: var(--pasupu)"></span>
+        విత్తనాలు
+      </span>
+      <span class="cost-value">₹640</span>
+    </div>
+    <div class="cost-row">
+      <span class="cost-label">
+        <span class="cost-dot" style="background: var(--pacchi-light)"></span>
+        ఎరువులు
+      </span>
+      <span class="cost-value">₹1,200</span>
+    </div>
+    <div class="cost-row">
+      <span class="cost-label">
+        <span class="cost-dot" style="background: var(--matti-light)"></span>
+        కూలి
+      </span>
+      <span class="cost-value">₹1,600</span>
+    </div>
+    <div class="cost-row">
+      <span class="cost-label">
+        <span class="cost-dot" style="background: var(--neeli-light)"></span>
+        నీటిపారుదల
+      </span>
+      <span class="cost-value">₹450</span>
+    </div>
+    <div class="cost-row">
+      <span class="cost-label">
+        <span class="cost-dot" style="background: var(--erra)"></span>
+        పురుగు మందు
+      </span>
+      <span class="cost-value">₹310</span>
+    </div>
+    <div class="cost-row total">
+      <span class="cost-label">మొత్తం పెట్టుబడి</span>
+      <span class="cost-value">₹4,200</span>
+    </div>
+
+    <!-- Stacked proportion bar -->
+    <div class="cost-bar-wrap">
+      <!-- seed 640/4200=15.2%, fertilizer 28.6%, labour 38.1%, water 10.7%, pest 7.4% -->
+      <div class="cost-bar-seg" data-width="15.2" style="width:0; background: var(--pasupu)"></div>
+      <div class="cost-bar-seg" data-width="28.6" style="width:0; background: var(--pacchi-light)"></div>
+      <div class="cost-bar-seg" data-width="38.1" style="width:0; background: var(--matti-light)"></div>
+      <div class="cost-bar-seg" data-width="10.7" style="width:0; background: var(--neeli-light)"></div>
+      <div class="cost-bar-seg" data-width="7.4"  style="width:0; background: var(--erra)"></div>
+    </div>
+  </div>
+
+  <div class="bottom-spacer"></div>
+</div>
+
+<!-- Voice FAB -->
+<button class="voice-fab" id="voiceFab" aria-label="Voice input">
+  <svg viewBox="0 0 24 24">
+    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z"/>
+    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+  </svg>
+</button>
+
+<!-- Bottom Navigation — పంట tab active -->
+<nav class="bottom-nav">
+  <button class="nav-item">
+    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    <span class="nav-label">హోం</span>
+  </button>
+  <button class="nav-item">
+    <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+    <span class="nav-label">దబ్బు</span>
+  </button>
+  <button class="nav-item" style="min-width: 64px;">
+    <!-- spacer for FAB -->
+  </button>
+  <button class="nav-item">
+    <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    <span class="nav-label">మార్కెట్</span>
+  </button>
+  <button class="nav-item active">
+    <!-- Leaf / crop icon -->
+    <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21H5.8C7 18.33 8.5 16.19 10 15c3-.43 5.67.3 7 3h2c1-3.83-.17-7.25-2-10zm.18-2.12A4.38 4.38 0 0 0 17 5c-2.21 0-4 1.79-4 4 0 .69.18 1.33.48 1.9 1.7-.56 3.38-.72 4.2-1.37.63-.49.97-1.19.97-1.97 0-.24-.04-.47-.11-.68A4.31 4.31 0 0 0 17.18 5.88z"/></svg>
+    <span class="nav-label">పంట</span>
+  </button>
+</nav>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<style>
+/* Extra keyframes that need to be after DOM for specificity */
+@keyframes haloglow {
+  0%, 100% { opacity: 0.4; r: 28; }
+  50%       { opacity: 0.7; r: 34; }
+}
+
+@keyframes pulseRing {
+  0%   { r: 20; opacity: 0.6; }
+  100% { r: 36; opacity: 0; }
+}
+</style>
+
+<script>
+// ═══════════════════════════════════════════════
+// MATTI v4 — Panta Screen Interaction Engine
+// All Living Geometry invariants from v1 +
+// lifecycle SVG, journal stagger, cost bar anim
+// ═══════════════════════════════════════════════
+
+// ─── Kolam Background (identical to v1) ───
+(function drawKolam() {
+  const canvas = document.getElementById('kolam-bg');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    draw();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const spacing = 34;
+    const dotR = 1.5;
+    const goldenAngle = 137.508 * (Math.PI / 180);
+
+    for (let x = spacing; x < canvas.width; x += spacing) {
+      for (let y = spacing; y < canvas.height; y += spacing) {
+        ctx.beginPath();
+        ctx.arc(x, y, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = '#8B4513';
+        ctx.fill();
+
+        if ((Math.floor(x / spacing) + Math.floor(y / spacing)) % 3 === 0) {
+          ctx.beginPath();
+          ctx.arc(x, y, spacing * 0.3,
+                  goldenAngle * Math.floor(x / spacing),
+                  goldenAngle * Math.floor(x / spacing) + Math.PI * 0.8);
+          ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+})();
+
+// ─── Ripple Effect ───
+function addRipple(el) {
+  el.style.position = 'relative';
+  el.style.overflow = 'hidden';
+  el.addEventListener('click', function(e) {
+    const rect = this.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    const size = Math.max(rect.width, rect.height) * 2;
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top  = (e.clientY - rect.top  - size / 2) + 'px';
+    this.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 610);
+  });
+}
+
+document.querySelectorAll('.nav-item, .quick-btn, .journal-card').forEach(addRipple);
+
+// ─── Intersection Observer — Journal Events ───
+const journalObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      const delay = parseInt(entry.target.dataset.delay || 0);
+      setTimeout(() => {
+        entry.target.classList.add('animate-in');
+      }, delay);
+      journalObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.journal-event').forEach(el => journalObserver.observe(el));
+
+// ─── Intersection Observer — Cost Card ───
+const costObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('animate-in');
+      // Animate proportion bars
+      setTimeout(() => {
+        document.querySelectorAll('.cost-bar-seg').forEach(seg => {
+          seg.style.transition = 'width 987ms cubic-bezier(0.34, 1.56, 0.64, 1)';
+          seg.style.width = seg.dataset.width + '%';
+        });
+      }, 200);
+      costObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.2 });
+
+document.querySelectorAll('.cost-card').forEach(el => costObserver.observe(el));
+
+// ─── Quick Log Buttons — Inline Form Toggle ───
+let activeForm = null;
+
+document.querySelectorAll('.quick-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const formId = this.dataset.form;
+    const form = document.getElementById(formId);
+
+    if (activeForm && activeForm !== form) {
+      activeForm.classList.remove('open');
+    }
+
+    if (form.classList.contains('open')) {
+      form.classList.remove('open');
+      activeForm = null;
+    } else {
+      form.classList.add('open');
+      activeForm = form;
+      // Scroll into view
+      setTimeout(() => {
+        form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+  });
+});
+
+function closeForm(formId) {
+  const form = document.getElementById(formId);
+  form.classList.remove('open');
+  if (activeForm === form) activeForm = null;
+}
+
+function saveForm(formId, message) {
+  closeForm(formId);
+  showToast('✓ ' + message, 'default', 3500);
+}
+
+// ─── Voice FAB ───
+const voiceFab = document.getElementById('voiceFab');
+let listening = false;
+
+voiceFab.addEventListener('click', () => {
+  listening = !listening;
+  voiceFab.classList.toggle('listening', listening);
+
+  if (listening) {
+    showToast('🎙️ వింటున్నాను... పంట పని చెప్పండి', 'default', 3000);
+    setTimeout(() => {
+      if (listening) {
+        listening = false;
+        voiceFab.classList.remove('listening');
+        showToast('✓ "నీళ్ళు పెట్టాను రెండు గంటలు" — నమోదు అయింది', 'default', 4000);
+      }
+    }, 3000);
+  }
+});
+
+// ─── Toast System ───
+function showToast(message, type = 'default', duration = 4000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `mango-toast ${type}`;
+
+  const iconMap = { default: '🍃', warning: '⚠️', alert: '🔔' };
+  toast.innerHTML = `
+    <span class="toast-icon">${iconMap[type] || '🍃'}</span>
+    <span class="toast-text">${message}</span>
+  `;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.animation = 'toastFloat 2s ease-in-out infinite';
+  }, 610);
+
+  setTimeout(() => {
+    toast.style.transition = 'opacity 377ms ease, transform 377ms ease';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-10px) rotate(-2deg)';
+    setTimeout(() => toast.remove(), 377);
+  }, duration);
+}
+
+// ─── Field Selector interaction ───
+document.getElementById('fieldSelector').addEventListener('click', function() {
+  const chevron = this.querySelector('.field-selector-chevron');
+  const isOpen = chevron.textContent === '▴';
+  chevron.textContent = isOpen ? '▾' : '▴';
+  chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  showToast('🌾 పొలం మార్పు — తాత్కాలికంగా ఒక పొలం మాత్రమే', 'warning', 2500);
+});
+
+// ─── Nav Active Toggle ───
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ─── Day Counter Animation ───
+(function animateDays() {
+  const el = document.getElementById('dayCounter');
+  if (!el) return;
+  const target = 87;
+  const duration = 1200;
+  const start = performance.now();
+
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(target * eased);
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+
+  setTimeout(() => requestAnimationFrame(tick), 1200);
+})();
+
+// ─── Lifecycle scroll: auto-scroll to center (Growth stage) ───
+(function scrollToCurrentStage() {
+  const scroll = document.getElementById('lifecycleScroll');
+  if (!scroll) return;
+  // Growth is at x=280 in a 520px container, center it in ~420px viewport
+  // Center: 280 - 420/2 + node_radius = 280 - 210 + 20 = 90
+  setTimeout(() => {
+    scroll.scrollTo({ left: 70, behavior: 'smooth' });
+  }, 1400);
+})();
+
+// ─── Initial Toast ───
+setTimeout(() => {
+  showToast('🌿 లక్ష్మి, పంట 87వ రోజులో ఉంది · మంచి స్థితి!', 'default', 5000);
+}, 2200);
+
+// ─── Photo thumb tap feedback ───
+document.querySelectorAll('.photo-thumb').forEach(thumb => {
+  thumb.addEventListener('click', () => {
+    showToast('📸 ఫోటో పెద్దదిగా చూపించడానికి... (తాత్కాలికంగా లేదు)', 'default', 2000);
+  });
+});
+
+</script>
+</body>
+</html>

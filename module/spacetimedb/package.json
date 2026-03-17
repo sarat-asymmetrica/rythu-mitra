@@ -1,0 +1,21 @@
+{
+  "name": "rythu-mitra-module",
+  "version": "1.0.0",
+  "description": "Rythu Mitra — vernacular-first farmer business management (SpacetimeDB module)",
+  "scripts": {
+    "build": "spacetime build",
+    "publish": "spacetime publish rythu-mitra",
+    "publish:clear": "spacetime publish rythu-mitra --clear-database -y",
+    "generate": "spacetime generate --lang typescript --out-dir ../../client/src/module_bindings",
+    "logs": "spacetime logs rythu-mitra"
+  },
+  "keywords": ["rythu-mitra", "farmer", "telugu", "spacetimedb"],
+  "author": "Asymmetrica",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "spacetimedb": "^2.0.1"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.2"
+  }
+}

@@ -1,0 +1,20 @@
+@import './styles/matti.css';
+
+/* App shell constraint */
+#app {
+  position: relative;
+  z-index: var(--z-content);
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--patti);
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.05);
+  overflow-x: hidden;
+}
+
+@media (max-width: 420px) {
+  #app {
+    max-width: 100%;
+    box-shadow: none;
+  }
+}

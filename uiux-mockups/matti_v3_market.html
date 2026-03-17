@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Rythu Mitra — Matti v3 Market</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@300;400;500;600;700&family=Noto+Serif+Telugu:wght@400;700&family=Noto+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════
+   MATTI DESIGN SYSTEM v3 — Market / మార్కెట్
+   Living Geometry invariants + Deccan aesthetics
+   Turmeric wash charts, wabi-sabi grid, shibui toggle
+   ═══════════════════════════════════════════════ */
+
+:root {
+  /* Earth Palette */
+  --matti:        #8B4513;
+  --matti-light:  #A0522D;
+  --pasupu:       #E8A317;
+  --pasupu-soft:  #F5D98E;
+  --pasupu-glow:  rgba(232, 163, 23, 0.15);
+  --neeli:        #1B4F72;
+  --neeli-light:  #2980B9;
+  --neeli-soft:   rgba(27, 79, 114, 0.1);
+  --patti:        #FAF7F0;
+  --patti-warm:   #F5F0E6;
+  --nalupurugu:   #D4C5A9;
+  --pacchi:       #2D6A4F;
+  --pacchi-light: #40916C;
+  --pacchi-soft:  rgba(45, 106, 79, 0.12);
+  --erra:         #C0392B;
+  --erra-soft:    rgba(192, 57, 43, 0.1);
+  --ittadi:       #B8860B;
+  --ittadi-glow:  rgba(184, 134, 11, 0.2);
+
+  /* Ink Hierarchy */
+  --ink-primary:   #1C1410;
+  --ink-secondary: #5D4E37;
+  --ink-tertiary:  #8B7D6B;
+  --ink-faint:     #B8A99A;
+
+  /* Typography */
+  --font-te:         'Noto Sans Telugu', 'Noto Sans', sans-serif;
+  --font-te-display: 'Noto Serif Telugu', 'Noto Sans Telugu', serif;
+  --font-mono:       'Courier Prime', 'Courier New', monospace;
+
+  /* Phi-derived type scale */
+  --text-xs:   0.8125rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.25rem;
+  --text-xl:   1.618rem;
+  --text-2xl:  2rem;
+  --text-hero: 2.618rem;
+
+  /* Fibonacci spacing */
+  --space-1:  1px;
+  --space-2:  2px;
+  --space-3:  3px;
+  --space-5:  5px;
+  --space-8:  8px;
+  --space-13: 13px;
+  --space-21: 21px;
+  --space-34: 34px;
+  --space-55: 55px;
+
+  /* Animation durations (Fibonacci) */
+  --dur-89:  89ms;
+  --dur-144: 144ms;
+  --dur-233: 233ms;
+  --dur-377: 377ms;
+  --dur-610: 610ms;
+  --dur-987: 987ms;
+  --dur-1597: 1597ms;
+
+  --breathe: 4s;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-te);
+  background: var(--patti);
+  color: var(--ink-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ═══ Kolam Background Canvas ═══ */
+#kolam-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.025;
+}
+
+/* ═══ App Shell ═══ */
+.app-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--patti);
+  box-shadow: 0 0 80px rgba(0,0,0,0.05);
+}
+
+/* ═══ Status Bar ═══ */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-8) var(--space-21);
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
+}
+
+/* ═══ Market Header ═══ */
+.market-header {
+  padding: var(--space-13) var(--space-21) var(--space-8);
+}
+
+.market-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  opacity: 0;
+  animation: fadeUp var(--dur-610) cubic-bezier(0.34, 1.56, 0.64, 1) 200ms forwards;
+}
+
+.market-title {
+  font-family: var(--font-te-display);
+  font-size: var(--text-xl);
+  font-weight: 400;
+  color: var(--ink-primary);
+}
+
+.market-updated {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
+}
+
+/* ═══ Crop Filter Pills ═══ */
+.crop-pills {
+  display: flex;
+  gap: var(--space-8);
+  padding: var(--space-13) var(--space-21);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  opacity: 0;
+  animation: fadeUp var(--dur-610) ease 400ms forwards;
+}
+
+.crop-pills::-webkit-scrollbar { display: none; }
+
+.crop-pill {
+  flex-shrink: 0;
+  padding: var(--space-5) var(--space-13);
+  border-radius: 2px 8px 3px 6px;
+  border: 1px solid var(--nalupurugu);
+  background: var(--patti);
+  font-family: var(--font-te);
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+  cursor: pointer;
+  transition: transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1),
+              background var(--dur-233) ease,
+              border-color var(--dur-233) ease,
+              color var(--dur-233) ease,
+              box-shadow var(--dur-233) ease;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.crop-pill.active {
+  background: var(--pasupu);
+  border-color: var(--ittadi);
+  color: var(--ink-primary);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(232, 163, 23, 0.35);
+}
+
+.crop-pill:not(.active):hover {
+  background: var(--pasupu-glow);
+  border-color: var(--pasupu-soft);
+}
+
+.crop-pill:active {
+  transform: scale(0.94);
+  transition-duration: var(--dur-89);
+}
+
+/* ═══ Hero Price Card ═══ */
+.hero-price-card {
+  margin: var(--space-8) var(--space-21) var(--space-13);
+  padding: var(--space-21);
+  background: linear-gradient(135deg, var(--patti-warm) 0%, var(--patti) 100%);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 3px 13px 5px 8px;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  animation: fadeUp var(--dur-610) cubic-bezier(0.22, 1, 0.36, 1) 600ms forwards;
+}
+
+/* Gold shimmer bar on top */
+.hero-price-card::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: var(--space-21);
+  width: 55px; height: 3px;
+  background: var(--pasupu);
+  border-radius: 0 0 2px 2px;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.hero-mandi-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+}
+
+.hero-mandi-name {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.hero-timestamp {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+}
+
+.hero-price-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-13);
+}
+
+.hero-price {
+  font-family: var(--font-te-display);
+  font-size: var(--text-hero);
+  font-weight: 700;
+  color: var(--ink-primary);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}
+
+.hero-price .unit {
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--ink-tertiary);
+  margin-left: var(--space-5);
+  letter-spacing: 0;
+}
+
+.trend-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-8);
+  border-radius: 4px 10px 4px 6px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-family: var(--font-mono);
+  animation: trendPulse 3s ease-in-out infinite;
+}
+
+.trend-badge.up {
+  background: var(--pacchi-soft);
+  color: var(--pacchi);
+}
+
+.trend-badge.down {
+  background: var(--erra-soft);
+  color: var(--erra);
+}
+
+.trend-arrow {
+  display: inline-block;
+  font-size: 14px;
+  animation: arrowBounce 1.5s ease-in-out infinite;
+}
+
+.trend-badge.up .trend-arrow { animation-name: arrowBounceUp; }
+.trend-badge.down .trend-arrow { animation-name: arrowBounceDown; }
+
+.msp-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  margin-top: var(--space-13);
+  padding-top: var(--space-13);
+  border-top: 1px solid rgba(212, 197, 169, 0.5);
+}
+
+.msp-label {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
+}
+
+.msp-value {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--neeli);
+}
+
+.msp-diff {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  padding: 2px var(--space-5);
+  border-radius: 3px;
+}
+
+.msp-diff.below {
+  background: var(--erra-soft);
+  color: var(--erra);
+}
+
+.msp-diff.above {
+  background: var(--pacchi-soft);
+  color: var(--pacchi);
+}
+
+/* ═══ Chart Section ═══ */
+.chart-section {
+  margin: 0 var(--space-21) var(--space-13);
+  opacity: 0;
+  transform: translateY(15px);
+}
+
+.chart-section.animate-in {
+  animation: cardSlideIn var(--dur-987) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-13);
+}
+
+.chart-title {
+  font-family: var(--font-te-display);
+  font-size: var(--text-base);
+  color: var(--ink-primary);
+}
+
+.chart-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  font-size: 11px;
+  color: var(--ink-tertiary);
+}
+
+.legend-line {
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.legend-line.price { background: var(--pasupu); }
+.legend-line.msp { background: var(--neeli); border-top: 2px dashed var(--neeli); height: 0; }
+
+#price-chart {
+  width: 100%;
+  height: 140px;
+  border-radius: 2px 6px 2px 4px;
+  cursor: crosshair;
+  display: block;
+}
+
+/* Chart tooltip */
+.chart-tooltip {
+  position: absolute;
+  padding: var(--space-5) var(--space-8);
+  background: var(--ink-primary);
+  color: var(--patti);
+  font-size: 11px;
+  font-family: var(--font-mono);
+  border-radius: 3px 6px 3px 4px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--dur-144) ease;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.chart-wrap {
+  position: relative;
+}
+
+/* ═══ Mandi Comparison Grid ═══ */
+.mandi-section {
+  margin: 0 var(--space-21) var(--space-13);
+  opacity: 0;
+  transform: translateY(15px);
+}
+
+.mandi-section.animate-in {
+  animation: cardSlideIn var(--dur-987) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.section-label {
+  font-family: var(--font-te-display);
+  font-size: var(--text-base);
+  color: var(--ink-primary);
+  margin-bottom: var(--space-13);
+}
+
+.mandi-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.mandi-row {
+  padding: var(--space-13) var(--space-13);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 2px 8px 3px 5px;
+  background: var(--patti);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow var(--dur-233) ease;
+}
+
+.mandi-row:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 13px rgba(0,0,0,0.06);
+}
+
+.mandi-row:active {
+  transform: scale(0.98);
+  transition-duration: var(--dur-89);
+}
+
+.mandi-row.nearest {
+  border-color: var(--pasupu-soft);
+  background: linear-gradient(135deg, var(--pasupu-glow) 0%, var(--patti) 100%);
+}
+
+.mandi-row.best {
+  border-color: rgba(45, 106, 79, 0.3);
+  background: linear-gradient(135deg, var(--pacchi-soft) 0%, var(--patti) 100%);
+}
+
+/* Progress bar behind the row */
+.mandi-bar-bg {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  border-radius: 2px 0 0 2px;
+  opacity: 0.07;
+  transition: width var(--dur-987) cubic-bezier(0.34, 1.56, 0.64, 1);
+  width: 0;
+}
+
+.mandi-row.best .mandi-bar-bg { background: var(--pacchi); }
+.mandi-row.nearest .mandi-bar-bg { background: var(--pasupu); }
+.mandi-row:not(.best):not(.nearest) .mandi-bar-bg { background: var(--nalupurugu); }
+
+.mandi-row-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: var(--space-3) 0;
+}
+
+.mandi-name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.mandi-name {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink-primary);
+}
+
+.badge-utham {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px var(--space-5);
+  border-radius: 2px 5px 2px 3px;
+  background: var(--pacchi-soft);
+  color: var(--pacchi);
+  letter-spacing: 0.3px;
+  animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.8s both;
+}
+
+.badge-nearest {
+  font-size: 10px;
+  padding: 1px var(--space-5);
+  border-radius: 2px 5px 2px 3px;
+  background: var(--pasupu-glow);
+  color: var(--ittadi);
+}
+
+.mandi-price {
+  font-size: var(--text-base);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.mandi-row.best .mandi-price { color: var(--pacchi); }
+.mandi-row.nearest .mandi-price { color: var(--ittadi); }
+.mandi-row:not(.best):not(.nearest) .mandi-price { color: var(--ink-secondary); }
+
+.mandi-meta {
+  font-size: 11px;
+  color: var(--ink-faint);
+  grid-row: 2;
+  grid-column: 1;
+  font-family: var(--font-mono);
+}
+
+.mandi-transport {
+  font-size: 11px;
+  color: var(--ink-tertiary);
+  grid-row: 2;
+  grid-column: 2;
+  text-align: right;
+  font-family: var(--font-mono);
+}
+
+/* ═══ Price Alert Card ═══ */
+.alert-card {
+  margin: 0 var(--space-21) var(--space-13);
+  padding: var(--space-21);
+  background: linear-gradient(135deg, var(--patti-warm) 0%, var(--patti) 100%);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 3px 13px 5px 8px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(15px);
+}
+
+.alert-card.animate-in {
+  animation: cardSlideIn var(--dur-987) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.alert-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: var(--space-21);
+  width: 40px; height: 3px;
+  background: var(--neeli);
+  border-radius: 0 0 2px 2px;
+  animation: shimmer 3s ease-in-out infinite 1s;
+}
+
+.alert-card-title {
+  font-family: var(--font-te-display);
+  font-size: var(--text-base);
+  color: var(--ink-primary);
+  margin-bottom: var(--space-13);
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.alert-bell {
+  font-size: 16px;
+  animation: bellShake 4s ease-in-out infinite;
+}
+
+.alert-description {
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+  margin-bottom: var(--space-13);
+  line-height: 1.6;
+}
+
+/* Price Slider */
+.price-slider-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-13);
+  margin-bottom: var(--space-13);
+}
+
+.price-slider-label {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+  min-width: 60px;
+}
+
+.price-slider-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.price-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to right, var(--pasupu) 0%, var(--pasupu) 68%, var(--nalupurugu) 68%);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.price-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--pasupu);
+  border: 3px solid var(--patti);
+  box-shadow: 0 2px 8px rgba(184, 134, 11, 0.4);
+  cursor: grab;
+  transition: transform var(--dur-144) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.price-slider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.3);
+}
+
+.price-slider::-moz-range-thumb {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--pasupu);
+  border: 3px solid var(--patti);
+  box-shadow: 0 2px 8px rgba(184, 134, 11, 0.4);
+  cursor: grab;
+}
+
+.price-target-display {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--ink-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Shibui Toggle */
+.alert-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-13);
+  border-top: 1px solid rgba(212, 197, 169, 0.4);
+}
+
+.toggle-label {
+  font-size: var(--text-sm);
+  color: var(--ink-secondary);
+  line-height: 1.5;
+}
+
+.toggle-sublabel {
+  font-size: var(--text-xs);
+  color: var(--ink-faint);
+  margin-top: 2px;
+}
+
+.shibui-toggle {
+  position: relative;
+  width: 46px; height: 26px;
+  flex-shrink: 0;
+}
+
+.shibui-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 0; height: 0;
+}
+
+.toggle-track {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--nalupurugu);
+  border-radius: 13px;
+  cursor: pointer;
+  transition: background var(--dur-377) ease;
+}
+
+.toggle-track::before {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--patti);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  transition: transform var(--dur-377) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.shibui-toggle input:checked + .toggle-track {
+  background: var(--pasupu);
+}
+
+.shibui-toggle input:checked + .toggle-track::before {
+  transform: translateX(20px);
+}
+
+/* ═══ Historical Comparison ═══ */
+.history-card {
+  margin: 0 var(--space-21) var(--space-13);
+  padding: var(--space-21);
+  border: 1px solid var(--nalupurugu);
+  border-radius: 2px 8px 3px 5px;
+  background: var(--patti);
+  opacity: 0;
+  transform: translateY(15px);
+}
+
+.history-card.animate-in {
+  animation: cardSlideIn var(--dur-987) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.history-title {
+  font-family: var(--font-te-display);
+  font-size: var(--text-base);
+  color: var(--ink-primary);
+  margin-bottom: var(--space-13);
+}
+
+.history-comparison {
+  display: flex;
+  gap: var(--space-21);
+  align-items: flex-end;
+}
+
+.history-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.history-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-5);
+}
+
+.history-bar-label {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+}
+
+.history-bar-track {
+  height: 8px;
+  background: rgba(212, 197, 169, 0.4);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.history-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  width: 0;
+  transition: width var(--dur-1597) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.history-bar-fill.current { background: var(--pasupu); }
+.history-bar-fill.last { background: var(--nalupurugu); }
+
+.history-price {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-primary);
+}
+
+.history-sub {
+  font-size: var(--text-xs);
+  color: var(--ink-tertiary);
+}
+
+.history-delta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+  padding: 0 var(--space-8);
+}
+
+.history-delta-arrow {
+  font-size: 20px;
+}
+
+.history-delta-value {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--pacchi);
+  text-align: center;
+}
+
+/* ═══ Voice Input FAB ═══ */
+.voice-fab {
+  position: fixed;
+  bottom: 89px;
+  right: 50%;
+  transform: translateX(calc(210px - 28px));
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--pasupu);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 13px rgba(232, 163, 23, 0.35),
+              0 1px 3px rgba(0,0,0,0.1);
+  z-index: 100;
+  transition: transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow var(--dur-233) ease;
+  animation: fabEntry var(--dur-610) cubic-bezier(0.34, 1.56, 0.64, 1) 1800ms both;
+}
+
+.voice-fab:hover {
+  transform: translateX(calc(210px - 28px)) scale(1.08);
+  box-shadow: 0 6px 21px rgba(232, 163, 23, 0.45), 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.voice-fab:active {
+  transform: translateX(calc(210px - 28px)) scale(0.92);
+  transition-duration: var(--dur-89);
+}
+
+.voice-fab svg {
+  width: 24px; height: 24px;
+  fill: var(--patti);
+}
+
+.voice-fab::before {
+  content: '';
+  position: absolute;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--pasupu);
+  opacity: 0;
+  animation: breatheRing var(--breathe) ease-in-out infinite;
+}
+
+.voice-fab.listening {
+  animation: breathePulse var(--breathe) ease-in-out infinite;
+  background: var(--erra);
+}
+
+/* ═══ Bottom Navigation ═══ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%; max-width: 420px;
+  height: 68px;
+  background: var(--patti);
+  border-top: 1px solid var(--nalupurugu);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 var(--space-8);
+  z-index: 99;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: var(--space-8);
+  cursor: pointer;
+  border: none;
+  background: none;
+  position: relative;
+  transition: color var(--dur-233) ease;
+  color: var(--ink-tertiary);
+  min-width: 56px;
+  overflow: hidden;
+}
+
+.nav-item.active { color: var(--matti); }
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 20px; height: 2px;
+  background: var(--matti);
+  border-radius: 0 0 2px 2px;
+}
+
+.nav-item svg {
+  width: 22px; height: 22px;
+  fill: currentColor;
+  transition: transform var(--dur-233) cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.nav-item:active svg { transform: scale(0.85); }
+
+.nav-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+/* ═══ Toast System ═══ */
+.toast-container {
+  position: fixed;
+  top: var(--space-21);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 42px);
+  max-width: 378px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  pointer-events: none;
+}
+
+.mango-toast {
+  padding: var(--space-13) var(--space-21);
+  background: var(--patti);
+  border: 1px solid var(--nalupurugu);
+  border-left: 4px solid var(--pacchi);
+  border-radius: 2px 8px 8px 2px;
+  box-shadow: 0 4px 21px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: var(--space-13);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(-20px) rotate(2deg);
+  animation: toastIn var(--dur-610) cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.mango-toast.warning { border-left-color: var(--pasupu); }
+.mango-toast.alert { border-left-color: var(--erra); }
+
+.toast-text {
+  font-size: var(--text-sm);
+  color: var(--ink-primary);
+  line-height: 1.4;
+}
+
+/* ═══ Ripple ═══ */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(184, 134, 11, 0.15) 0%, transparent 70%);
+  transform: scale(0);
+  animation: rippleExpand var(--dur-610) linear forwards;
+  pointer-events: none;
+}
+
+/* ═══ Bottom spacer ═══ */
+.bottom-spacer { height: 160px; }
+
+/* ═══ Keyframe Animations ═══ */
+@keyframes fadeUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.6; width: 40px; }
+  50% { opacity: 1; width: 60px; }
+}
+
+@keyframes breathePulse {
+  0%, 100% {
+    transform: translateX(calc(210px - 28px)) scale(1);
+    box-shadow: 0 4px 13px rgba(192, 57, 43, 0.35);
+  }
+  50% {
+    transform: translateX(calc(210px - 28px)) scale(1.06);
+    box-shadow: 0 6px 21px rgba(192, 57, 43, 0.5);
+  }
+}
+
+@keyframes breatheRing {
+  0%, 100% { opacity: 0; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(1.4); }
+}
+
+@keyframes fabEntry {
+  from { opacity: 0; transform: translateX(calc(210px - 28px)) scale(0) rotate(-90deg); }
+  to { opacity: 1; transform: translateX(calc(210px - 28px)) scale(1) rotate(0deg); }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-20px) rotate(3deg); }
+  to { opacity: 1; transform: translateY(0) rotate(0deg); }
+}
+
+@keyframes toastFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes rippleExpand {
+  to { transform: scale(4); opacity: 0; }
+}
+
+@keyframes trendPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.75; }
+}
+
+@keyframes arrowBounceUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes arrowBounceDown {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+@keyframes bellShake {
+  0%, 85%, 100% { transform: rotate(0); }
+  88% { transform: rotate(-12deg); }
+  92% { transform: rotate(12deg); }
+  96% { transform: rotate(-6deg); }
+  98% { transform: rotate(6deg); }
+}
+
+@keyframes badgePop {
+  from { opacity: 0; transform: scale(0) rotate(-10deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+/* ═══ Responsive ═══ */
+@media (max-width: 420px) {
+  .app-shell { max-width: 100%; box-shadow: none; }
+  .voice-fab { right: var(--space-21); transform: none; }
+  .voice-fab:hover { transform: scale(1.08); }
+  .voice-fab:active { transform: scale(0.92); }
+  @keyframes breathePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  @keyframes fabEntry {
+    from { opacity: 0; transform: scale(0) rotate(-90deg); }
+    to { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Kolam Background -->
+<canvas id="kolam-bg"></canvas>
+
+<!-- App Shell -->
+<div class="app-shell">
+
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>BSNL 4G ··· 72%</span>
+  </div>
+
+  <!-- Market Header -->
+  <div class="market-header">
+    <div class="market-title-row">
+      <span class="market-title">మార్కెట్</span>
+      <span class="market-updated">నవీకరణ: 9:38 AM</span>
+    </div>
+  </div>
+
+  <!-- Crop Filter Pills -->
+  <div class="crop-pills">
+    <button class="crop-pill active" data-crop="groundnut">వేరుశెనగ</button>
+    <button class="crop-pill" data-crop="cotton">పత్తి</button>
+    <button class="crop-pill" data-crop="chilli">మిర్చి</button>
+    <button class="crop-pill" data-crop="tomato">టమాటా</button>
+  </div>
+
+  <!-- Hero Price Card -->
+  <div class="hero-price-card">
+    <div class="hero-mandi-row">
+      <span class="hero-mandi-name">అనంతపురం మండీ</span>
+      <span class="hero-timestamp">10 ని. క్రితం</span>
+    </div>
+    <div class="hero-price-row">
+      <div>
+        <div class="hero-price" id="heroPrice">
+          ₹5,840
+          <span class="unit">/ క్వింటాల్</span>
+        </div>
+      </div>
+      <div class="trend-badge down" id="trendBadge">
+        <span class="trend-arrow">↓</span>
+        <span id="trendText">₹40</span>
+      </div>
+    </div>
+    <div class="msp-row">
+      <span class="msp-label">MSP</span>
+      <span class="msp-value">₹5,850</span>
+      <span class="msp-diff below" id="mspDiff">₹10 తక్కువ</span>
+    </div>
+  </div>
+
+  <!-- Price Trend Chart -->
+  <div class="chart-section" id="chartSection">
+    <div class="chart-header">
+      <span class="chart-title">30 రోజుల ధర చరిత్ర</span>
+      <div class="chart-legend">
+        <div class="legend-item">
+          <div class="legend-line price"></div>
+          <span>ధర</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-line msp"></div>
+          <span>MSP</span>
+        </div>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="price-chart"></canvas>
+      <div class="chart-tooltip" id="chartTooltip"></div>
+    </div>
+  </div>
+
+  <!-- Mandi Comparison Grid -->
+  <div class="mandi-section" id="mandiSection">
+    <div class="section-label">మండీ పోలిక</div>
+    <div class="mandi-list" id="mandiList">
+
+      <div class="mandi-row nearest" data-price="5840" data-pct="85">
+        <div class="mandi-bar-bg"></div>
+        <div class="mandi-row-content">
+          <div class="mandi-name-row">
+            <span class="mandi-name">అనంతపురం</span>
+            <span class="badge-nearest">సమీపం</span>
+          </div>
+          <span class="mandi-price">₹5,840</span>
+          <span class="mandi-meta">12 km · మీ స్థానం</span>
+          <span class="mandi-transport">రవాణా: ₹120</span>
+        </div>
+      </div>
+
+      <div class="mandi-row best" data-price="5920" data-pct="100">
+        <div class="mandi-bar-bg"></div>
+        <div class="mandi-row-content">
+          <div class="mandi-name-row">
+            <span class="mandi-name">కర్నూలు</span>
+            <span class="badge-utham">ఉత్తమ ధర</span>
+          </div>
+          <span class="mandi-price">₹5,920</span>
+          <span class="mandi-meta">68 km</span>
+          <span class="mandi-transport">రవాణా: ₹380</span>
+        </div>
+      </div>
+
+      <div class="mandi-row" data-price="5680" data-pct="55">
+        <div class="mandi-bar-bg"></div>
+        <div class="mandi-row-content">
+          <div class="mandi-name-row">
+            <span class="mandi-name">హిందూపురం</span>
+          </div>
+          <span class="mandi-price">₹5,680</span>
+          <span class="mandi-meta">34 km</span>
+          <span class="mandi-transport">రవాణా: ₹210</span>
+        </div>
+      </div>
+
+      <div class="mandi-row" data-price="5760" data-pct="67">
+        <div class="mandi-bar-bg"></div>
+        <div class="mandi-row-content">
+          <div class="mandi-name-row">
+            <span class="mandi-name">గుంటూరు</span>
+          </div>
+          <span class="mandi-price">₹5,760</span>
+          <span class="mandi-meta">142 km</span>
+          <span class="mandi-transport">రవాణా: ₹680</span>
+        </div>
+      </div>
+
+      <div class="mandi-row" data-price="5800" data-pct="74">
+        <div class="mandi-bar-bg"></div>
+        <div class="mandi-row-content">
+          <div class="mandi-name-row">
+            <span class="mandi-name">ఒంగోలు</span>
+          </div>
+          <span class="mandi-price">₹5,800</span>
+          <span class="mandi-meta">198 km</span>
+          <span class="mandi-transport">రవాణా: ₹820</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Price Alert Card -->
+  <div class="alert-card" id="alertCard">
+    <div class="alert-card-title">
+      <span class="alert-bell">🔔</span>
+      ధర హెచ్చరిక సెట్ చేయండి
+    </div>
+    <div class="alert-description" id="alertDescription">
+      ₹<span id="alertTargetDisplay">6,000</span> కంటే ఎక్కువైతే తెలియజేయండి
+    </div>
+
+    <div class="price-slider-row">
+      <span class="price-slider-label">లక్ష్య ధర</span>
+      <div class="price-slider-wrap">
+        <input type="range" class="price-slider" id="priceSlider"
+               min="5000" max="7000" step="50" value="6000">
+      </div>
+      <span class="price-target-display">₹<span id="sliderValue">6,000</span></span>
+    </div>
+
+    <div class="alert-toggle-row">
+      <div>
+        <div class="toggle-label">వేరుశెనగ ధర హెచ్చరిక</div>
+        <div class="toggle-sublabel">SMS + అప్ నోటిఫికేషన్</div>
+      </div>
+      <label class="shibui-toggle">
+        <input type="checkbox" id="alertToggle" checked>
+        <span class="toggle-track"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Historical Comparison -->
+  <div class="history-card" id="historyCard">
+    <div class="history-title">గత సీజన్ పోలిక</div>
+    <div class="history-comparison">
+
+      <div class="history-column">
+        <div class="history-bar-wrap">
+          <div class="history-bar-label">ఈ సీజన్ సగటు</div>
+          <div class="history-bar-track">
+            <div class="history-bar-fill current" id="histBarCurrent" data-width="82"></div>
+          </div>
+        </div>
+        <div class="history-price">₹5,780</div>
+        <div class="history-sub">రబీ 2025–26</div>
+      </div>
+
+      <div class="history-delta">
+        <span class="history-delta-arrow">↑</span>
+        <div class="history-delta-value">+₹320<br>+5.9%</div>
+      </div>
+
+      <div class="history-column">
+        <div class="history-bar-wrap">
+          <div class="history-bar-label">గత సీజన్ సగటు</div>
+          <div class="history-bar-track">
+            <div class="history-bar-fill last" id="histBarLast" data-width="68"></div>
+          </div>
+        </div>
+        <div class="history-price" style="color: var(--ink-tertiary);">₹5,460</div>
+        <div class="history-sub">రబీ 2024–25</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="bottom-spacer"></div>
+</div><!-- /app-shell -->
+
+<!-- Voice FAB -->
+<button class="voice-fab" id="voiceFab" aria-label="Voice input">
+  <svg viewBox="0 0 24 24">
+    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5z"/>
+    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+  </svg>
+</button>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <button class="nav-item" id="nav-home">
+    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    <span class="nav-label">హోం</span>
+  </button>
+  <button class="nav-item" id="nav-money">
+    <svg viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
+    <span class="nav-label">దబ్బు</span>
+  </button>
+  <button class="nav-item" style="min-width: 64px;"><!-- FAB spacer --></button>
+  <button class="nav-item active" id="nav-market">
+    <svg viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+    <span class="nav-label">మార్కెట్</span>
+  </button>
+  <button class="nav-item" id="nav-crop">
+    <svg viewBox="0 0 24 24"><path d="M17 8C8 10 5.9 16.17 3.82 21h1.89c.5-1.14 1.2-2.26 2.1-3.22A18.87 18.87 0 0021 2c0 0-4 .5-4 6zM3.2 15.7c.5-.6.9-1.3 1.3-2C5.7 11.2 8 8.5 12 7c-2.5 3.5-4 7-4 10H5.7c.5-1 1-2 1.5-3z"/></svg>
+    <span class="nav-label">పంట</span>
+  </button>
+</nav>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// MATTI v3 — Market Screen Engine
+// Turmeric wash chart + wabi-sabi grid + shibui toggle
+// ═══════════════════════════════════════════════
+
+// ─── Mock Data (Anantapur district, Groundnut, 30 days) ───
+const CROP_DATA = {
+  groundnut: {
+    label: 'వేరుశెనగ',
+    msp: 5850,
+    currentPrice: 5840,
+    mandi: 'అనంతపురం మండీ',
+    trend: -40,
+    // 30-day prices: realistic groundnut range for Anantapur
+    prices: [
+      5620, 5640, 5580, 5600, 5700, 5720, 5680,
+      5750, 5800, 5780, 5820, 5860, 5900, 5880,
+      5920, 5910, 5870, 5850, 5840, 5880, 5920,
+      5960, 5940, 5900, 5880, 5860, 5840, 5820,
+      5840, 5840
+    ]
+  },
+  cotton: {
+    label: 'పత్తి',
+    msp: 6620,
+    currentPrice: 6480,
+    mandi: 'అనంతపురం మండీ',
+    trend: +60,
+    prices: [
+      6100, 6150, 6200, 6180, 6220, 6300, 6280,
+      6350, 6400, 6380, 6420, 6460, 6500, 6480,
+      6520, 6540, 6500, 6480, 6460, 6440, 6460,
+      6480, 6500, 6520, 6480, 6460, 6440, 6460,
+      6480, 6480
+    ]
+  },
+  chilli: {
+    label: 'మిర్చి',
+    msp: 0,
+    currentPrice: 12400,
+    mandi: 'అనంతపురం మండీ',
+    trend: +220,
+    prices: [
+      10800, 11000, 11200, 11100, 11400, 11600, 11800,
+      12000, 11900, 12100, 12200, 12400, 12600, 12500,
+      12300, 12100, 12000, 12200, 12400, 12600, 12800,
+      12600, 12400, 12300, 12200, 12400, 12500, 12400,
+      12400, 12400
+    ]
+  },
+  tomato: {
+    label: 'టమాటా',
+    msp: 0,
+    currentPrice: 1840,
+    mandi: 'అనంతపురం మండీ',
+    trend: -180,
+    prices: [
+      3200, 3100, 2900, 2700, 2600, 2500, 2400,
+      2300, 2200, 2300, 2400, 2500, 2400, 2300,
+      2200, 2100, 2000, 1900, 1800, 1850, 1900,
+      1950, 1900, 1850, 1800, 1820, 1840, 1860,
+      1840, 1840
+    ]
+  }
+};
+
+let activeCrop = 'groundnut';
+let chartAnimationId = null;
+let chartDrawProgress = 0;
+
+// ─── Kolam Background ───
+(function drawKolam() {
+  const canvas = document.getElementById('kolam-bg');
+  const ctx = canvas.getContext('2d');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    draw();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const spacing = 34;
+    const dotR = 1.5;
+    const goldenAngle = 137.508 * (Math.PI / 180);
+
+    for (let x = spacing; x < canvas.width; x += spacing) {
+      for (let y = spacing; y < canvas.height; y += spacing) {
+        ctx.beginPath();
+        ctx.arc(x, y, dotR, 0, Math.PI * 2);
+        ctx.fillStyle = '#8B4513';
+        ctx.fill();
+
+        if ((Math.floor(x / spacing) + Math.floor(y / spacing)) % 3 === 0) {
+          ctx.beginPath();
+          ctx.arc(x, y, spacing * 0.3,
+            goldenAngle * Math.floor(x / spacing),
+            goldenAngle * Math.floor(x / spacing) + Math.PI * 0.8);
+          ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)';
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+})();
+
+// ─── Turmeric Wash Chart (brush stroke simulation) ───
+function drawPriceChart(prices, msp, animProgress) {
+  const canvas = document.getElementById('price-chart');
+  if (!canvas) return;
+
+  // Size to container
+  const container = canvas.parentElement;
+  canvas.width = container.clientWidth || 378;
+  canvas.height = 140;
+  const ctx = canvas.getContext('2d');
+
+  const W = canvas.width;
+  const H = canvas.height;
+  const PAD_L = 8, PAD_R = 8, PAD_T = 16, PAD_B = 24;
+  const chartW = W - PAD_L - PAD_R;
+  const chartH = H - PAD_T - PAD_B;
+
+  const minP = Math.min(...prices) - 80;
+  const maxP = Math.max(...prices) + 80;
+  const rangeP = maxP - minP;
+
+  const n = prices.length;
+  const drawCount = Math.max(2, Math.floor(n * animProgress));
+
+  // Map price → y
+  function py(price) {
+    return PAD_T + chartH - ((price - minP) / rangeP) * chartH;
+  }
+  // Map index → x
+  function px(i) {
+    return PAD_L + (i / (n - 1)) * chartW;
+  }
+
+  ctx.clearRect(0, 0, W, H);
+
+  // ── MSP Dashed Reference Line (neeli blue) ──
+  if (msp > 0) {
+    const mspY = py(msp);
+    ctx.save();
+    ctx.strokeStyle = 'rgba(27, 79, 114, 0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(PAD_L, mspY);
+    ctx.lineTo(W - PAD_R, mspY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // MSP label
+    ctx.fillStyle = 'rgba(27, 79, 114, 0.7)';
+    ctx.font = '9px Courier New';
+    ctx.textAlign = 'right';
+    ctx.fillText('MSP', W - PAD_R - 2, mspY - 3);
+    ctx.restore();
+  }
+
+  // ── Soft X-axis grid ──
+  ctx.save();
+  ctx.strokeStyle = 'rgba(212, 197, 169, 0.3)';
+  ctx.lineWidth = 1;
+  for (let step = 0; step <= 3; step++) {
+    const gx = PAD_L + (step / 3) * chartW;
+    ctx.beginPath();
+    ctx.moveTo(gx, PAD_T);
+    ctx.lineTo(gx, PAD_T + chartH);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // ── Turmeric Fill (gradient under line) ──
+  if (drawCount >= 2) {
+    // Build a clipped fill path
+    const grad = ctx.createLinearGradient(0, PAD_T, 0, PAD_T + chartH);
+    grad.addColorStop(0, 'rgba(232, 163, 23, 0.25)');
+    grad.addColorStop(0.7, 'rgba(232, 163, 23, 0.06)');
+    grad.addColorStop(1, 'rgba(232, 163, 23, 0)');
+
+    ctx.save();
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(px(0), py(prices[0]));
+    for (let i = 1; i < drawCount; i++) {
+      // Smooth curve via cubic bezier
+      const cx1 = px(i - 1) + (px(i) - px(i - 1)) * 0.5;
+      const cx2 = px(i) - (px(i) - px(i - 1)) * 0.5;
+      ctx.bezierCurveTo(cx1, py(prices[i-1]), cx2, py(prices[i]), px(i), py(prices[i]));
+    }
+    ctx.lineTo(px(drawCount - 1), PAD_T + chartH);
+    ctx.lineTo(px(0), PAD_T + chartH);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // ── Turmeric Wash Line (variable stroke = brush simulation) ──
+  if (drawCount >= 2) {
+    for (let i = 1; i < drawCount; i++) {
+      const x1 = px(i - 1), y1 = py(prices[i - 1]);
+      const x2 = px(i), y2 = py(prices[i]);
+
+      // Velocity → stroke width (fast price change = wider brush)
+      const velocity = Math.abs(prices[i] - prices[i - 1]);
+      const strokeW = 1.5 + Math.min(velocity / 50, 3);
+
+      // Age fade: older segments are more transparent (impermanence)
+      const ageAlpha = 0.3 + 0.7 * (i / (n - 1));
+
+      // Price direction → hue shift (up = slightly warmer, down = slightly cooler)
+      const isUp = prices[i] >= prices[i - 1];
+
+      ctx.save();
+      ctx.strokeStyle = isUp
+        ? `rgba(232, 163, 23, ${ageAlpha})`
+        : `rgba(210, 140, 20, ${ageAlpha * 0.85})`;
+      ctx.lineWidth = strokeW;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      // Slight brush texture: draw 2 slightly offset strokes
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      const cx1 = x1 + (x2 - x1) * 0.5;
+      const cx2 = x2 - (x2 - x1) * 0.5;
+      ctx.bezierCurveTo(cx1, y1, cx2, y2, x2, y2);
+      ctx.stroke();
+
+      // Second pass: thinner, slightly offset for watercolor texture
+      if (strokeW > 2) {
+        ctx.strokeStyle = isUp
+          ? `rgba(184, 134, 11, ${ageAlpha * 0.35})`
+          : `rgba(139, 90, 10, ${ageAlpha * 0.25})`;
+        ctx.lineWidth = strokeW * 0.4;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1 + 1.5);
+        ctx.bezierCurveTo(cx1, y1 + 1.5, cx2, y2 + 1.5, x2, y2 + 1.5);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // ── Current price dot ──
+    if (drawCount === n) {
+      const lastX = px(n - 1);
+      const lastY = py(prices[n - 1]);
+
+      // Glow ring
+      const dotGrad = ctx.createRadialGradient(lastX, lastY, 0, lastX, lastY, 10);
+      dotGrad.addColorStop(0, 'rgba(232, 163, 23, 0.4)');
+      dotGrad.addColorStop(1, 'rgba(232, 163, 23, 0)');
+      ctx.fillStyle = dotGrad;
+      ctx.beginPath();
+      ctx.arc(lastX, lastY, 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Core dot
+      ctx.fillStyle = '#E8A317';
+      ctx.strokeStyle = '#FAF7F0';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(lastX, lastY, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+  }
+
+  // ── Date labels on X axis ──
+  ctx.save();
+  ctx.fillStyle = 'rgba(139, 125, 107, 0.7)';
+  ctx.font = '9px Courier New';
+  ctx.textAlign = 'center';
+  const today = new Date(2026, 2, 15); // March 15
+  const labels = [29, 20, 10, 0]; // days ago indices
+  labels.forEach(idx => {
+    if (idx < drawCount) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - (n - 1 - idx));
+      const label = `${d.getDate()}/${d.getMonth() + 1}`;
+      ctx.fillText(label, px(idx), H - 6);
+    }
+  });
+  ctx.restore();
+
+  // ── Store point positions for tooltip hit-testing ──
+  canvas._pricePoints = prices.map((p, i) => ({ x: px(i), y: py(p), price: p, idx: i }));
+  canvas._msp = msp;
+}
+
+// ─── Chart animation ───
+function animateChart(prices, msp) {
+  if (chartAnimationId) cancelAnimationFrame(chartAnimationId);
+  chartDrawProgress = 0;
+  const duration = 1200; // ms
+  const startTime = performance.now();
+
+  function step(now) {
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    // Ease out quart
+    const eased = 1 - Math.pow(1 - t, 4);
+    chartDrawProgress = eased;
+    drawPriceChart(prices, msp, eased);
+    if (t < 1) {
+      chartAnimationId = requestAnimationFrame(step);
+    }
+  }
+
+  chartAnimationId = requestAnimationFrame(step);
+}
+
+// ─── Chart tooltip on hover/touch ───
+(function setupChartTooltip() {
+  const canvas = document.getElementById('price-chart');
+  const tooltip = document.getElementById('chartTooltip');
+
+  function showTooltipAt(clientX, clientY) {
+    if (!canvas._pricePoints) return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = clientX - rect.left;
+    const my = clientY - rect.top;
+
+    // Find nearest point
+    let nearest = null, minDist = Infinity;
+    canvas._pricePoints.forEach(pt => {
+      const dist = Math.abs(pt.x - mx);
+      if (dist < minDist) { minDist = dist; nearest = pt; }
+    });
+
+    if (nearest && minDist < 30) {
+      const today = new Date(2026, 2, 15);
+      const d = new Date(today);
+      d.setDate(d.getDate() - (canvas._pricePoints.length - 1 - nearest.idx));
+      const dateStr = `${d.getDate()}/${d.getMonth() + 1}`;
+      tooltip.textContent = `${dateStr} — ₹${nearest.price.toLocaleString('en-IN')}`;
+      tooltip.style.opacity = '1';
+
+      // Position above the point, clamp to canvas edges
+      let tx = nearest.x - tooltip.offsetWidth / 2;
+      tx = Math.max(0, Math.min(tx, canvas.width - tooltip.offsetWidth));
+      let ty = nearest.y - 32;
+      if (ty < 0) ty = nearest.y + 10;
+
+      tooltip.style.left = tx + 'px';
+      tooltip.style.top = ty + 'px';
+
+      // Redraw with vertical guide
+      drawPriceChart(canvas._pricePoints.map(p => p.price), canvas._msp || 0, 1);
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.strokeStyle = 'rgba(184, 134, 11, 0.3)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath();
+      ctx.moveTo(nearest.x, 16);
+      ctx.lineTo(nearest.x, 116);
+      ctx.stroke();
+      ctx.restore();
+    } else {
+      tooltip.style.opacity = '0';
+    }
+  }
+
+  canvas.addEventListener('mousemove', e => showTooltipAt(e.clientX, e.clientY));
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    const t = e.touches[0];
+    showTooltipAt(t.clientX, t.clientY);
+  }, { passive: false });
+  canvas.addEventListener('mouseleave', () => {
+    tooltip.style.opacity = '0';
+    const data = CROP_DATA[activeCrop];
+    drawPriceChart(data.prices, data.msp, 1);
+  });
+  canvas.addEventListener('touchend', () => {
+    tooltip.style.opacity = '0';
+  });
+})();
+
+// ─── Update Hero Card ───
+function updateHeroCard(crop) {
+  const data = CROP_DATA[crop];
+  const heroPrice = document.getElementById('heroPrice');
+  const trendBadge = document.getElementById('trendBadge');
+  const trendText = document.getElementById('trendText');
+  const mspDiff = document.getElementById('mspDiff');
+
+  // Price counter animation
+  const startVal = parseInt(heroPrice.dataset.current || '5840');
+  const endVal = data.currentPrice;
+  heroPrice.dataset.current = endVal;
+  const dur = 610;
+  const t0 = performance.now();
+
+  function tick(now) {
+    const p = Math.min((now - t0) / dur, 1);
+    const eased = 1 - Math.pow(1 - p, 3);
+    const val = Math.round(startVal + (endVal - startVal) * eased);
+    heroPrice.innerHTML = `₹${val.toLocaleString('en-IN')}<span class="unit">/ క్వింటాల్</span>`;
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // Trend badge
+  const isUp = data.trend >= 0;
+  trendBadge.className = `trend-badge ${isUp ? 'up' : 'down'}`;
+  trendBadge.querySelector('.trend-arrow').textContent = isUp ? '↑' : '↓';
+  trendText.textContent = `₹${Math.abs(data.trend)}`;
+
+  // MSP diff
+  if (data.msp === 0) {
+    mspDiff.textContent = 'MSP లేదు';
+    mspDiff.className = 'msp-diff';
+    document.querySelector('.msp-row .msp-value').textContent = '—';
+  } else {
+    const diff = data.currentPrice - data.msp;
+    document.querySelector('.msp-row .msp-value').textContent = `₹${data.msp.toLocaleString('en-IN')}`;
+    if (diff < 0) {
+      mspDiff.className = 'msp-diff below';
+      mspDiff.textContent = `₹${Math.abs(diff)} తక్కువ`;
+    } else {
+      mspDiff.className = 'msp-diff above';
+      mspDiff.textContent = `₹${diff} ఎక్కువ`;
+    }
+  }
+}
+
+// ─── Crop Pill Selection ───
+document.querySelectorAll('.crop-pill').forEach(pill => {
+  pill.style.position = 'relative';
+  pill.style.overflow = 'hidden';
+
+  pill.addEventListener('click', function() {
+    document.querySelectorAll('.crop-pill').forEach(p => p.classList.remove('active'));
+    this.classList.add('active');
+    activeCrop = this.dataset.crop;
+    updateHeroCard(activeCrop);
+    const data = CROP_DATA[activeCrop];
+    animateChart(data.prices, data.msp);
+    rippleEffect(this, event);
+  });
+});
+
+// ─── Mandi Row Interactions ───
+document.querySelectorAll('.mandi-row').forEach(row => {
+  row.addEventListener('click', function(e) {
+    rippleEffect(this, e);
+    const price = this.querySelector('.mandi-price').textContent;
+    const name = this.querySelector('.mandi-name').textContent;
+    showToast(`📍 ${name}: ${price}/క్వింటాల్`, 'default', 3000);
+  });
+});
+
+// ─── Price Slider ───
+const priceSlider = document.getElementById('priceSlider');
+const sliderValueEl = document.getElementById('sliderValue');
+const alertDescEl = document.getElementById('alertDescription');
+
+function formatPrice(val) {
+  return parseInt(val).toLocaleString('en-IN');
+}
+
+function updateSlider(val) {
+  sliderValueEl.textContent = formatPrice(val);
+  alertDescEl.innerHTML = `₹<span id="alertTargetDisplay">${formatPrice(val)}</span> కంటే ఎక్కువైతే తెలియజేయండి`;
+
+  // Update slider gradient fill
+  const min = parseInt(priceSlider.min);
+  const max = parseInt(priceSlider.max);
+  const pct = ((val - min) / (max - min)) * 100;
+  priceSlider.style.background = `linear-gradient(to right, var(--pasupu) 0%, var(--pasupu) ${pct}%, var(--nalupurugu) ${pct}%)`;
+}
+
+priceSlider.addEventListener('input', function() {
+  updateSlider(this.value);
+});
+
+priceSlider.addEventListener('change', function() {
+  const data = CROP_DATA[activeCrop];
+  if (parseInt(this.value) > data.currentPrice) {
+    showToast(`🔔 హెచ్చరిక సెట్ చేయబడింది: ₹${formatPrice(this.value)}/క్వింటాల్`, 'default', 4000);
+  }
+});
+
+// ─── Alert Toggle ───
+const alertToggle = document.getElementById('alertToggle');
+alertToggle.addEventListener('change', function() {
+  if (this.checked) {
+    showToast('✓ ధర హెచ్చరిక ఆన్ చేయబడింది', 'default', 3000);
+  } else {
+    showToast('🔕 ధర హెచ్చరిక ఆఫ్ చేయబడింది', 'warning', 3000);
+  }
+});
+
+// ─── Ripple Effect ───
+function rippleEffect(el, e) {
+  const rect = el.getBoundingClientRect();
+  const ripple = document.createElement('span');
+  ripple.className = 'ripple';
+  const size = Math.max(rect.width, rect.height) * 2;
+  ripple.style.width = ripple.style.height = size + 'px';
+  const clientX = e.clientX || (rect.left + rect.width / 2);
+  const clientY = e.clientY || (rect.top + rect.height / 2);
+  ripple.style.left = (clientX - rect.left - size / 2) + 'px';
+  ripple.style.top = (clientY - rect.top - size / 2) + 'px';
+  el.appendChild(ripple);
+  setTimeout(() => ripple.remove(), 610);
+}
+
+document.querySelectorAll('.crop-pill, .mandi-row, .nav-item').forEach(el => {
+  el.addEventListener('click', function(e) {
+    rippleEffect(this, e);
+  });
+});
+
+// ─── Intersection Observer for scroll animations ───
+const scrollObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      el.classList.add('animate-in');
+
+      // Trigger mandi bar fills
+      if (el.id === 'mandiSection') {
+        setTimeout(() => {
+          document.querySelectorAll('.mandi-bar-bg').forEach(bar => {
+            const row = bar.closest('.mandi-row');
+            const pct = row.dataset.pct;
+            bar.style.transition = 'width 987ms cubic-bezier(0.34, 1.56, 0.64, 1)';
+            bar.style.width = pct + '%';
+          });
+        }, 300);
+      }
+
+      // Trigger history bars
+      if (el.id === 'historyCard') {
+        setTimeout(() => {
+          const cur = document.getElementById('histBarCurrent');
+          const last = document.getElementById('histBarLast');
+          if (cur) { cur.style.width = cur.dataset.width + '%'; }
+          if (last) { last.style.width = last.dataset.width + '%'; }
+        }, 300);
+      }
+
+      scrollObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.15 });
+
+['chartSection', 'mandiSection', 'alertCard', 'historyCard'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) scrollObserver.observe(el);
+});
+
+// ─── Chart resize on window resize ───
+window.addEventListener('resize', () => {
+  const data = CROP_DATA[activeCrop];
+  drawPriceChart(data.prices, data.msp, chartDrawProgress);
+});
+
+// ─── Voice FAB ───
+const voiceFab = document.getElementById('voiceFab');
+let listening = false;
+
+voiceFab.addEventListener('click', () => {
+  listening = !listening;
+  voiceFab.classList.toggle('listening', listening);
+  rippleEffect(voiceFab, event);
+
+  if (listening) {
+    showToast('🎙️ వింటున్నాను... చెప్పండి', 'default', 3000);
+    setTimeout(() => {
+      if (listening) {
+        listening = false;
+        voiceFab.classList.remove('listening');
+        showToast('✓ "అనంతపురం వేరుశెనగ ధర" — ₹5,840/క్వింటాల్', 'default', 4500);
+      }
+    }, 3000);
+  }
+});
+
+// ─── Bottom Nav ───
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function(e) {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
+    rippleEffect(this, e);
+  });
+});
+
+// ─── Toast System ───
+function showToast(message, type = 'default', duration = 4000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `mango-toast ${type}`;
+
+  const iconMap = { default: '🍃', warning: '⚠️', alert: '🔔' };
+  toast.innerHTML = `
+    <span style="font-size:18px;flex-shrink:0">${iconMap[type] || '🍃'}</span>
+    <span class="toast-text">${message}</span>
+  `;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.animation = 'toastFloat 2s ease-in-out infinite';
+  }, 610);
+
+  setTimeout(() => {
+    toast.style.transition = 'opacity 377ms ease, transform 377ms ease';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-10px) rotate(-2deg)';
+    setTimeout(() => toast.remove(), 377);
+  }, duration);
+}
+
+// ─── Init Sequence ───
+(function init() {
+  // Initial hero card with data
+  updateHeroCard(activeCrop);
+
+  // Initial chart draw — delayed so CSS layout is complete
+  setTimeout(() => {
+    const data = CROP_DATA[activeCrop];
+    animateChart(data.prices, data.msp);
+  }, 800);
+
+  // Welcome toast
+  setTimeout(() => {
+    showToast('📊 వేరుశెనగ: 5 మండీల ధరలు నవీకరించబడ్డాయి', 'default', 5000);
+  }, 2000);
+})();
+
+</script>
+</body>
+</html>
