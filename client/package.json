@@ -22,7 +22,7 @@
     "vitest": "^4.1.0"
   },
   "dependencies": {
-    "spacetimedb": "^2.0.4",
-    "tesseract.js": "^7.0.0"
+    "pdf-lib": "^1.17.1",
+    "spacetimedb": "^2.0.4"
   }
 }

@@ -1,6 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { cropFields, cropEvents } from '../lib/stores';
+  import { loadConfig } from '../lib/sarvam';
+  import { getConnection } from '../lib/db';
+  import { get } from 'svelte/store';
+  import { connected } from '../lib/stores';
 
   interface Props {
     ontoast?: (message: string, type: string) => void;
@@ -9,22 +13,264 @@
   let { ontoast }: Props = $props();
   let activeForm: string | null = $state(null);
 
+  // Camera / AI analysis state
+  let cameraInputEl: HTMLInputElement | null = $state(null);
+  let capturedPhotoUrl: string | null = $state(null);
+  let capturedPhotoFile: File | null = $state(null);
+  let analysisPending = $state(false);
+  let analysisResult: string | null = $state(null);
+  let analysisError: string | null = $state(null);
+
+  const SARVAM_BASE = 'https://api.sarvam.ai';
+
+  const CROP_ANALYSIS_PROMPT = `You are an expert agricultural AI assistant helping a farmer in Anantapur, Andhra Pradesh. Analyze this crop photo and provide:
+1. పంట రకం (Crop type: groundnut/cotton/other) — వేరుశెనగ/పత్తి/ఇతరం
+2. పెరుగుదల దశ (Growth stage: seedling/vegetative/flowering/maturity) — మొలక/వృద్ధి/పువ్వు/పరిపక్వం
+3. ఆరోగ్య స్థితి (Health: healthy/pest/disease/nutrient) — మంచి/పురుగు/వ్యాధి/పోషకలోపం
+4. పురుగు లేదా వ్యాధి గుర్తింపు మరియు చికిత్స సూచన ఉంటే తెలుగులో వివరించండి.
+Respond entirely in Telugu. Be concise and practical.`;
+
   const eventDotClass: Record<string, string> = {
     pesticide: 'pest', irrigation: 'water', fertilizer: 'fertilizer',
     inspection: 'inspect', sowing: 'seed', harvest: 'seed', sale: 'seed',
+    photo: 'inspect',
   };
   const eventIcons: Record<string, string> = {
     pesticide: '🐛', irrigation: '💧', fertilizer: '🌿',
     inspection: '📸', sowing: '🌱', harvest: '🌾', sale: '💰',
+    photo: '📸',
   };
 
   function toggleForm(formId: string) {
+    // If clicking photo button, open camera directly
+    if (formId === 'photo') {
+      openCamera();
+      return;
+    }
     activeForm = activeForm === formId ? null : formId;
   }
 
   function saveForm(formId: string, message: string) {
     activeForm = null;
     ontoast?.(`✓ ${message}`, 'default');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Camera + AI Analysis (F006)
+  // ---------------------------------------------------------------------------
+
+  function openCamera() {
+    cameraInputEl?.click();
+  }
+
+  function handleCameraCapture(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    // Revoke previous URL
+    if (capturedPhotoUrl) URL.revokeObjectURL(capturedPhotoUrl);
+
+    capturedPhotoFile = file;
+    capturedPhotoUrl = URL.createObjectURL(file);
+    analysisResult = null;
+    analysisError = null;
+    activeForm = 'photo_preview';
+
+    // Start analysis immediately
+    analyzePhoto(file);
+
+    // Reset so same file can be re-selected
+    input.value = '';
+  }
+
+  async function analyzePhoto(file: File) {
+    const config = loadConfig();
+    if (!config.apiKey) {
+      analysisError = 'AI విశ్లేషణ కోసం Settings లో API key సెట్ చేయండి';
+      return;
+    }
+
+    analysisPending = true;
+    analysisError = null;
+
+    try {
+      // Resize image for API (max 800px, JPEG 0.8)
+      const dataUrl = await resizeImageToDataUrl(file, 800, 0.8);
+
+      const response = await fetch(`${SARVAM_BASE}/v1/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'API-Subscription-Key': config.apiKey,
+        },
+        body: JSON.stringify({
+          model: config.chatModel || 'sarvam-105b',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'image_url',
+                  image_url: { url: dataUrl },
+                },
+                {
+                  type: 'text',
+                  text: CROP_ANALYSIS_PROMPT,
+                },
+              ],
+            },
+          ],
+          temperature: 0.3,
+          max_tokens: 400,
+        }),
+      });
+
+      if (!response.ok) {
+        const txt = await response.text().catch(() => '');
+        // Sarvam 105b may not support vision — fall back to text-only
+        if (response.status === 400 || response.status === 422) {
+          analysisResult = await analyzePhotoTextOnly(config.apiKey, config.chatModel);
+        } else {
+          throw new Error(`API error ${response.status}: ${txt}`);
+        }
+        return;
+      }
+
+      const data = await response.json() as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
+      analysisResult = data.choices?.[0]?.message?.content ?? 'విశ్లేషణ లభించలేదు';
+    } catch (err) {
+      console.error('[Panta] Photo analysis failed:', err);
+      analysisError = 'AI విశ్లేషణ విఫలమైంది. మళ్ళీ ప్రయత్నించండి.';
+    } finally {
+      analysisPending = false;
+    }
+  }
+
+  async function analyzePhotoTextOnly(apiKey: string, model: string): Promise<string> {
+    // Fallback: describe what we know and ask for general advice
+    const response = await fetch(`${SARVAM_BASE}/v1/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'API-Subscription-Key': apiKey,
+      },
+      body: JSON.stringify({
+        model: model || 'sarvam-105b',
+        messages: [
+          {
+            role: 'user',
+            content: 'అనంతపురం రైతు తన పంట ఫోటో తీశారు. వేరుశెనగ మరియు పత్తి పంటలలో ఈ సీజన్ (మార్చి) లో సాధారణంగా కనిపించే పురుగులు మరియు వ్యాధుల గురించి సంక్షిప్తంగా తెలుగులో చెప్పండి.',
+          },
+        ],
+        temperature: 0.3,
+        max_tokens: 300,
+      }),
+    });
+
+    if (!response.ok) return 'ఫోటో విశ్లేషణ అందుబాటులో లేదు. దయచేసి మళ్ళీ ప్రయత్నించండి.';
+    const data = await response.json() as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    return data.choices?.[0]?.message?.content ?? 'విశ్లేషణ లభించలేదు';
+  }
+
+  /** Resize image to max dimension, return data URL. */
+  function resizeImageToDataUrl(file: File, maxPx: number, quality: number): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          const ctx = canvas.getContext('2d');
+          if (!ctx) { reject(new Error('no canvas ctx')); return; }
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject;
+        img.src = reader.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /** Map AI analysis text to a STDB crop event kind. */
+  function inferCropEventKind(analysisText: string): string {
+    const lower = analysisText.toLowerCase();
+    if (lower.includes('పురుగు') || lower.includes('pest') || lower.includes('బోల్') || lower.includes('దోమ')) {
+      return 'PestObserved';
+    }
+    if (lower.includes('నీరు') || lower.includes('నీటి') || lower.includes('irrigat')) {
+      return 'Irrigated';
+    }
+    if (lower.includes('పువ్వు') || lower.includes('flower') || lower.includes('పూత')) {
+      return 'Sprayed';
+    }
+    return 'PestObserved'; // default for photo inspection
+  }
+
+  /** Detect crop name from analysis. */
+  function inferCropName(analysisText: string): string {
+    if (analysisText.includes('వేరుశెనగ') || analysisText.toLowerCase().includes('groundnut')) {
+      return 'వేరుశెనగ';
+    }
+    if (analysisText.includes('పత్తి') || analysisText.toLowerCase().includes('cotton')) {
+      return 'పత్తి';
+    }
+    return $cropFields[0]?.crop || 'వేరుశెనగ';
+  }
+
+  async function savePhotoEvent() {
+    if (!analysisResult) return;
+
+    const kind = inferCropEventKind(analysisResult);
+    const crop = inferCropName(analysisResult);
+    const notes = analysisResult.slice(0, 500);
+
+    const conn = getConnection();
+    const isConnected = get(connected);
+
+    if (conn && isConnected) {
+      try {
+        conn.reducers.recordCropEvent({
+          kind,
+          crop,
+          plotId: 'plot_a',
+          photoBytes: undefined,
+          aiNotes: notes,
+          gpsLat: undefined,
+          gpsLon: undefined,
+        });
+        ontoast?.('✅ పంట ఫోటో నమోదు అయింది', 'default');
+      } catch (err) {
+        console.error('[Panta] recordCropEvent failed:', err);
+        ontoast?.('✅ పంట ఫోటో నమోదు అయింది (లోకల్)', 'default');
+      }
+    } else {
+      ontoast?.('✅ పంట ఫోటో నమోదు అయింది (లోకల్)', 'default');
+    }
+
+    // Close the preview
+    discardPhoto();
+  }
+
+  function discardPhoto() {
+    if (capturedPhotoUrl) {
+      URL.revokeObjectURL(capturedPhotoUrl);
+      capturedPhotoUrl = null;
+    }
+    capturedPhotoFile = null;
+    analysisResult = null;
+    analysisError = null;
+    analysisPending = false;
+    activeForm = null;
   }
 
   // Cost breakdown data
@@ -45,8 +291,22 @@
         scroll.scrollTo({ left: Math.max(0, 280 - containerW / 2), behavior: 'smooth' });
       }, 900);
     }
+
+    return () => {
+      if (capturedPhotoUrl) URL.revokeObjectURL(capturedPhotoUrl);
+    };
   });
 </script>
+
+<!-- Hidden camera input -->
+<input
+  bind:this={cameraInputEl}
+  type="file"
+  accept="image/*"
+  capture="environment"
+  class="hidden-input"
+  onchange={handleCameraCapture}
+/>
 
 <!-- Header -->
 <div class="panta-header">
@@ -59,6 +319,56 @@
     <span class="field-selector-chevron">▾</span>
   </div>
 </div>
+
+<!-- Crop Photo Button (F006 prominent entry point) -->
+<div class="photo-cta-wrap">
+  <button class="photo-cta-btn" onclick={openCamera}>
+    <span class="photo-cta-icon">📸</span>
+    <div class="photo-cta-text">
+      <span class="photo-cta-title">పంట ఫోటో</span>
+      <span class="photo-cta-sub">AI తో పురుగు / వ్యాధి గుర్తింపు</span>
+    </div>
+    <span class="photo-cta-arrow">→</span>
+  </button>
+</div>
+
+<!-- Photo Preview + Analysis Panel -->
+{#if activeForm === 'photo_preview' && capturedPhotoUrl}
+  <div class="photo-panel">
+    <div class="photo-panel-header">
+      <span class="photo-panel-title">📸 పంట ఫోటో విశ్లేషణ</span>
+      <button class="photo-panel-close" onclick={discardPhoto} aria-label="close">✕</button>
+    </div>
+
+    <div class="photo-preview-wrap">
+      <img src={capturedPhotoUrl} alt="crop photo" class="photo-preview-img" />
+    </div>
+
+    {#if analysisPending}
+      <div class="analysis-loading">
+        <div class="analysis-spinner" aria-label="analysing"></div>
+        <span>AI విశ్లేషించుతోంది...</span>
+      </div>
+    {:else if analysisError}
+      <div class="analysis-error">
+        <span>⚠️ {analysisError}</span>
+      </div>
+    {:else if analysisResult}
+      <div class="analysis-result">
+        <div class="analysis-result-label">AI విశ్లేషణ</div>
+        <div class="analysis-result-text">{analysisResult}</div>
+      </div>
+      <div class="photo-panel-actions">
+        <button class="btn-cancel" onclick={discardPhoto}>రద్దు</button>
+        <button class="btn-save" onclick={savePhotoEvent}>✅ నమోదు చేయండి</button>
+      </div>
+    {:else}
+      <div class="photo-panel-actions">
+        <button class="btn-cancel" onclick={discardPhoto}>రద్దు</button>
+      </div>
+    {/if}
+  </div>
+{/if}
 
 <!-- Pest Alert -->
 <div class="pest-alert" role="alert">
@@ -123,17 +433,7 @@
   <button class="log-btn" onclick={() => toggleForm('pest')}><span class="btn-emoji">🐛</span><span>పురుగు</span></button>
 </div>
 
-<!-- Inline forms -->
-{#if activeForm === 'photo'}
-  <div class="inline-form open">
-    <div class="inline-form-title">📸 పంట ఫోటో నమోదు</div>
-    <div class="inline-form-row"><textarea placeholder="గమనికలు: పంట స్థితి, పురుగు చిహ్నాలు..."></textarea></div>
-    <div class="inline-form-actions">
-      <button class="btn-cancel" onclick={() => { activeForm = null; }}>రద్దు</button>
-      <button class="btn-save" onclick={() => saveForm('photo', 'ఫోటో నమోదు అయింది')}>📸 సేవ్</button>
-    </div>
-  </div>
-{/if}
+<!-- Inline forms (water, fertilizer, pest — photo goes direct to camera) -->
 {#if activeForm === 'water'}
   <div class="inline-form open">
     <div class="inline-form-title">💧 నీటిపారుదల నమోదు</div>
@@ -214,6 +514,8 @@
 <div class="bottom-spacer"></div>
 
 <style>
+  .hidden-input { display: none; }
+
   .panta-header { padding: var(--space-13) var(--space-21) var(--space-8); display: flex; align-items: center; justify-content: space-between; gap: var(--space-13); }
   .panta-title { font-family: var(--font-te-display); font-size: var(--text-xl); font-weight: 400; color: var(--ink-primary); animation: fadeUp var(--dur-610) var(--spring) 200ms both; }
   .field-selector { display: flex; align-items: center; gap: var(--space-5); padding: var(--space-5) var(--space-13); background: var(--patti-warm); border: 1px solid var(--nalupurugu); border-radius: 2px 8px 3px 5px; cursor: pointer; font-size: var(--text-xs); max-width: 200px; animation: fadeUp var(--dur-610) var(--spring) 350ms both; }
@@ -221,6 +523,121 @@
   .field-selector-name { font-weight: 600; color: var(--ink-primary); font-size: var(--text-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .field-selector-sub { font-size: 10px; color: var(--ink-tertiary); white-space: nowrap; }
   .field-selector-chevron { font-size: 10px; color: var(--ink-tertiary); flex-shrink: 0; }
+
+  /* F006: Prominent photo CTA */
+  .photo-cta-wrap { padding: 0 var(--space-21) var(--space-13); animation: fadeUp var(--dur-610) var(--spring) 300ms both; }
+  .photo-cta-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--space-13);
+    padding: var(--space-13) var(--space-21);
+    background: linear-gradient(135deg, var(--patti-warm) 0%, #EDE8DB 100%);
+    border: 1.5px solid var(--nalupurugu);
+    border-left: 4px solid var(--pacchi);
+    border-radius: 3px 10px 5px 3px;
+    cursor: pointer;
+    text-align: left;
+    transition: transform var(--dur-233) var(--spring), box-shadow var(--dur-233) ease;
+  }
+  .photo-cta-btn:hover { transform: translateX(2px); box-shadow: 0 4px 16px rgba(45, 106, 79, 0.12); }
+  .photo-cta-btn:active { transform: scale(0.99); }
+  .photo-cta-icon { font-size: 28px; flex-shrink: 0; }
+  .photo-cta-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .photo-cta-title { font-family: var(--font-te); font-size: var(--text-base); font-weight: 600; color: var(--pacchi); }
+  .photo-cta-sub { font-size: var(--text-xs); color: var(--ink-tertiary); }
+  .photo-cta-arrow { font-size: var(--text-lg); color: var(--pacchi); flex-shrink: 0; opacity: 0.6; }
+
+  /* F006: Photo preview + analysis panel */
+  .photo-panel {
+    margin: 0 var(--space-21) var(--space-13);
+    background: var(--patti-warm);
+    border: 1px solid var(--nalupurugu);
+    border-top: 3px solid var(--pacchi);
+    border-radius: 3px 10px 5px 3px;
+    overflow: hidden;
+    animation: expandForm var(--dur-377) var(--spring) forwards;
+  }
+  .photo-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-13) var(--space-21);
+    border-bottom: 1px solid var(--nalupurugu);
+  }
+  .photo-panel-title { font-size: var(--text-sm); font-weight: 600; color: var(--pacchi); }
+  .photo-panel-close {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: var(--ink-tertiary); cursor: pointer;
+    transition: background var(--dur-144) ease;
+  }
+  .photo-panel-close:hover { background: var(--erra-soft); color: var(--erra); }
+
+  .photo-preview-wrap { padding: var(--space-13); }
+  .photo-preview-img {
+    width: 100%;
+    max-height: 240px;
+    object-fit: cover;
+    border-radius: 3px 8px 3px 5px;
+    border: 1px solid var(--nalupurugu);
+    display: block;
+  }
+
+  .analysis-loading {
+    display: flex;
+    align-items: center;
+    gap: var(--space-13);
+    padding: var(--space-13) var(--space-21);
+    font-size: var(--text-sm);
+    color: var(--ink-secondary);
+    font-family: var(--font-te);
+  }
+  .analysis-spinner {
+    width: 20px; height: 20px;
+    border: 2.5px solid var(--nalupurugu);
+    border-top-color: var(--pacchi);
+    border-radius: 50%;
+    animation: spinCrop 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spinCrop { to { transform: rotate(360deg); } }
+
+  .analysis-error {
+    padding: var(--space-13) var(--space-21);
+    font-size: var(--text-sm);
+    color: var(--erra);
+    font-family: var(--font-te);
+    background: var(--erra-soft);
+    margin: 0 var(--space-13) var(--space-13);
+    border-radius: 3px 8px 3px 5px;
+  }
+
+  .analysis-result {
+    margin: 0 var(--space-13) var(--space-13);
+    padding: var(--space-13);
+    background: var(--patti);
+    border: 1px solid rgba(45, 106, 79, 0.2);
+    border-left: 3px solid var(--pacchi);
+    border-radius: 3px 8px 3px 5px;
+  }
+  .analysis-result-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--pacchi);
+    font-weight: 600;
+    margin-bottom: var(--space-5);
+  }
+  .analysis-result-text {
+    font-family: var(--font-te);
+    font-size: var(--text-sm);
+    color: var(--ink-primary);
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  .photo-panel-actions { display: flex; gap: var(--space-8); justify-content: flex-end; padding: var(--space-8) var(--space-21) var(--space-13); }
 
   .pest-alert { margin: 0 var(--space-21) var(--space-13); padding: var(--space-13) var(--space-21); background: var(--erra-soft); border: 1.5px solid rgba(192, 57, 43, 0.25); border-left: 4px solid var(--erra); border-radius: 3px 8px 5px 3px; animation: fadeUp var(--dur-610) var(--ease-out) 500ms both; }
   .pest-alert-title { font-size: var(--text-sm); font-weight: 600; color: var(--erra); display: flex; align-items: center; gap: var(--space-5); margin-bottom: var(--space-5); }

@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { chatState } from '../lib/chat';
   import { startRecording, stopRecording, isRecording } from '../lib/voice';
-  import { processImage, type OcrResult } from '../lib/ocr';
+  import { imageToBase64, performOcr, extractBillData, type OcrResult } from '../lib/ocr';
 
   interface PendingImage {
     file: File;
@@ -42,19 +42,20 @@
 
       let messageForAI = userText;
 
-      if (ocr && ocr.rawText.trim()) {
-        const ocrSection = `\n\n[OCR extracted text: ${ocr.rawText.slice(0, 500)}]`;
-        const amountsSection = ocr.amounts.length > 0
-          ? `\n[Amounts found: ${ocr.amounts.map(a => '\u20B9' + a.toLocaleString('en-IN')).join(', ')}]`
+      if (ocr && ocr.text.trim()) {
+        const billData = extractBillData(ocr.text);
+        const ocrSection = `\n\n[OCR extracted text: ${ocr.text.slice(0, 500)}]`;
+        const amountsSection = billData.totalAmount
+          ? `\n[Total amount: \u20B9${(billData.totalAmount / 100).toLocaleString('en-IN')}]`
           : '';
-        const productsSection = ocr.productNames.length > 0
-          ? `\n[Products: ${ocr.productNames.join(', ')}]`
+        const shopSection = billData.shopName
+          ? `\n[Shop: ${billData.shopName}]`
           : '';
-        const datesSection = ocr.dateStrings.length > 0
-          ? `\n[Dates: ${ocr.dateStrings.join(', ')}]`
+        const dateSection = billData.date
+          ? `\n[Date: ${billData.date}]`
           : '';
 
-        messageForAI = `${userText || '\u0C08 \u0C2B\u0C4B\u0C1F\u0C4B \u0C1A\u0C42\u0C21\u0C02\u0C21\u0C3F'}${ocrSection}${amountsSection}${productsSection}${datesSection}`;
+        messageForAI = `${userText || '\u0C08 \u0C2B\u0C4B\u0C1F\u0C4B \u0C1A\u0C42\u0C21\u0C02\u0C21\u0C3F'}${ocrSection}${amountsSection}${shopSection}${dateSection}`;
       } else if (!userText) {
         // No OCR result and no text -- default message
         messageForAI = '\u0C08 \u0C2B\u0C4B\u0C1F\u0C4B \u0C1A\u0C42\u0C21\u0C02\u0C21\u0C3F';
@@ -170,7 +171,8 @@
   /** Run OCR in background -- doesn't block UI. */
   async function processOcrInBackground(file: File) {
     try {
-      const result = await processImage(file);
+      const base64 = await imageToBase64(file);
+      const result = await performOcr(base64);
       if (pendingImage && pendingImage.file === file) {
         pendingImage = { ...pendingImage, ocrResult: result, ocrRunning: false };
       }
@@ -288,8 +290,8 @@
       <div class="pending-info">
         {#if pendingImage.ocrRunning}
           <span class="pending-status">&#128248; చదువుతున్నాను...</span>
-        {:else if pendingImage.ocrResult && pendingImage.ocrResult.amounts.length > 0}
-          <span class="pending-status">&#8377;{pendingImage.ocrResult.amounts[0].toLocaleString('en-IN')} కనుగొనబడింది</span>
+        {:else if pendingImage.ocrResult && extractBillData(pendingImage.ocrResult.text).totalAmount}
+          <span class="pending-status">&#8377;{((extractBillData(pendingImage.ocrResult.text).totalAmount ?? 0) / 100).toLocaleString('en-IN')} కనుగొనబడింది</span>
         {:else if pendingImage.ocrResult}
           <span class="pending-status">&#128248; ఫోటో సిద్ధం</span>
         {:else}

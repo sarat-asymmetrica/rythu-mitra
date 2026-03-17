@@ -1,9 +1,10 @@
 <script lang="ts">
   import BriefingCard from '../components/BriefingCard.svelte';
   import BalanceStrip from '../components/BalanceStrip.svelte';
+  import SchemeCard from '../components/SchemeCard.svelte';
   import { moneyEvents, myFarmer, myFarmerContext, briefingCards, connected } from '../lib/stores';
   import { online } from '../lib/network';
-  import type { BriefingCard as BriefingCardType } from '../lib/types';
+  import type { BriefingCard as BriefingCardType, GovtScheme } from '../lib/types';
 
   // Static briefing cards (shown alongside or when no STDB data)
   const staticCards: (BriefingCardType & { delay: number })[] = [
@@ -89,6 +90,34 @@
     }));
     return [...liveWithDelay, ...staticWithOffset];
   }
+
+  // F009: Government schemes (hardcoded, STDB-backed later)
+  const govtSchemes: GovtScheme[] = [
+    {
+      id: 'pmkisan',
+      name: 'PM-KISAN',
+      lastInstallment: 'జూన్ 2025',
+      lastAmount: 2000,
+      nextExpected: 'అక్టోబర్ 2025',
+      status: 'received',
+    },
+    {
+      id: 'ysr-rythu',
+      name: 'YSR Rythu Bharosa',
+      lastInstallment: 'మార్చి 2025',
+      lastAmount: 4500,
+      nextExpected: 'సెప్టెంబర్ 2025',
+      status: 'pending',
+    },
+    {
+      id: 'pmfby',
+      name: 'PMFBY',
+      lastInstallment: 'ఫిబ్రవరి 2025',
+      lastAmount: 800,
+      nextExpected: 'ఖరీఫ్ నమోదు ఏప్రిల్',
+      status: 'pending',
+    },
+  ];
 </script>
 
 <!-- Greeting -->
@@ -142,6 +171,20 @@
       delay={card.delay}
       speakText={card.speakText ?? ''}
     />
+  {/each}
+</div>
+
+<!-- F009: Government Schemes Section -->
+<div class="section-header">
+  <span class="section-title">సర్కారు పథకాలు</span>
+  <span class="section-action">అన్నీ →</span>
+</div>
+
+<div class="schemes-list">
+  {#each govtSchemes as scheme, i}
+    <div style="animation-delay: {i * 100}ms">
+      <SchemeCard {scheme} />
+    </div>
   {/each}
 </div>
 
@@ -265,6 +308,14 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-13);
+  }
+
+  .schemes-list {
+    padding: 0 var(--space-21);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
   }
 
   .txn-list { padding: 0 var(--space-21); }
