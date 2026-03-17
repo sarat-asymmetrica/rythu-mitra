@@ -1,12 +1,19 @@
 <script lang="ts">
   import DonutChart from '../components/DonutChart.svelte';
-  import { donutSegments, totalIncome, totalExpense, balance, transactionGroups } from '../lib/stores';
+  import {
+    donutSegments, totalIncome, totalExpense, balance, transactionGroups,
+    moneyEvents, cropEvents, balanceData, myFarmer,
+  } from '../lib/stores';
+  import { generateSeasonReport, downloadPdf, type SeasonReport } from '../lib/pdf';
+  import { get } from 'svelte/store';
 
   interface Props {
     ontoast?: (message: string, type: string) => void;
   }
 
   let { ontoast }: Props = $props();
+
+  let generatingPdf = $state(false);
 
   function showQuickToast(category: string) {
     ontoast?.(`🌿 ${category} నమోదు — మొత్తం చెప్పండి`, 'default');
@@ -21,6 +28,63 @@
     labor: '🧑‍🌾', seeds: '🌾', irrigation: '💧', fertilizer: '🧪',
     transport: '🚛', crop_sale: '💰', govt_subsidy: '🏛️', other: '📝',
   };
+
+  async function handlePdfDownload() {
+    generatingPdf = true;
+    try {
+      const farmer = get(myFarmer);
+      const events = get(moneyEvents);
+      const crops  = get(cropEvents);
+      const bal    = get(balanceData);
+
+      // Compute top expense category
+      const expenseByKind = new Map<string, number>();
+      for (const e of events) {
+        if (e.amount < 0) {
+          expenseByKind.set(e.kind, (expenseByKind.get(e.kind) ?? 0) + Math.abs(e.amount));
+        }
+      }
+      let topKind = 'labor';
+      let topAmt  = 0;
+      for (const [k, a] of expenseByKind) {
+        if (a > topAmt) { topAmt = a; topKind = k; }
+      }
+      const topPct = bal.expense > 0 ? Math.round((topAmt / bal.expense) * 100) : 0;
+
+      const report: SeasonReport = {
+        farmerName:  farmer?.name ?? 'రైతు',
+        village:     farmer?.village ?? '',
+        district:    farmer?.district ?? '',
+        season:      'రబీ 2026',
+        totalIncome:   bal.income,
+        totalExpense:  bal.expense,
+        balance:       bal.net,
+        transactions:  events.map(e => ({
+          date:        e.date,
+          description: e.description,
+          amount:      e.amount,
+          kind:        e.kind,
+        })),
+        topExpenseCategory: topKind,
+        topExpensePercent:  topPct,
+        cropEvents: crops.map(c => ({
+          date:  c.date,
+          kind:  c.kind,
+          crop:  c.title,
+          notes: c.body,
+        })),
+      };
+
+      const bytes = await generateSeasonReport(report);
+      downloadPdf(bytes, 'season_report_rabi2026.pdf');
+      ontoast?.('PDF డౌన్లోడ్ మొదలైంది', 'default');
+    } catch (err) {
+      ontoast?.('PDF తయారు చేయడం సాధ్యం కాలేదు', 'alert');
+      console.error('PDF generation error:', err);
+    } finally {
+      generatingPdf = false;
+    }
+  }
 </script>
 
 <!-- Header -->
@@ -119,28 +183,44 @@
 <!-- Season P&L Card -->
 <div class="txn-section-header">
   <span class="txn-section-title">సీజన్ సారాంశం</span>
-  <span class="txn-section-action">వివరాలు →</span>
+  <button
+    class="txn-section-action pdf-action-btn"
+    onclick={handlePdfDownload}
+    disabled={generatingPdf}
+    aria-label="PDF డౌన్లోడ్"
+  >
+    {#if generatingPdf}
+      ⏳ తయారవుతోంది...
+    {:else}
+      📄 PDF డౌన్లోడ్
+    {/if}
+  </button>
 </div>
 
 <div class="pnl-card">
   <div class="pnl-card-label">ఈ రబీ సీజన్</div>
   <div class="pnl-net-section">
-    <div class="pnl-net-sublabel">మొత్తం నికర లాభం</div>
-    <div class="pnl-net-amount">లాభం ₹10,750</div>
+    <div class="pnl-net-sublabel">మొత్తం నికర {$balance >= 0 ? 'లాభం' : 'నష్టం'}</div>
+    <div class="pnl-net-amount" class:loss={$balance < 0}>
+      {$balance >= 0 ? 'లాభం' : 'నష్టం'} ₹{Math.abs($balance).toLocaleString('en-IN')}
+    </div>
   </div>
   <div class="pnl-bar-section">
     <div class="pnl-bar-sublabel">ఆదాయం</div>
     <div class="pnl-track income-track">
       <div class="pnl-bar income-bar" style="width: 100%; transition: width var(--dur-987) var(--spring);">
-        <span class="pnl-bar-label">₹28,400</span>
+        <span class="pnl-bar-label">₹{$totalIncome.toLocaleString('en-IN')}</span>
       </div>
     </div>
   </div>
   <div class="pnl-bar-section">
     <div class="pnl-bar-sublabel">ఖర్చులు</div>
     <div class="pnl-track expense-track">
-      <div class="pnl-bar expense-bar" style="width: 62%; transition: width var(--dur-987) var(--spring);">
-        <span class="pnl-bar-label">₹17,650</span>
+      <div
+        class="pnl-bar expense-bar"
+        style="width: {$totalIncome > 0 ? Math.min(100, Math.round($totalExpense / $totalIncome * 100)) : 0}%; transition: width var(--dur-987) var(--spring);"
+      >
+        <span class="pnl-bar-label">₹{$totalExpense.toLocaleString('en-IN')}</span>
       </div>
     </div>
   </div>
@@ -252,4 +332,27 @@
   .pnl-bar-footer { display: flex; justify-content: space-between; }
   .pnl-bar-meta { font-size: var(--text-xs); color: var(--ink-tertiary); }
   .pnl-bar-meta span { font-weight: 600; color: var(--ink-secondary); }
+  .pnl-net-amount.loss { color: var(--erra); }
+
+  .pdf-action-btn {
+    background: transparent;
+    border: none;
+    font-size: var(--text-xs);
+    color: var(--neeli);
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-card-sm);
+    transition: background var(--dur-233) ease;
+    font-family: var(--font-te);
+  }
+
+  .pdf-action-btn:hover:not(:disabled) {
+    background: rgba(27, 79, 114, 0.08);
+  }
+
+  .pdf-action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 </style>

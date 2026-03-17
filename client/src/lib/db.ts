@@ -28,6 +28,8 @@ const HOST = 'wss://maincloud.spacetimedb.com';
 const DB_NAME = 'rythu-mitra';
 const TOKEN_KEY = `stdb_token_${DB_NAME}`;
 const SEEDED_KEY = 'rythu_mitra_data_seeded';
+const ONBOARDED_KEY = 'rythu_mitra_onboarded';
+const DEMO_KEY = 'rythu_mitra_demo_mode';
 
 // The live connection (null until connected)
 let conn: DbConnection | null = null;
@@ -84,9 +86,32 @@ function forceSync(connection: DbConnection): void {
 }
 
 // ---------------------------------------------------------------------------
-// Auto-registration: ensure a farmer exists for this browser identity
+// Auto-registration: only in demo mode or when onboarding completed
 // ---------------------------------------------------------------------------
 
+/**
+ * isDemoMode: true when URL has ?demo=true OR localStorage has demo flag.
+ * In demo mode we auto-register as Lakshmi with seed data (original behaviour).
+ */
+function isDemoMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('demo') === 'true') {
+    localStorage.setItem(DEMO_KEY, 'true');
+    return true;
+  }
+  return localStorage.getItem(DEMO_KEY) === 'true';
+}
+
+/**
+ * Ensure a farmer exists for this browser identity.
+ *
+ * Behaviour:
+ *   - Demo mode: auto-register as Lakshmi with seed data (original behaviour).
+ *   - Onboarded: re-register using saved localStorage data if STDB row is missing
+ *     (handles the case where DB was cleared but browser retains the flag).
+ *   - Not onboarded and not demo: do nothing — App.svelte shows OnboardingFlow.
+ */
 function ensureFarmerRegistered(connection: DbConnection, identity: Identity): void {
   const farmers = iterToArray(connection.db.farmer.iter());
   const idStr = String(identity);
@@ -97,9 +122,68 @@ function ensureFarmerRegistered(connection: DbConnection, identity: Identity): v
     return;
   }
 
-  console.log('[stdb] No farmer for this identity, auto-registering...');
+  // ── Demo mode: auto-register as Lakshmi ──
+  if (isDemoMode()) {
+    console.log('[stdb] Demo mode — auto-registering Lakshmi...');
+    _registerDemoFarmer(connection, idStr);
+    return;
+  }
 
-  // Register the demo farmer for this browser identity
+  // ── Onboarded but STDB row missing (e.g. DB cleared) ──
+  if (localStorage.getItem(ONBOARDED_KEY) === 'true') {
+    const savedName = localStorage.getItem('rythu_mitra_farmer_name') || '';
+    const savedVillage = localStorage.getItem('rythu_mitra_farmer_village') || '';
+    const savedDistrict = localStorage.getItem('rythu_mitra_farmer_district') || 'అనంతపురం';
+    const savedLanguage = (localStorage.getItem('rythu_mitra_farmer_language') || 'te') as 'te' | 'en';
+    const savedCrops = localStorage.getItem('rythu_mitra_farmer_crops') || '[]';
+    const savedAcres = parseFloat(localStorage.getItem('rythu_mitra_farmer_acres') || '0');
+
+    if (!savedName) {
+      // No saved data despite flag — clear and let onboarding run again
+      localStorage.removeItem(ONBOARDED_KEY);
+      console.warn('[stdb] Onboarding flag set but no saved name — clearing flag for re-onboarding');
+      return;
+    }
+
+    console.log('[stdb] Onboarded but STDB row missing — re-registering:', savedName);
+    try {
+      connection.reducers.registerFarmer({
+        name: savedName,
+        phone: '',
+        village: savedVillage,
+        district: savedDistrict,
+        language: savedLanguage,
+      });
+    } catch (err) {
+      console.warn('[stdb] Re-registration failed:', err);
+    }
+
+    // Restore farmer context after a short delay
+    setTimeout(() => {
+      try {
+        connection.reducers.updateFarmerContext({
+          crops: savedCrops,
+          acres: savedAcres,
+          plots: '[]',
+          irrigationType: '',
+          seasonStage: '',
+          painPoints: '',
+          rawStoryJson: '{}',
+        });
+      } catch (err) {
+        console.warn('[stdb] Failed to restore farmer context:', err);
+      }
+    }, 800);
+
+    return;
+  }
+
+  // ── Not yet onboarded — do nothing, App.svelte shows OnboardingFlow ──
+  console.log('[stdb] Not onboarded — waiting for OnboardingFlow to complete');
+}
+
+/** Demo-mode: auto-register as Lakshmi with seed data. */
+function _registerDemoFarmer(connection: DbConnection, idStr: string): void {
   connection.reducers.registerFarmer({
     name: '\u0C32\u0C15\u0C4D\u0C37\u0C4D\u0C2E\u0C3F',          // లక్ష్మి
     phone: '9876543210',
@@ -108,17 +192,14 @@ function ensureFarmerRegistered(connection: DbConnection, identity: Identity): v
     language: 'te',
   });
 
-  // Wait for the farmer to ACTUALLY appear in the subscription before seeding.
-  // The registerFarmer reducer runs async on the server — we need to wait for the
-  // onInsert callback to fire, confirming the farmer exists in the DB.
+  // Wait for farmer to appear in STDB before seeding context + data
   const checkInterval = setInterval(() => {
     const farmers = iterToArray(connection.db.farmer.iter());
     const found = farmers.find(f => String(f.identity) === idStr);
     if (found) {
       clearInterval(checkInterval);
-      console.log('[stdb] Farmer registration confirmed:', found.name);
+      console.log('[stdb] Demo farmer confirmed:', found.name);
 
-      // NOW it's safe to update context and seed data
       try {
         connection.reducers.updateFarmerContext({
           crops: '["వేరుశెనగ","పత్తి"]',
@@ -129,23 +210,18 @@ function ensureFarmerRegistered(connection: DbConnection, identity: Identity): v
           painPoints: 'తెల్ల దోమ, నీటి కొరత',
           rawStoryJson: '{}',
         });
-        console.log('[stdb] Farmer context updated');
+        console.log('[stdb] Demo farmer context set');
       } catch (err) {
-        console.warn('[stdb] Failed to update farmer context:', err);
+        console.warn('[stdb] Failed to set demo farmer context:', err);
       }
 
-      // Seed demo data — farmer is confirmed to exist, reducers will pass auth check
       setTimeout(() => seedDemoData(connection), 500);
 
       showToast('\u0C38\u0C4D\u0C35\u0C3E\u0C17\u0C24\u0C02 \u0C32\u0C15\u0C4D\u0C37\u0C4D\u0C2E\u0C3F! \uD83C\uDF3E', 'default', 5000);
-      // స్వాగతం లక్ష్మి! 🌾
     }
-  }, 300); // Check every 300ms
+  }, 300);
 
-  // Safety: stop checking after 10 seconds (don't leak interval)
-  setTimeout(() => {
-    clearInterval(checkInterval);
-  }, 10000);
+  setTimeout(() => clearInterval(checkInterval), 10000);
 }
 
 // ---------------------------------------------------------------------------
@@ -281,11 +357,13 @@ export function connect(): void {
           forceSync(_conn);
           console.log('[stdb] Sync complete');
 
-          // Auto-register farmer if not found for this identity
+          // Auto-register farmer if not found for this identity.
+          // In non-demo mode: only re-registers if onboarding flag is set
+          // (real users are registered by OnboardingFlow.svelte).
           ensureFarmerRegistered(_conn, id);
 
-          // Seed demo data if not yet seeded (separate from registration!)
-          if (localStorage.getItem(SEEDED_KEY) !== 'true') {
+          // Seed demo data ONLY in demo mode
+          if (isDemoMode() && localStorage.getItem(SEEDED_KEY) !== 'true') {
             // Wait a bit for registration to complete if it was just triggered
             setTimeout(() => {
               const farmers = iterToArray(_conn.db.farmer.iter());

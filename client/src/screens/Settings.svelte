@@ -6,13 +6,21 @@
     testSarvamKey,
     type SarvamConfig,
   } from '../lib/sarvam';
+  import { loadOcrConfig, saveOcrConfig, hasOcrKey, type OcrConfig } from '../lib/ocr';
+  import { loadSearchConfig, type SearchConfig } from '../lib/search';
+  import { generateSeasonReport, downloadPdf, type SeasonReport } from '../lib/pdf';
+  import { getQueueSize } from '../lib/offline';
   import { showToast } from '../lib/toast';
-  import { farmerMemories, dismissedMemories, refreshMemories } from '../lib/stores';
+  import {
+    farmerMemories, dismissedMemories, refreshMemories,
+    moneyEvents, cropEvents, balanceData, myFarmer,
+  } from '../lib/stores';
   import {
     dismissMemory,
     restoreMemory,
     saveMemory,
   } from '../lib/memory';
+  import { get } from 'svelte/store';
 
   interface Props {
     ontoast?: (message: string, type: string) => void;
@@ -26,6 +34,38 @@
   let keyStatus: 'unknown' | 'valid' | 'invalid' = $state(
     config.apiKey ? 'unknown' : 'invalid',
   );
+
+  // OCR config
+  let ocrConfig: OcrConfig = $state(loadOcrConfig());
+  let ocrKeyStatus: 'present' | 'missing' = $state(
+    hasOcrKey() ? 'present' : 'missing',
+  );
+
+  // Search config (persisted state for UI toggles)
+  const SEARCH_DDG_KEY   = 'rythu_mitra_search_ddg_enabled';
+  const SEARCH_SARVAM_KEY = 'rythu_mitra_search_sarvam_enabled';
+  const SEARCH_GOOGLE_KEY = 'rythu_mitra_search_api_key';
+  const SEARCH_ENGINE_KEY = 'rythu_mitra_search_engine_id';
+
+  let searchDDG    = $state(localStorage.getItem(SEARCH_DDG_KEY)    !== 'false');
+  let searchSarvam = $state(localStorage.getItem(SEARCH_SARVAM_KEY) !== 'false');
+  let searchGoogle = $state(!!(localStorage.getItem(SEARCH_GOOGLE_KEY)));
+  let googleApiKey  = $state(localStorage.getItem(SEARCH_GOOGLE_KEY) ?? '');
+  let googleEngineId = $state(localStorage.getItem(SEARCH_ENGINE_KEY) ?? '');
+
+  function activeProviderCount(): number {
+    let count = 1; // cached KB is always active
+    if (searchDDG) count++;
+    if (searchSarvam && hasApiKey()) count++;
+    if (searchGoogle && googleApiKey && googleEngineId) count++;
+    return count;
+  }
+
+  // PDF generation state
+  let generatingPdf = $state(false);
+
+  // Offline queue size
+  let queueSize = $state(getQueueSize());
 
   // Memory section state
   let showDismissed = $state(false);
@@ -47,7 +87,104 @@
 
   function handleSave() {
     saveConfig(config);
+    // Save OCR config
+    saveOcrConfig(ocrConfig);
+    ocrKeyStatus = ocrConfig.mistralApiKey ? 'present' : 'missing';
+    // Save search config toggles
+    localStorage.setItem(SEARCH_DDG_KEY,    String(searchDDG));
+    localStorage.setItem(SEARCH_SARVAM_KEY, String(searchSarvam));
+    if (googleApiKey)   localStorage.setItem(SEARCH_GOOGLE_KEY, googleApiKey);
+    else                localStorage.removeItem(SEARCH_GOOGLE_KEY);
+    if (googleEngineId) localStorage.setItem(SEARCH_ENGINE_KEY, googleEngineId);
+    else                localStorage.removeItem(SEARCH_ENGINE_KEY);
+    queueSize = getQueueSize();
     showToast('Settings saved', 'default', 2000);
+  }
+
+  function handleOcrKeyInput(e: Event) {
+    const input = e.target as HTMLInputElement;
+    ocrConfig.mistralApiKey = input.value.trim();
+    ocrKeyStatus = ocrConfig.mistralApiKey ? 'present' : 'missing';
+  }
+
+  function handleTestOcrKey() {
+    if (!ocrConfig.mistralApiKey) {
+      showToast('Mistral OCR key not entered', 'warning', 3000);
+      return;
+    }
+    // Key format validation: must be a non-empty string (real validation requires a network call)
+    if (ocrConfig.mistralApiKey.length >= 8) {
+      ocrKeyStatus = 'present';
+      showToast('OCR key looks valid! Save to apply.', 'default', 3000);
+    } else {
+      showToast('Key too short — check and try again', 'alert', 3000);
+    }
+  }
+
+  async function handleDownloadPdf() {
+    generatingPdf = true;
+    try {
+      const farmer = get(myFarmer);
+      const events = get(moneyEvents);
+      const crops  = get(cropEvents);
+      const bal    = get(balanceData);
+
+      // Compute top expense category
+      const expenseByKind = new Map<string, number>();
+      for (const e of events) {
+        if (e.amount < 0) {
+          expenseByKind.set(e.kind, (expenseByKind.get(e.kind) ?? 0) + Math.abs(e.amount));
+        }
+      }
+      let topKind = 'labor';
+      let topAmt  = 0;
+      for (const [k, a] of expenseByKind) {
+        if (a > topAmt) { topAmt = a; topKind = k; }
+      }
+      const topPct = bal.expense > 0 ? Math.round((topAmt / bal.expense) * 100) : 0;
+
+      const report: SeasonReport = {
+        farmerName:  farmer?.name ?? 'రైతు',
+        village:     farmer?.village ?? '',
+        district:    farmer?.district ?? '',
+        season:      'రబీ 2026',
+        totalIncome:   bal.income,
+        totalExpense:  bal.expense,
+        balance:       bal.net,
+        transactions:  events.map(e => ({
+          date:        e.date,
+          description: e.description,
+          amount:      e.amount,
+          kind:        e.kind,
+        })),
+        topExpenseCategory: topKind,
+        topExpensePercent:  topPct,
+        cropEvents: crops.map(c => ({
+          date:  c.date,
+          kind:  c.kind,
+          crop:  c.title,
+          notes: c.body,
+        })),
+      };
+
+      const bytes = await generateSeasonReport(report);
+      downloadPdf(bytes, `season_report_rabi2026.pdf`);
+      showToast('PDF డౌన్లోడ్ మొదలైంది', 'default', 2000);
+    } catch (err) {
+      showToast('PDF తయారు చేయడం సాధ్యం కాలేదు', 'alert', 3000);
+      console.error('PDF generation error:', err);
+    } finally {
+      generatingPdf = false;
+    }
+  }
+
+  function handleClearData() {
+    const confirmed = window.confirm(
+      'మీ అన్ని స్థానిక డేటా తొలగించబడుతుంది. ఖచ్చితంగా కొనసాగించాలా?'
+    );
+    if (!confirmed) return;
+    localStorage.clear();
+    showToast('స్థానిక డేటా క్లియర్ చేయబడింది. పేజీ రిఫ్రెష్ చేయండి.', 'default', 4000);
   }
 
   async function handleTestKey() {
@@ -171,6 +308,96 @@
     </select>
   </section>
 
+  <!-- Mistral OCR Key -->
+  <section class="config-section">
+    <div class="field-header">
+      <label class="field-label" for="mistral-key">Mistral OCR Key</label>
+      <span
+        class="status-dot"
+        class:valid={ocrKeyStatus === 'present'}
+        class:invalid={ocrKeyStatus === 'missing'}
+        aria-label={ocrKeyStatus === 'present' ? 'configured' : 'not configured'}
+      ></span>
+    </div>
+    <p class="field-hint">For bill/document scanning (api.mistral.ai)</p>
+    <input
+      id="mistral-key"
+      type="password"
+      class="key-input"
+      placeholder="Enter Mistral API key..."
+      value={ocrConfig.mistralApiKey}
+      oninput={handleOcrKeyInput}
+      autocomplete="off"
+      spellcheck={false}
+    />
+    <button
+      class="test-btn"
+      onclick={handleTestOcrKey}
+      disabled={!ocrConfig.mistralApiKey}
+    >
+      Test Key
+    </button>
+  </section>
+
+  <!-- Search Configuration -->
+  <section class="config-section">
+    <label class="field-label">Web Search</label>
+    <p class="field-hint">Select providers for AI web search queries</p>
+
+    <div class="search-option">
+      <label class="checkbox-label">
+        <input
+          type="checkbox"
+          bind:checked={searchDDG}
+          class="checkbox-input"
+        />
+        <span class="checkbox-text">DuckDuckGo (free, no key needed)</span>
+      </label>
+    </div>
+
+    <div class="search-option">
+      <label class="checkbox-label">
+        <input
+          type="checkbox"
+          bind:checked={searchSarvam}
+          class="checkbox-input"
+        />
+        <span class="checkbox-text">Sarvam Knowledge (uses main Sarvam key)</span>
+      </label>
+    </div>
+
+    <div class="search-option">
+      <label class="checkbox-label">
+        <input
+          type="checkbox"
+          bind:checked={searchGoogle}
+          class="checkbox-input"
+        />
+        <span class="checkbox-text">Google Custom Search</span>
+      </label>
+    </div>
+
+    {#if searchGoogle}
+      <div class="google-fields">
+        <input
+          type="password"
+          class="key-input"
+          style="margin-bottom: var(--space-8);"
+          placeholder="Google API Key"
+          bind:value={googleApiKey}
+          autocomplete="off"
+        />
+        <input
+          type="text"
+          class="key-input"
+          placeholder="Google Engine ID (cx=...)"
+          bind:value={googleEngineId}
+          autocomplete="off"
+        />
+      </div>
+    {/if}
+  </section>
+
   <!-- Save button -->
   <button class="save-btn" onclick={handleSave}>
     Save Settings
@@ -196,7 +423,58 @@
         {hasApiKey() ? 'Ready' : 'Key needed'}
       </span>
     </div>
+    <div class="status-row">
+      <span class="status-label">OCR (Bill Scan):</span>
+      <span class="status-value" class:ok={ocrKeyStatus === 'present'} class:missing={ocrKeyStatus === 'missing'}>
+        {ocrKeyStatus === 'present' ? 'Ready' : 'Key needed'}
+      </span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">Web Search:</span>
+      <span class="status-value ok">
+        {activeProviderCount()} providers active
+      </span>
+    </div>
+    <div class="status-row">
+      <span class="status-label">PDF Reports:</span>
+      <span class="status-value ok">Ready</span>
+    </div>
+    {#if queueSize > 0}
+    <div class="status-row">
+      <span class="status-label">Offline queue:</span>
+      <span class="status-value" class:ok={queueSize === 0} class:missing={queueSize > 0}>
+        {queueSize} pending
+      </span>
+    </div>
+    {/if}
   </div>
+
+  <!-- Data Export Section -->
+  <section class="data-export-section">
+    <h2 class="data-export-title">డేటా ఎగుమతి</h2>
+    <div class="export-buttons">
+      <button
+        class="export-btn pdf-btn"
+        onclick={handleDownloadPdf}
+        disabled={generatingPdf}
+      >
+        {#if generatingPdf}
+          <span class="export-btn-icon">⏳</span>
+          <span class="export-btn-label">తయారవుతోంది...</span>
+        {:else}
+          <span class="export-btn-icon">📄</span>
+          <span class="export-btn-label">సీజన్ సారాంశం PDF</span>
+        {/if}
+      </button>
+      <button
+        class="export-btn clear-btn"
+        onclick={handleClearData}
+      >
+        <span class="export-btn-icon">🗑️</span>
+        <span class="export-btn-label">డేటా క్లియర్</span>
+      </button>
+    </div>
+  </section>
 
   <!-- ═══ Memories Section ═══ -->
   <section class="memories-section">
@@ -679,5 +957,111 @@
 
   .memory-list.dismissed {
     margin-top: var(--space-8);
+  }
+
+  /* Search config checkboxes */
+  .search-option {
+    margin-bottom: var(--space-8);
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    cursor: pointer;
+  }
+
+  .checkbox-input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--pacchi);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .checkbox-text {
+    font-family: var(--font-te);
+    font-size: var(--text-sm);
+    color: var(--ink-secondary);
+  }
+
+  .google-fields {
+    margin-top: var(--space-8);
+    padding-left: var(--space-21);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  /* Data Export Section */
+  .data-export-section {
+    margin-top: var(--space-34);
+    padding: var(--space-21) 0;
+    border-top: 1px solid var(--nalupurugu-soft);
+  }
+
+  .data-export-title {
+    font-family: var(--font-te-display);
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--ink-primary);
+    margin-bottom: var(--space-13);
+  }
+
+  .export-buttons {
+    display: flex;
+    gap: var(--space-8);
+  }
+
+  .export-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-5);
+    padding: var(--space-13) var(--space-8);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--nalupurugu);
+    cursor: pointer;
+    transition: transform var(--dur-233) var(--spring), box-shadow var(--dur-233) ease;
+    min-height: 72px;
+  }
+
+  .export-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .export-btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .export-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .pdf-btn {
+    background: var(--neeli-soft, rgba(27, 79, 114, 0.06));
+    border-color: var(--neeli);
+  }
+
+  .clear-btn {
+    background: var(--erra-soft);
+    border-color: var(--erra);
+  }
+
+  .export-btn-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .export-btn-label {
+    font-family: var(--font-te);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--ink-secondary);
+    text-align: center;
+    line-height: 1.3;
   }
 </style>

@@ -1,6 +1,6 @@
 # Rythu Mitra — Feature Backlog
 
-**Last updated:** 2026-03-16 (Day 1 complete! See SPRINT_2026_03_16.md for full report)
+**Last updated:** 2026-03-17 (Day 2 complete! See SPRINT_2026_03_17.md for full report)
 **Status key:** 📋 Specced | 🔨 Building | ✅ Live | ⏸️ Blocked | — Not yet specced
 
 ---
@@ -27,7 +27,7 @@ The minimum interactions that prove the thesis: "voice in, structured data out."
 |----|---------|--------|------------|----------|
 | F004 | Voice → Expense Entry (Dabbu) | ✅ Live | F001, F002 | [F004](F004_voice_expense_entry.md) |
 | F005 | Morning Briefing (Home Screen) | ✅ Live | F001, F002 | [F005](F005_morning_briefing.md) |
-| F006 | Crop Photo Event (Panta) | — | F001, F002 | — |
+| F006 | Crop Photo Event (Panta) | ✅ Live | F001, F002 | — |
 
 **Wave 1 exit criteria:** Lakshmi can voice-note an expense in Telugu, see her balance on the home screen with mandi prices, and photograph a pest for crop logging. All data persists locally and syncs.
 
@@ -40,10 +40,10 @@ Where the mathematical substrate earns its keep.
 | ID | Feature | Status | Depends On | Contract |
 |----|---------|--------|------------|----------|
 | F007 | Mandi Price Feed (Market) | ✅ Live | F001 | — |
-| F014 | Collapsible Chat Interface (THE PRODUCT) | 📋 Specced | F001, F002, F004 | [F014](F014_chat_interface.md) |
-| F008 | MRP Overcharge Detection (Vyapti) | — | F007 | — |
-| F009 | PM-KISAN Status Check (Sarkar) | — | F001 | — |
-| F010 | Season Summary PDF (Reports) | — | F001, F004 | — |
+| F014 | Collapsible Chat Interface (THE PRODUCT) | ✅ Live | F001, F002, F004 | [F014](F014_chat_interface.md) |
+| F008 | MRP Overcharge Detection (Vyapti) | ✅ Live | F007 | — |
+| F009 | PM-KISAN Status Check (Sarkar) | ✅ Live | F001 | — |
+| F010 | Season Summary PDF (Reports) | ✅ Live | F001, F004 | — |
 
 **Wave 2 exit criteria:** Market screen shows live mandi prices. Photographing a dealer bill flags overcharges (0 false positives via vyapti). PM-KISAN status in Telugu. PDF report generated on-device.
 
@@ -57,7 +57,7 @@ Single-player value proven → add multiplayer + education.
 |----|---------|--------|------------|----------|
 | F011 | P2P Messaging (People) | — | F001, F002 | — |
 | F012 | Learn Mode (Curriculum) | — | F001 | — |
-| F013 | Onboarding Conversation | — | F001, F002, F004 | — |
+| F013 | Onboarding Conversation | ✅ Live | F001, F002, F004 | — |
 
 ---
 

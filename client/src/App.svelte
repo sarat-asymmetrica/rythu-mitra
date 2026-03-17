@@ -6,6 +6,7 @@
   import BottomNav from './components/BottomNav.svelte';
   import ChatBar from './components/ChatBar.svelte';
   import ChatPanel from './components/ChatPanel.svelte';
+  import OnboardingFlow from './components/OnboardingFlow.svelte';
   import Toast from './components/Toast.svelte';
   import Home from './screens/Home.svelte';
   import Dabbu from './screens/Dabbu.svelte';
@@ -16,6 +17,28 @@
   import { chatState } from './lib/chat';
   import { onNetworkChange } from './lib/network';
   import { executeAction } from './lib/actions';
+
+  // ---------------------------------------------------------------------------
+  // Onboarding: show OnboardingFlow for first-time users.
+  // Demo mode (?demo=true or localStorage 'rythu_mitra_demo_mode') bypasses this.
+  // ---------------------------------------------------------------------------
+  function checkNeedsOnboarding(): boolean {
+    if (typeof window === 'undefined') return false;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('demo') === 'true') return false;
+    if (localStorage.getItem('rythu_mitra_demo_mode') === 'true') return false;
+    return localStorage.getItem('rythu_mitra_onboarded') !== 'true';
+  }
+
+  let needsOnboarding = $state(checkNeedsOnboarding());
+
+  function handleOnboardingComplete() {
+    needsOnboarding = false;
+    // Farmer registration is triggered by OnboardingFlow itself via getConnection().
+    // If STDB was connected before onboarding finished, the reducers were called there.
+    // If not yet connected, ensureFarmerRegistered() in db.ts will pick it up on connect.
+    showToast('స్వాగతం! రైతు మిత్ర కి వచ్చారు 🌾', 'default', 4000);
+  }
 
   // Screen transition state
   let transitioning = $state(false);
@@ -142,6 +165,11 @@
     };
   });
 </script>
+
+<!-- Onboarding overlay (shown for first-time users) -->
+{#if needsOnboarding}
+  <OnboardingFlow oncomplete={handleOnboardingComplete} />
+{/if}
 
 <!-- Connection status indicator + settings gear -->
 <div class="top-bar">
